@@ -1,0 +1,916 @@
+{
+ "steps": [
+  {
+   "step": "pool_after_D6",
+   "total": 66379,
+   "cells": {
+    "class_T1": 7691,
+    "class_T2": 10596,
+    "class_T3": 11575,
+    "class_T4": 12630,
+    "sequence_T1": 6489,
+    "sequence_T2": 5979,
+    "sequence_T3": 5988,
+    "sequence_T4": 5431
+   },
+   "repositories": 21190
+  },
+  {
+   "step": "dev_set_D11",
+   "total": 200,
+   "cells": {
+    "class_T1": 25,
+    "class_T2": 25,
+    "class_T3": 25,
+    "class_T4": 25,
+    "sequence_T1": 25,
+    "sequence_T2": 25,
+    "sequence_T3": 25,
+    "sequence_T4": 25
+   },
+   "repositories": 195
+  },
+  {
+   "step": "pool_diagrams_of_the_dev_repositories",
+   "total": 2682,
+   "cells": {
+    "class_T1": 421,
+    "class_T2": 448,
+    "class_T3": 432,
+    "class_T4": 325,
+    "sequence_T1": 206,
+    "sequence_T2": 241,
+    "sequence_T3": 261,
+    "sequence_T4": 348
+   },
+   "repositories": 195
+  },
+  {
+   "step": "pool_without_the_dev_repositories",
+   "total": 63697,
+   "cells": {
+    "class_T1": 7270,
+    "class_T2": 10148,
+    "class_T3": 11143,
+    "class_T4": 12305,
+    "sequence_T1": 6283,
+    "sequence_T2": 5738,
+    "sequence_T3": 5727,
+    "sequence_T4": 5083
+   },
+   "repositories": 20995
+  },
+  {
+   "step": "other_pool_diagrams_of_the_dev_repositories",
+   "total": 2482,
+   "cells": {
+    "class_T1": 396,
+    "class_T2": 423,
+    "class_T3": 407,
+    "class_T4": 300,
+    "sequence_T1": 181,
+    "sequence_T2": 216,
+    "sequence_T3": 236,
+    "sequence_T4": 323
+   },
+   "repositories": 159
+  },
+  {
+   "step": "loss_curve_split_D12",
+   "total": 200,
+   "cells": {
+    "class_T1": 25,
+    "class_T2": 25,
+    "class_T3": 25,
+    "class_T4": 25,
+    "sequence_T1": 25,
+    "sequence_T2": 25,
+    "sequence_T3": 25,
+    "sequence_T4": 25
+   },
+   "repositories": 86
+  },
+  {
+   "step": "training_pool_after_D7",
+   "total": 63646,
+   "cells": {
+    "class_T1": 7262,
+    "class_T2": 10142,
+    "class_T3": 11143,
+    "class_T4": 12305,
+    "sequence_T1": 6256,
+    "sequence_T2": 5733,
+    "sequence_T3": 5722,
+    "sequence_T4": 5083
+   },
+   "repositories": 20986,
+   "removed": {
+    "class_T1": 8,
+    "class_T2": 6,
+    "class_T3": 0,
+    "class_T4": 0,
+    "sequence_T1": 27,
+    "sequence_T2": 5,
+    "sequence_T3": 5,
+    "sequence_T4": 0,
+    "total": 51
+   }
+  },
+  {
+   "step": "training_sample_D13",
+   "total": 20000,
+   "cells": {
+    "class_T1": 2500,
+    "class_T2": 2500,
+    "class_T3": 2500,
+    "class_T4": 2500,
+    "sequence_T1": 2500,
+    "sequence_T2": 2500,
+    "sequence_T3": 2500,
+    "sequence_T4": 2500
+   },
+   "repositories": 10158
+  }
+ ],
+ "draws": {
+  "dev": {
+   "drawn_first": 200,
+   "dropped": 0,
+   "dropped_of_the_first_draw": 0,
+   "new_keys": 0,
+   "dropped_by_reason": {},
+   "dropped_by_cell": {
+    "class_T1": {},
+    "class_T2": {},
+    "class_T3": {},
+    "class_T4": {},
+    "sequence_T1": {},
+    "sequence_T2": {},
+    "sequence_T3": {},
+    "sequence_T4": {}
+   },
+   "first_draw_keys_no_longer_drawn_that_were_not_dropped": 0,
+   "every_other_key_of_the_first_draw_keeps_its_place": true,
+   "available": {
+    "class_T1": 7691,
+    "class_T2": 10596,
+    "class_T3": 11575,
+    "class_T4": 12630,
+    "sequence_T1": 6489,
+    "sequence_T2": 5979,
+    "sequence_T3": 5988,
+    "sequence_T4": 5431
+   },
+   "excluded_keys_passed_over": {
+    "class_T1": 0,
+    "class_T2": 0,
+    "class_T3": 0,
+    "class_T4": 0,
+    "sequence_T1": 0,
+    "sequence_T2": 0,
+    "sequence_T3": 0,
+    "sequence_T4": 0
+   },
+   "amendment_1": {
+    "excluded_keys_the_draw_holds_without_the_exclusion": [],
+    "keys_that_enter": [],
+    "every_other_key_keeps_its_place": true
+   },
+   "amendment_2": {
+    "excluded_keys_the_draw_holds_without_the_exclusion": [],
+    "keys_that_enter": [],
+    "every_other_key_keeps_its_place": true
+   }
+  },
+  "loss_curve": {
+   "drawn_first": 200,
+   "dropped": 0,
+   "dropped_of_the_first_draw": 0,
+   "new_keys": 0,
+   "dropped_by_reason": {},
+   "dropped_by_cell": {
+    "class_T1": {},
+    "class_T2": {},
+    "class_T3": {},
+    "class_T4": {},
+    "sequence_T1": {},
+    "sequence_T2": {},
+    "sequence_T3": {},
+    "sequence_T4": {}
+   },
+   "first_draw_keys_no_longer_drawn_that_were_not_dropped": 0,
+   "every_other_key_of_the_first_draw_keeps_its_place": true,
+   "available": {
+    "class_T1": 396,
+    "class_T2": 423,
+    "class_T3": 407,
+    "class_T4": 300,
+    "sequence_T1": 181,
+    "sequence_T2": 216,
+    "sequence_T3": 236,
+    "sequence_T4": 323
+   },
+   "excluded_keys_passed_over": {
+    "class_T1": 0,
+    "class_T2": 0,
+    "class_T3": 0,
+    "class_T4": 0,
+    "sequence_T1": 0,
+    "sequence_T2": 0,
+    "sequence_T3": 0,
+    "sequence_T4": 0
+   },
+   "amendment_1": {
+    "excluded_keys_the_draw_holds_without_the_exclusion": [],
+    "keys_that_enter": [],
+    "every_other_key_keeps_its_place": true
+   },
+   "amendment_2": {
+    "excluded_keys_the_draw_holds_without_the_exclusion": [],
+    "keys_that_enter": [],
+    "every_other_key_keeps_its_place": true
+   }
+  },
+  "train": {
+   "drawn_first": 20000,
+   "dropped": 1,
+   "dropped_of_the_first_draw": 1,
+   "new_keys": 1,
+   "dropped_by_reason": {
+    "status:crash": 1
+   },
+   "dropped_by_cell": {
+    "class_T1": {},
+    "class_T2": {},
+    "class_T3": {},
+    "class_T4": {
+     "status:crash": 1
+    },
+    "sequence_T1": {},
+    "sequence_T2": {},
+    "sequence_T3": {},
+    "sequence_T4": {}
+   },
+   "first_draw_keys_no_longer_drawn_that_were_not_dropped": 0,
+   "every_other_key_of_the_first_draw_keeps_its_place": true,
+   "available": {
+    "class_T1": 7262,
+    "class_T2": 10142,
+    "class_T3": 11143,
+    "class_T4": 12305,
+    "sequence_T1": 6256,
+    "sequence_T2": 5733,
+    "sequence_T3": 5722,
+    "sequence_T4": 5083
+   },
+   "excluded_keys_passed_over": {
+    "class_T1": 9,
+    "class_T2": 0,
+    "class_T3": 0,
+    "class_T4": 1,
+    "sequence_T1": 4,
+    "sequence_T2": 1,
+    "sequence_T3": 4,
+    "sequence_T4": 1
+   },
+   "amendment_1": {
+    "excluded_keys_the_draw_holds_without_the_exclusion": [
+     {
+      "key": "5e1bd90f34c878920af6b73e9147e699b2c88ebd.puml",
+      "cell": "class_T1",
+      "rank": 2243
+     },
+     {
+      "key": "9d2c8e179b217c99c0d28a263751b0953c73c7ba.puml",
+      "cell": "sequence_T1",
+      "rank": 1084
+     }
+    ],
+    "keys_that_enter": [
+     {
+      "key": "5b48724f94cd7b3b07ed863eb9b39370b85ddfc6.puml",
+      "cell": "class_T1",
+      "rank": 2500
+     },
+     {
+      "key": "c0b030baa824b6b579d774e99cd3d871d997c20f_03.puml",
+      "cell": "sequence_T1",
+      "rank": 2500
+     }
+    ],
+    "every_other_key_keeps_its_place": true
+   },
+   "amendment_2": {
+    "excluded_keys_the_draw_holds_without_the_exclusion": [
+     {
+      "key": "e1420542cc0cb7ea1c4df3cc434be1af68b9516c.puml",
+      "cell": "class_T1",
+      "rank": 480
+     },
+     {
+      "key": "07e83f7d9d9e95fb8689983e6ecc1ecc295f9506.puml",
+      "cell": "class_T1",
+      "rank": 504
+     },
+     {
+      "key": "6f6391f3d71c4e26cfcd77f7c13d68e5718d3caf.puml",
+      "cell": "class_T1",
+      "rank": 1085
+     },
+     {
+      "key": "5502a2b7209c7ec49dd73bb6535cf261c2d13fa1.puml",
+      "cell": "class_T1",
+      "rank": 1671
+     },
+     {
+      "key": "c53a1cf1b06811d84ad2e497908dd74168256c0e.puml",
+      "cell": "class_T1",
+      "rank": 1847
+     },
+     {
+      "key": "4a47a6f15529f0420849bd9c16caf9381c007bbd.puml",
+      "cell": "class_T1",
+      "rank": 2058
+     },
+     {
+      "key": "6026abb8fe2c8e2969eda34db7965aba71471933.puml",
+      "cell": "class_T1",
+      "rank": 2074
+     },
+     {
+      "key": "e3e71c9bb0eb072f2b041d233a4de90d1312e012.puml",
+      "cell": "class_T1",
+      "rank": 2100
+     },
+     {
+      "key": "2a3ed1fb353457603d3361d2b592474c6deabe82_03.puml",
+      "cell": "sequence_T1",
+      "rank": 610
+     },
+     {
+      "key": "60f5e65c4f72ead90d9e750b61ddae05beadd45f.puml",
+      "cell": "sequence_T1",
+      "rank": 734
+     },
+     {
+      "key": "57f68644b590899e826b273980e221ccdcdab904.puml",
+      "cell": "sequence_T1",
+      "rank": 2058
+     },
+     {
+      "key": "6d41fec125fb5cd89d35c3f863034f8410640337.puml",
+      "cell": "sequence_T2",
+      "rank": 223
+     },
+     {
+      "key": "58aba15c267c7b604fa02905823e700f94adf61e.puml",
+      "cell": "sequence_T3",
+      "rank": 356
+     },
+     {
+      "key": "e43c2309e2ed3f3fd80d9702fda8d6c828def2bc.puml",
+      "cell": "sequence_T3",
+      "rank": 471
+     },
+     {
+      "key": "9b857a21e667cad350df930669372fc4d009278d.puml",
+      "cell": "sequence_T3",
+      "rank": 798
+     },
+     {
+      "key": "c550c22ee36c50d64caf0cfb07c1db35e1a5b3c8.puml",
+      "cell": "sequence_T3",
+      "rank": 2155
+     },
+     {
+      "key": "919fd2b5d063354e44946f431abee76264532957.puml",
+      "cell": "sequence_T4",
+      "rank": 1896
+     }
+    ],
+    "keys_that_enter": [
+     {
+      "key": "06e33108ca7fa4bd2a4e7befc6bff03eb9af6a64.puml",
+      "cell": "class_T1",
+      "rank": 2493
+     },
+     {
+      "key": "fbd5c893d4d0573020efe582c4d7df004c8a8b37.puml",
+      "cell": "class_T1",
+      "rank": 2494
+     },
+     {
+      "key": "9f1f4442f86e863185c45ab5cade1246395402db.puml",
+      "cell": "class_T1",
+      "rank": 2495
+     },
+     {
+      "key": "aa5daf60798b6792e4741c40500c627b7f01a9d0.puml",
+      "cell": "class_T1",
+      "rank": 2496
+     },
+     {
+      "key": "4399ff470ce837fd07d61159f83a5fc8e331984c.puml",
+      "cell": "class_T1",
+      "rank": 2497
+     },
+     {
+      "key": "901a40b422684a49975e10705cd56ffcd4753685.puml",
+      "cell": "class_T1",
+      "rank": 2498
+     },
+     {
+      "key": "35e1f80faa971167b20a34261a9b08b4cc9dea3e.puml",
+      "cell": "class_T1",
+      "rank": 2499
+     },
+     {
+      "key": "1eb07e9bd3f4d6095baee7ba1aa99b5d82cc1c33.puml",
+      "cell": "class_T1",
+      "rank": 2500
+     },
+     {
+      "key": "ca8f9c69347c2d820df3ff9b83dd75d5d79963a5.puml",
+      "cell": "sequence_T1",
+      "rank": 2498
+     },
+     {
+      "key": "d100efe9a1707c4d1af5fc0cc218ba161860742c.puml",
+      "cell": "sequence_T1",
+      "rank": 2499
+     },
+     {
+      "key": "5fef29a931a3a2c0d8e37c3a014348ad690bdc69.puml",
+      "cell": "sequence_T1",
+      "rank": 2500
+     },
+     {
+      "key": "4b35075345e19132a317434e319f4c4925afbb51_02.puml",
+      "cell": "sequence_T2",
+      "rank": 2500
+     },
+     {
+      "key": "2fe86ff13a8217432c269972ec9f431e5fcf9edd.puml",
+      "cell": "sequence_T3",
+      "rank": 2497
+     },
+     {
+      "key": "8f789468eb983537f73e0135b70104c69494f6e0.puml",
+      "cell": "sequence_T3",
+      "rank": 2498
+     },
+     {
+      "key": "e7f88f6b446d669083e077ad9d37647626de63f6.puml",
+      "cell": "sequence_T3",
+      "rank": 2499
+     },
+     {
+      "key": "c63e77ad8328e192550c0ea67b2add47022e5bdd.puml",
+      "cell": "sequence_T3",
+      "rank": 2500
+     },
+     {
+      "key": "ce17a726bc2164212c2ce7da27037bab9e4f85f3.puml",
+      "cell": "sequence_T4",
+      "rank": 2500
+     }
+    ],
+    "every_other_key_keeps_its_place": true
+   }
+  }
+ },
+ "amendment_1": {
+  "A3": {
+   "candidates_compared": 66379,
+   "reference_diagrams": 1000,
+   "excluded": {
+    "class_T1": 0,
+    "class_T2": 0,
+    "class_T3": 0,
+    "class_T4": 0,
+    "sequence_T1": 4,
+    "sequence_T2": 0,
+    "sequence_T3": 0,
+    "sequence_T4": 0,
+    "total": 4
+   }
+  },
+  "A4": {
+   "candidates_compared": 63646,
+   "reference_diagrams": 200,
+   "excluded": {
+    "class_T1": 1,
+    "class_T2": 0,
+    "class_T3": 0,
+    "class_T4": 0,
+    "sequence_T1": 1,
+    "sequence_T2": 0,
+    "sequence_T3": 0,
+    "sequence_T4": 0,
+    "total": 2
+   }
+  },
+  "excluded_keys": 6,
+  "excluded_keys_a_draw_holds_without_the_exclusion": {
+   "dev": 0,
+   "loss_curve": 0,
+   "train": 2
+  }
+ },
+ "amendment_2": {
+  "A6": {
+   "candidates_compared": 63646,
+   "reference_diagrams": 200,
+   "excluded": {
+    "class_T1": 28,
+    "class_T2": 1,
+    "class_T3": 0,
+    "class_T4": 0,
+    "sequence_T1": 6,
+    "sequence_T2": 2,
+    "sequence_T3": 9,
+    "sequence_T4": 1,
+    "total": 47
+   }
+  },
+  "excluded_keys": 47,
+  "excluded_keys_a_draw_holds_without_the_exclusion": {
+   "dev": 0,
+   "loss_curve": 0,
+   "train": 17
+  }
+ },
+ "sets": {
+  "dev": {
+   "diagrams": 200,
+   "cells": {
+    "class_T1": 25,
+    "class_T2": 25,
+    "class_T3": 25,
+    "class_T4": 25,
+    "sequence_T1": 25,
+    "sequence_T2": 25,
+    "sequence_T3": 25,
+    "sequence_T4": 25
+   },
+   "repositories": 195,
+   "largest_repository": {
+    "repository": "Hajneken_driver-logbook",
+    "diagrams": 2
+   },
+   "three_largest_repositories": [
+    {
+     "repository": "Hajneken_driver-logbook",
+     "diagrams": 2
+    },
+    {
+     "repository": "caogansong_usp",
+     "diagrams": 2
+    },
+    {
+     "repository": "jwork-2021_jw01-Mars-Z777",
+     "diagrams": 2
+    }
+   ],
+   "repositories_with_more_than_5_diagrams": 0
+  },
+  "loss_curve": {
+   "diagrams": 200,
+   "cells": {
+    "class_T1": 25,
+    "class_T2": 25,
+    "class_T3": 25,
+    "class_T4": 25,
+    "sequence_T1": 25,
+    "sequence_T2": 25,
+    "sequence_T3": 25,
+    "sequence_T4": 25
+   },
+   "repositories": 86,
+   "largest_repository": {
+    "repository": "Almadanmp_backend4",
+    "diagrams": 5
+   },
+   "three_largest_repositories": [
+    {
+     "repository": "Almadanmp_backend4",
+     "diagrams": 5
+    },
+    {
+     "repository": "Darcy97_U3D_Libs",
+     "diagrams": 5
+    },
+    {
+     "repository": "SwissDataScienceCenter_renku",
+     "diagrams": 5
+    }
+   ],
+   "repositories_with_more_than_5_diagrams": 0
+  },
+  "train_20k": {
+   "diagrams": 20000,
+   "cells": {
+    "class_T1": 2500,
+    "class_T2": 2500,
+    "class_T3": 2500,
+    "class_T4": 2500,
+    "sequence_T1": 2500,
+    "sequence_T2": 2500,
+    "sequence_T3": 2500,
+    "sequence_T4": 2500
+   },
+   "repositories": 10158,
+   "largest_repository": {
+    "repository": "etf-validator_etf-webapp",
+    "diagrams": 56
+   },
+   "three_largest_repositories": [
+    {
+     "repository": "etf-validator_etf-webapp",
+     "diagrams": 56
+    },
+    {
+     "repository": "noelmartens_TransitionAcademy",
+     "diagrams": 53
+    },
+    {
+     "repository": "BrunoCesarAngst_abstractFactory",
+     "diagrams": 40
+    }
+   ],
+   "repositories_with_more_than_5_diagrams": 513
+  },
+  "train_5k": {
+   "diagrams": 5000,
+   "cells": {
+    "class_T1": 625,
+    "class_T2": 625,
+    "class_T3": 625,
+    "class_T4": 625,
+    "sequence_T1": 625,
+    "sequence_T2": 625,
+    "sequence_T3": 625,
+    "sequence_T4": 625
+   },
+   "repositories": 3748,
+   "largest_repository": {
+    "repository": "noelmartens_TransitionAcademy",
+    "diagrams": 17
+   },
+   "three_largest_repositories": [
+    {
+     "repository": "noelmartens_TransitionAcademy",
+     "diagrams": 17
+    },
+    {
+     "repository": "etf-validator_etf-webapp",
+     "diagrams": 16
+    },
+    {
+     "repository": "Trimpl_Social_Project",
+     "diagrams": 12
+    }
+   ],
+   "repositories_with_more_than_5_diagrams": 33
+  },
+  "train_1k": {
+   "diagrams": 1000,
+   "cells": {
+    "class_T1": 125,
+    "class_T2": 125,
+    "class_T3": 125,
+    "class_T4": 125,
+    "sequence_T1": 125,
+    "sequence_T2": 125,
+    "sequence_T3": 125,
+    "sequence_T4": 125
+   },
+   "repositories": 920,
+   "largest_repository": {
+    "repository": "noelmartens_TransitionAcademy",
+    "diagrams": 4
+   },
+   "three_largest_repositories": [
+    {
+     "repository": "noelmartens_TransitionAcademy",
+     "diagrams": 4
+    },
+    {
+     "repository": "open-dcs_doc",
+     "diagrams": 4
+    },
+    {
+     "repository": "15882504801_is_analysis",
+     "diagrams": 3
+    }
+   ],
+   "repositories_with_more_than_5_diagrams": 0
+  }
+ },
+ "dev_repositories": 195,
+ "token_check": {
+  "keys_counted_again": 400,
+  "differing_from_the_table_of_D4": 0,
+  "above_the_cap": 0,
+  "longest_target_tokens": {
+   "dev": 2562,
+   "loss_curve": 3530
+  },
+  "token_cap": 5376
+ },
+ "checks": {
+  "shared_repositories": {
+   "dev_and_test": 0,
+   "train_and_test": 0,
+   "train_and_dev": 0,
+   "loss_curve_and_train": 0,
+   "loss_curve_and_test": 0
+  },
+  "loss_curve_repositories_outside_the_dev_repositories": 0,
+  "keys_in_two_sets": 0,
+  "test_keys_in_a_set": 0,
+  "excluded_keys_in_a_set": 0,
+  "block_excluded_keys_in_a_set": 0,
+  "loss_curve_excluded_keys_in_a_set": 0,
+  "nested": {
+   "train_1k_in_train_5k": true,
+   "train_5k_in_train_20k": true
+  },
+  "eight_equal_cells": {
+   "train_20k": true,
+   "train_5k": true,
+   "train_1k": true
+  },
+  "dev_cells": true,
+  "loss_curve_cells": true,
+  "largest_number_of_diagrams_of_one_repository": {
+   "dev": 2,
+   "loss_curve": 5,
+   "train_20k": 56,
+   "train_5k": 17,
+   "train_1k": 4
+  },
+  "repository_limit_of_dev_and_loss_curve": 5,
+  "all_set_keys_rendered_ok_without_a_degeneracy_label": true,
+  "targets_within_the_token_cap": true,
+  "d13_reversing_condition_more_than_100_of_one_repository": false
+ },
+ "D15": {
+  "dev": {
+   "diagrams": 200,
+   "clock_sources": 0,
+   "renderer_trace": 1,
+   "clock_source_keys": [],
+   "renderer_trace_keys": [
+    "eb6f2cab997793d2e813aac5b3a224efd8681117.puml"
+   ]
+  },
+  "loss_curve": {
+   "diagrams": 200,
+   "clock_sources": 0,
+   "renderer_trace": 0,
+   "clock_source_keys": [],
+   "renderer_trace_keys": []
+  },
+  "train_20k": {
+   "diagrams": 20000,
+   "clock_sources": 14,
+   "renderer_trace": 25,
+   "clock_source_keys": [
+    "cec96c6a6693ce16b7ba822a59eeaa74f04d95b8.puml",
+    "1e1e043d3ef90fb8067521f8e26864970a01e1ae.puml",
+    "7ebd7927cd1ea859c6bb16542b139282f0a5956a.puml",
+    "31c7409df533c82e7173aa7f77a492295d98d9ef_03.puml",
+    "1209a8d3001f8486d75741cd61d6a3dec54746af_04.puml",
+    "a2b5999edeecac91267a747d54044393ac0699b8.puml",
+    "c0e8edc66fb0ec6258edc58d383bd3a4fcc12da8.puml",
+    "3c48d5f2ec1fc20be7119293a4b272959e0801d8.puml",
+    "fca1f36c465751320b8fbd71556acbc681f42eac.puml",
+    "6509dc72cdf4cbadc01db399f21a0423cb7846a2.puml",
+    "964ae296f78a1456582fde57fba24e3e1c312a01.puml",
+    "314167208eab9bfcd4b311912a8971d0ce78018f.puml",
+    "215511c75d762b0e85a8c5290b2f06552dde4e85.puml",
+    "ccb1f2fd026b3b9c4e29ce37dbb638b3b445fed8.puml"
+   ],
+   "renderer_trace_keys": [
+    "c5d0c46b6651263bdc779ab5de6a79bbe794a130.puml",
+    "0dddb29326f105aa4c27966e6888a05447b45886.puml",
+    "0a1140029cbf6843157b75378489ad4ff2d72abb.puml",
+    "07161cdb482c8a174c20caa506e86b993265f151.puml",
+    "13bb6aa54d1635c0f2517b42d8c3e4e25d842b8c.puml",
+    "fb1d38cc058d408a6e02f252d6accdaaaa84193d.puml",
+    "b0f847d79aba85c09b1d579c6b1cb0a808344433.puml",
+    "628bd74f133ec13d59dcbd692166b317666d7292.puml",
+    "4d8c7482300b2ee53426495d83c5ee0a08154b69.puml",
+    "6c78efa00eb84f1b4307662382c6e9a1370245d1.puml",
+    "956fec8e9a898e6a067176d637b7f680cd99d49c.puml",
+    "9bfc37947aefb3557e052ee7eddd8dd0158bb805.puml",
+    "3616297bf42b7e8e90bf4e795c6a7e2d904d5600.puml",
+    "28479097e909e4026827b1c71c5e5f6eae1879ac.puml",
+    "53443ca338db2e1e5a5e80fa3e911a8a9d3a7041.puml",
+    "47daaf8b7a007bb1f4d18bfae03e278a9e37d064.puml",
+    "d35de4428a167a8aecc30b65a4fe4b220397c7ad.puml",
+    "2eceb879c4ceb2ba3ea9b2323d70e3530f262676.puml",
+    "163fbedc21137a806e4629746f23a34c448eba64.puml",
+    "f95acbb2e941983658557a6c714d5789bf71352b.puml",
+    "14c2649074893924da417bbee017ccbe84e38822.puml",
+    "a080c9d377259e0edfe51402d4d96a5e7f4bf189.puml",
+    "d01612e5d244eba4974139b6ca6deb5a7447a721.puml",
+    "e7f51fd2125eefc09b4743c253b6e19e6bac3de6.puml",
+    "56f9057da9203a210db2684b23cf67d535e5a220.puml"
+   ]
+  },
+  "train_5k": {
+   "diagrams": 5000,
+   "clock_sources": 3,
+   "renderer_trace": 9,
+   "clock_source_keys": [
+    "c0e8edc66fb0ec6258edc58d383bd3a4fcc12da8.puml",
+    "3c48d5f2ec1fc20be7119293a4b272959e0801d8.puml",
+    "fca1f36c465751320b8fbd71556acbc681f42eac.puml"
+   ],
+   "renderer_trace_keys": [
+    "c5d0c46b6651263bdc779ab5de6a79bbe794a130.puml",
+    "07161cdb482c8a174c20caa506e86b993265f151.puml",
+    "13bb6aa54d1635c0f2517b42d8c3e4e25d842b8c.puml",
+    "fb1d38cc058d408a6e02f252d6accdaaaa84193d.puml",
+    "b0f847d79aba85c09b1d579c6b1cb0a808344433.puml",
+    "628bd74f133ec13d59dcbd692166b317666d7292.puml",
+    "4d8c7482300b2ee53426495d83c5ee0a08154b69.puml",
+    "6c78efa00eb84f1b4307662382c6e9a1370245d1.puml",
+    "56f9057da9203a210db2684b23cf67d535e5a220.puml"
+   ]
+  },
+  "train_1k": {
+   "diagrams": 1000,
+   "clock_sources": 1,
+   "renderer_trace": 1,
+   "clock_source_keys": [
+    "c0e8edc66fb0ec6258edc58d383bd3a4fcc12da8.puml"
+   ],
+   "renderer_trace_keys": [
+    "07161cdb482c8a174c20caa506e86b993265f151.puml"
+   ]
+  }
+ },
+ "render": {
+  "dev": {
+   "keys_in_the_manifest": 200,
+   "status_in_the_manifest": {
+    "ok": 200
+   },
+   "render_calls": [
+    200
+   ],
+   "keys_of_the_set": 200,
+   "status_of_the_keys_of_the_set": {
+    "ok": 200
+   },
+   "attempt_of_the_keys_of_the_set": {
+    "batch": 200
+   },
+   "keys_of_the_set_with_a_degeneracy_label": 0,
+   "manifest_keys_not_in_the_set": 0
+  },
+  "loss_curve": {
+   "keys_in_the_manifest": 200,
+   "status_in_the_manifest": {
+    "ok": 200
+   },
+   "render_calls": [
+    200
+   ],
+   "keys_of_the_set": 200,
+   "status_of_the_keys_of_the_set": {
+    "ok": 200
+   },
+   "attempt_of_the_keys_of_the_set": {
+    "batch": 200
+   },
+   "keys_of_the_set_with_a_degeneracy_label": 0,
+   "manifest_keys_not_in_the_set": 0
+  },
+  "train": {
+   "keys_in_the_manifest": 20020,
+   "status_in_the_manifest": {
+    "ok": 20019,
+    "crash": 1
+   },
+   "render_calls": [
+    20000,
+    1,
+    2,
+    17
+   ],
+   "keys_of_the_set": 20000,
+   "status_of_the_keys_of_the_set": {
+    "ok": 20000
+   },
+   "attempt_of_the_keys_of_the_set": {
+    "batch": 20000
+   },
+   "keys_of_the_set_with_a_degeneracy_label": 0,
+   "manifest_keys_not_in_the_set": 20
+  }
+ }
+}

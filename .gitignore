@@ -1,0 +1,16 @@
+data/sets/render/*/puml_images_1568/
+.venv/
+.local/
+.pytest_cache/
+data/replaced_images/
+decisions/
+.claude/
+__pycache__/
+*.py[cod]
+.DS_Store
+.env
+*-KEY.txt
+*.key
+*.tar
+*.safetensors
+checkpoint-*/

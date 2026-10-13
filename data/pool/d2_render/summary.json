@@ -1,0 +1,15 @@
+{
+ "keys": 1853,
+ "status": {
+  "ok": 1853
+ },
+ "no_image_reason": {},
+ "rendered_alone": 0,
+ "renderer_trace": 4,
+ "stage2": {
+  "converted": 1240,
+  "unchanged": 514,
+  "padded": 99
+ },
+ "requested_not_in_manifest": 0
+}

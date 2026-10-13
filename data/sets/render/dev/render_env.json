@@ -1,0 +1,63 @@
+{
+ "renderer": {
+  "jar": "/Users/vovapolishchuk/indiehacker/projects/university/dataset/plantuml-in-wild-dataset/phase2/4.generate_images/plantuml-1.2025.9.jar",
+  "sha256": "280f4aa97f4f3b7af39358dd0d79f65e353b54a1630b5f121a13b1651162185d",
+  "version": "PlantUML version 1.2025.9"
+ },
+ "java": [
+  "openjdk version \"26.0.1\" 2026-04-21",
+  "OpenJDK Runtime Environment Temurin-26.0.1+8 (build 26.0.1+8)",
+  "OpenJDK 64-Bit Server VM Temurin-26.0.1+8 (build 26.0.1+8, mixed mode, sharing)"
+ ],
+ "graphviz": "dot - graphviz version 16.1.0 (20260904.0139)",
+ "dot_guard": {
+  "path": "/Users/vovapolishchuk/indiehacker/projects/university/fine-tune/build/dot_guard.sh",
+  "sha256": "5d2209008f64d362c55a6b78da443d169a484b3ed0f7d4771ff9767f14ff9113",
+  "real_dot": "/opt/homebrew/bin/dot"
+ },
+ "pillow": "11.3.0",
+ "platform": "macOS-26.4-arm64-arm-64bit",
+ "stage_code": {
+  "stage2": {
+   "path": "/Users/vovapolishchuk/indiehacker/projects/university/dataset/plantuml-in-wild-dataset/phase2/5.postprocess_images/postprocess_images.py",
+   "sha256": "53742a3d8ec4414bbc4829a3b5d5c92f21be5754ffdafb2bb5c6fb8925c4b3fc"
+  },
+  "stage3": {
+   "path": "/Users/vovapolishchuk/indiehacker/projects/university/baseline-evaluation/util/standardize_images.py",
+   "sha256": "726d80a77092e817d517807e77043c61a55f2e9b659631b8a3f01aff21b8caf3"
+  }
+ },
+ "parameters": {
+  "dpi": 300,
+  "limit_size": 16384,
+  "min_side": 512,
+  "long_edge": 1568,
+  "plantuml_flags": [
+   "java",
+   "-DPLANTUML_LIMIT_SIZE=16384",
+   "-XmxHm",
+   "-jar",
+   "JAR",
+   "--threads",
+   "T",
+   "--output-dir",
+   "OUT",
+   "-tpng",
+   "-stdrpt",
+   "--no-error-image",
+   "-config",
+   "CFG",
+   "IN/*.puml"
+  ]
+ },
+ "runs": [
+  {
+   "started": "2026-10-10T18:04:09+0300",
+   "threads": 3,
+   "heap_mb": 32768,
+   "solo_heap_mb": 32768,
+   "batch_size": 200,
+   "render_py_sha256": "8626a6f6be5b6b6008d4fa8dfb40334b232eae7118407780ced41acacd1405dd"
+  }
+ ]
+}

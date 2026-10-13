@@ -1,0 +1,101 @@
+(0.178 - 12 Mo) 7 Mo - SecurityProfile LEGACY
+(0.181 - 12 Mo) 6 Mo - PlantUML Version 1.2025.9
+(0.181 - 12 Mo) 6 Mo - GraphicsEnvironment.isHeadless() false
+(0.182 - 12 Mo) 6 Mo - Forcing resource load on OpenJdk
+(0.296 - 12 Mo) 5 Mo - Found 3 files
+(0.298 - 12 Mo) 5 Mo - Using several threads: 1
+(0.300 - 16 Mo) 12 Mo - Working on /w/in/000133b38e70cfb70834681221553363e9f37714.puml
+(0.306 - 16 Mo) 11 Mo - Using charset UTF-8
+(0.308 - 16 Mo) 11 Mo - Reading from 000133b38e70cfb70834681221553363e9f37714.puml
+(0.310 - 16 Mo) 10 Mo - ...text loaded...
+(0.320 - 16 Mo) 9 Mo - Setting current dir: /w/.
+(0.320 - 16 Mo) 9 Mo - Setting current dir: /w/in
+(0.331 - 20 Mo) 14 Mo - ..compiling diagram...
+(0.345 - 20 Mo) 11 Mo - Trying to load style plantuml.skin
+(0.346 - 20 Mo) 15 Mo - Current dir is /w/in so trying /w/in/plantuml.skin
+(0.347 - 20 Mo) 15 Mo - File not found : 
+(0.347 - 20 Mo) 15 Mo - ... but plantuml.skin found inside the .jar
+(0.375 - 60 Mo) 48 Mo - ...parsing ok...
+(0.375 - 60 Mo) 48 Mo - Compilation duration 44
+(0.376 - 60 Mo) 48 Mo - Reading file: /w/in/000133b38e70cfb70834681221553363e9f37714.puml
+(0.376 - 60 Mo) 48 Mo - Creating file: /w/v1/000133b38e70cfb70834681221553363e9f37714.png
+(0.379 - 60 Mo) 47 Mo - Using style [classDiagram, class_, element, root]  []
+(0.381 - 60 Mo) 47 Mo - Using style [classDiagram, class_, element, header, root]  []
+(0.386 - 60 Mo) 46 Mo - Using style [element, root, spot, spotClass]  []
+(0.387 - 60 Mo) 46 Mo - Using style [document, root]  []
+(0.389 - 60 Mo) 45 Mo - Using style [classDiagram, document, root]  []
+(0.392 - 60 Mo) 45 Mo - Using style [element, root, visibilityIcon, public_]  []
+(0.392 - 60 Mo) 45 Mo - ...image drawing...
+(0.393 - 60 Mo) 45 Mo - Creating image 685x264 type=1
+(0.450 - 60 Mo) 33 Mo - Trying to pack image. hasAlpha=false
+(0.454 - 60 Mo) 33 Mo - Using Quantify555.
+(0.486 - 60 Mo) 31 Mo - Number of image(s): 1
+(0.487 - 60 Mo) 31 Mo - Working on /w/in/4dad9f32fe4de4843bcc9936a683aa8a2f3bcd53.puml
+(0.487 - 60 Mo) 31 Mo - Using charset UTF-8
+(0.487 - 60 Mo) 31 Mo - Reading from 4dad9f32fe4de4843bcc9936a683aa8a2f3bcd53.puml
+(0.487 - 60 Mo) 31 Mo - ...text loaded...
+(0.496 - 60 Mo) 30 Mo - Setting current dir: /w/in
+(0.496 - 60 Mo) 30 Mo - ..compiling diagram...
+(0.496 - 60 Mo) 30 Mo - Using style [document, header, root]  []
+(0.497 - 60 Mo) 30 Mo - Using style [document, footer, root]  []
+(0.498 - 60 Mo) 29 Mo - Using style [document, header, root]  []
+(0.499 - 60 Mo) 29 Mo - Using style [document, footer, root]  []
+(0.502 - 60 Mo) 29 Mo - ...parsing ok...
+(0.502 - 60 Mo) 29 Mo - Compilation duration 6
+(0.502 - 60 Mo) 29 Mo - Reading file: /w/in/4dad9f32fe4de4843bcc9936a683aa8a2f3bcd53.puml
+(0.502 - 60 Mo) 29 Mo - Creating file: /w/v1/4dad9f32fe4de4843bcc9936a683aa8a2f3bcd53.png
+(0.515 - 60 Mo) 28 Mo - Using style [classDiagram, class_, element, root]  []
+(0.515 - 60 Mo) 28 Mo - Using style [classDiagram, class_, element, header, root]  []
+(0.515 - 60 Mo) 28 Mo - Using style [element, root, spot, spotInterface]  []
+(0.516 - 60 Mo) 28 Mo - Using style [element, root, spot, spotClass]  []
+(0.517 - 60 Mo) 28 Mo - Using style [arrow, classDiagram, element, root]  []
+(0.517 - 60 Mo) 28 Mo - Using style [arrow, cardinality, classDiagram, element, root]  []
+(0.519 - 60 Mo) 27 Mo - Starting Graphviz process [/opt/homebrew/bin/dot, -Tsvg]
+(0.520 - 60 Mo) 27 Mo - DotString size: 908
+(0.532 - 60 Mo) 27 Mo - Ending process ok
+(0.532 - 60 Mo) 27 Mo - Ending Graphviz process
+(0.534 - 60 Mo) 27 Mo - Using style [document, root, title]  []
+(0.546 - 60 Mo) 26 Mo - Using style [classDiagram, document, root]  []
+(0.547 - 60 Mo) 26 Mo - Using style [document, root]  []
+(0.549 - 60 Mo) 26 Mo - ...image drawing...
+(0.549 - 60 Mo) 26 Mo - Creating image 1186x1524 type=1
+(0.575 - 60 Mo) 16 Mo - Trying to pack image. hasAlpha=false
+(0.583 - 60 Mo) 8 Mo - Using Quantify555.
+(0.619 - 64 Mo) 45 Mo - Number of image(s): 1
+(0.619 - 64 Mo) 45 Mo - Working on /w/in/7b907a2193a605d50cf838ce9ddf8fd1ff761ac0.puml
+(0.620 - 64 Mo) 45 Mo - Using charset UTF-8
+(0.620 - 64 Mo) 45 Mo - Reading from 7b907a2193a605d50cf838ce9ddf8fd1ff761ac0.puml
+(0.620 - 64 Mo) 45 Mo - ...text loaded...
+(0.621 - 64 Mo) 44 Mo - Setting current dir: /w/in
+(0.621 - 64 Mo) 44 Mo - ..compiling diagram...
+(0.628 - 64 Mo) 42 Mo - ...parsing ok...
+(0.628 - 64 Mo) 42 Mo - Compilation duration 7
+(0.628 - 64 Mo) 42 Mo - Reading file: /w/in/7b907a2193a605d50cf838ce9ddf8fd1ff761ac0.puml
+(0.628 - 64 Mo) 42 Mo - Creating file: /w/v1/7b907a2193a605d50cf838ce9ddf8fd1ff761ac0.png
+(0.628 - 64 Mo) 42 Mo - Using style [classDiagram, element, package_, root, title]  []
+(0.629 - 64 Mo) 42 Mo - Using style [element, header, root, stateDiagram, state]  []
+(0.629 - 64 Mo) 42 Mo - Using style [classDiagram, class_, element, root]  []
+(0.630 - 64 Mo) 42 Mo - Using style [classDiagram, class_, element, header, root]  []
+(0.630 - 64 Mo) 42 Mo - Using style [element, root, spot, spotClass]  []
+(0.631 - 64 Mo) 42 Mo - Using style [classDiagram, class_, element, root]  [utility]
+(0.631 - 64 Mo) 42 Mo - Using style [classDiagram, class_, element, header, root]  [utility]
+(0.632 - 64 Mo) 42 Mo - Using style [element, root, spot, spotInterface]  []
+(0.633 - 64 Mo) 42 Mo - Using style [arrow, classDiagram, element, root]  []
+(0.633 - 64 Mo) 42 Mo - Using style [arrow, cardinality, classDiagram, element, root]  []
+java.lang.IllegalStateException
+	at net.sourceforge.plantuml.Run.manageFileInternal(Run.java:344)
+	at net.sourceforge.plantuml.Run.lambda$processInputsInParallel$12(Run.java:301)
+	at net.sourceforge.plantuml.Run.lambda$processInParallel$14(Run.java:317)
+(0.635 - 64 Mo) 41 Mo - Using style [classDiagram, element, group, package_, root]  []
+(0.636 - 64 Mo) 41 Mo - Starting Graphviz process [/opt/homebrew/bin/dot, -Tsvg]
+(0.636 - 64 Mo) 41 Mo - DotString size: 2691
+(0.649 - 64 Mo) 41 Mo - Ending process ok
+(0.649 - 64 Mo) 41 Mo - Ending Graphviz process
+(0.652 - 64 Mo) 41 Mo - Using style [classDiagram, document, root]  []
+(0.652 - 64 Mo) 41 Mo - Using style [document, root]  []
+(0.654 - 64 Mo) 40 Mo - ...image drawing...
+(0.654 - 64 Mo) 40 Mo - Creating image 3356x1107 type=1
+(0.677 - 64 Mo) 22 Mo - Trying to pack image. hasAlpha=false
+(0.696 - 68 Mo) 18 Mo - Using Quantify555.
+(0.738 - 68 Mo) 38 Mo - Creating file: /w/v1/7b907a2193a605d50cf838ce9ddf8fd1ff761ac0.cmapx
+(0.738 - 68 Mo) 38 Mo - Number of image(s): 1

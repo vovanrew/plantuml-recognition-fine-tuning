@@ -1,0 +1,208 @@
+{
+ "decision": "decisions/training-pool-rules/record.md, elements D7 and D10 to D16, Amendment 1 (A1 to A5), Amendment 2 (A6 to A8)",
+ "inputs": {
+  "pool": {
+   "path": "data/pool/pool_after_d6.json",
+   "sha256": "d7f120ef66f37516d46060657c0df82e36c5dc160731b77f73e711e4c5afa20e"
+  },
+  "candidates": {
+   "path": "data/pool/candidates.tsv",
+   "sha256": "6e862cfed5c190bf073c2c39299714382ed37ccf6a481dfc3b9fb0a42e13d3c0"
+  },
+  "pool_config": {
+   "path": "data/pool/config.json",
+   "sha256": "bc505e6053633aee3023487d3485fa7b95090569e17b60dbc138816a0cf50489",
+   "parameters": {
+    "tiers_content_lines": {
+     "class": [
+      11.0,
+      24.0,
+      49.0
+     ],
+     "sequence": [
+      12.0,
+      22.0,
+      39.0
+     ]
+    },
+    "D1": {
+     "type_check_network": "closed",
+     "extractor": "extractor_v1"
+    },
+    "D2": {
+     "scale": 3.125,
+     "min_side": 512,
+     "deposit_limit": 4096,
+     "aspect_band": [
+      7.8,
+      8.2
+     ],
+     "own_dpi_pattern": "\\bdpi\\b",
+     "embedded": "{{",
+     "clip_long_edge": 16384,
+     "aspect_max": 8.0
+    },
+    "D3": {
+     "extractor": "extractor_v1",
+     "cross_check": "extractor_v2",
+     "jvm_options": [
+      "-Dhttp.proxyHost=127.0.0.1",
+      "-Dhttp.proxyPort=1",
+      "-Dhttps.proxyHost=127.0.0.1",
+      "-Dhttps.proxyPort=1",
+      "-Dhttp.nonProxyHosts=",
+      "-Dftp.proxyHost=127.0.0.1",
+      "-Dftp.proxyPort=1"
+     ],
+     "remote_include_pattern": "^[ \\t]*!(includeurl\\b|include(?:_many|_once|sub)?\\s+<?https?://|theme\\s+\\S+\\s+from\\s+https?://)"
+    },
+    "D4": {
+     "tokenizer": "Qwen/Qwen3.5-2B",
+     "use_fast": false,
+     "add_special_tokens": false,
+     "token_cap": 5376
+    },
+    "D5_D6": {
+     "shingle": 5,
+     "a_jaccard_min": [
+      7,
+      10
+     ],
+     "b_edit_similarity_min": [
+      4,
+      5
+     ],
+     "c_lines_held_min": [
+      4,
+      5
+     ],
+     "c_min_test_lines": 10,
+     "test_index": "position in the diagrams list of test_set.json"
+    }
+   }
+  },
+  "pool_sha256sums": {
+   "path": "data/pool/SHA256SUMS",
+   "sha256": "4a3ebab67cf730ee975eff9497e4b51173f746bbfd49eddf56f9b5617d9d8c53"
+  },
+  "test_set": {
+   "path": "baseline-evaluation/data/test_set.json",
+   "sha256": "e233e56968f90c7411d7c6b27cdd5c81f801fcc47fd1c7b45d174918a440744c"
+  },
+  "sources": "dataset/puml_files",
+  "test_sources": "baseline-evaluation/data/puml_files"
+ },
+ "code": {
+  "sample.py": "b9ed9c982ca69bdabcc63a9269b9c5b1198cb8c9d5b376999f2f3b66514ce35b",
+  "pool.py": "977000c2311ff4675cbef7ba02e8fb4a92117fbfb9a0c7123662dee2e462cde1",
+  "leakage.py": "d71399b23527b5541c5c0afdab9eb471bed7efd4108bc1c516252269c79fb824",
+  "render.py": "8626a6f6be5b6b6008d4fa8dfb40334b232eae7118407780ced41acacd1405dd"
+ },
+ "parameters": {
+  "seed": 42,
+  "cells": [
+   "class_T1",
+   "class_T2",
+   "class_T3",
+   "class_T4",
+   "sequence_T1",
+   "sequence_T2",
+   "sequence_T3",
+   "sequence_T4"
+  ],
+  "D10_tiers_content_lines": "quartile_thresholds of test_set.json; the tier of each key is that of data/pool/pool_after_d6.json",
+  "D11_dev": {
+   "n_per_cell": 25,
+   "repository_limit": 5,
+   "drawn_from": "pool after D6"
+  },
+  "D12_loss_curve": {
+   "n_per_cell": 25,
+   "repository_limit": 5,
+   "drawn_from": "the other pool diagrams of the dev repositories"
+  },
+  "D13_train": {
+   "n_per_cell": 2500,
+   "repository_limit": null,
+   "drawn_from": "pool after D6 without the dev repositories and without the candidates D7 flags",
+   "subsets_first_keys_of_each_cell": {
+    "train_20k": 2500,
+    "train_5k": 625,
+    "train_1k": 125
+   }
+  },
+  "sampler": "build_test_set.sample_cells; a generator of its own for each draw; a key of the exclusion list is passed over and does not count for its repository",
+  "D7": {
+   "shingle": 5,
+   "a_jaccard_min": [
+    7,
+    10
+   ],
+   "b_edit_similarity_min": [
+    4,
+    5
+   ],
+   "c_lines_held_min": [
+    4,
+    5
+   ],
+   "c_min_reference_lines": 10,
+   "reference": "the dev diagrams"
+  },
+  "Amendment_1": {
+   "A1_text": "the block csr_runner.extract_puml returns for the file (pool.isolate_batches), on both sides of a pair; the measures and thresholds are those of D7 above (build/leakage.py)",
+   "extract_puml_source_sha256": "a9053594872aa83ad11a39d69630ee8d6bd623dfbde2be94ffc19ea795bed62a",
+   "A2": "a flagged key goes on the exclusion list; the pool file, the candidate lists and the permutations are not changed",
+   "A3": {
+    "candidates": "pool after D6",
+    "reference": "the test diagrams",
+    "excluded_from": [
+     "dev",
+     "loss_curve",
+     "train"
+    ]
+   },
+   "A4": {
+    "candidates": "training pool after D7",
+    "reference": "the dev diagrams",
+    "excluded_from": [
+     "train"
+    ]
+   },
+   "A5_neighbours": "neighbours_test_block.tsv and neighbours_dev_block.tsv, as D8_neighbours below; distinct_lines is the number of distinct lines of the block"
+  },
+  "Amendment_2": {
+   "A6": {
+    "candidates": "training pool after D7",
+    "reference": "the diagrams of the loss-curve split",
+    "texts": [
+     "whole_file",
+     "block"
+    ],
+    "excluded_from": [
+     "train"
+    ]
+   },
+   "A6_texts": "whole_file: the file, the text of D7; block: the text of A1; a candidate that an arm flags on either text is excluded",
+   "A7": "as A2",
+   "A8": "loss_curve_excluded.jsonl; in d8_report.json the key A6 and, in training_sample and in block_alone.training_sample, against_the_loss_curve_split (no table of it is written)"
+  },
+  "D14": {
+   "render": "build/render.py, defaults",
+   "dropped": "status other than ok, or a degeneracy label on padded_size",
+   "clip_long_edge": 16384,
+   "aspect_max": 8.0,
+   "token_cap": 5376
+  },
+  "D15": {
+   "clock_pattern": "%(date|now)\\b",
+   "logged_exception": "renderer_trace of the render manifest"
+  },
+  "D8_neighbours": "largest value over all training diagrams, every pair computed; first training key in the order of train.json on a tie; no key when the value is 0; lines_held only for a reference diagram of at least 10 distinct lines"
+ },
+ "environment": {
+  "python": "3.9.6",
+  "numpy": "2.0.2",
+  "platform": "macOS-26.4-arm64-arm-64bit"
+ }
+}

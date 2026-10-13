@@ -1,0 +1,950 @@
+{
+ "D7": {
+  "candidates_compared": 63697,
+  "reference_diagrams": 200,
+  "pairs": 12739400,
+  "removed": {
+   "class_T1": 8,
+   "class_T2": 6,
+   "class_T3": 0,
+   "class_T4": 0,
+   "sequence_T1": 27,
+   "sequence_T2": 5,
+   "sequence_T3": 5,
+   "sequence_T4": 0,
+   "total": 51
+  },
+  "flagged_by_arm": {
+   "a": {
+    "class_T1": 1,
+    "class_T2": 2,
+    "class_T3": 0,
+    "class_T4": 0,
+    "sequence_T1": 11,
+    "sequence_T2": 4,
+    "sequence_T3": 4,
+    "sequence_T4": 0,
+    "total": 22
+   },
+   "b": {
+    "class_T1": 8,
+    "class_T2": 6,
+    "class_T3": 0,
+    "class_T4": 0,
+    "sequence_T1": 27,
+    "sequence_T2": 5,
+    "sequence_T3": 5,
+    "sequence_T4": 0,
+    "total": 51
+   },
+   "c": {
+    "class_T1": 0,
+    "class_T2": 1,
+    "class_T3": 0,
+    "class_T4": 0,
+    "sequence_T1": 0,
+    "sequence_T2": 0,
+    "sequence_T3": 4,
+    "sequence_T4": 0,
+    "total": 5
+   }
+  },
+  "removed_by_combination_of_arms": {
+   "ab": {
+    "class_T1": 1,
+    "class_T2": 1,
+    "class_T3": 0,
+    "class_T4": 0,
+    "sequence_T1": 11,
+    "sequence_T2": 4,
+    "sequence_T3": 0,
+    "sequence_T4": 0,
+    "total": 17
+   },
+   "abc": {
+    "class_T1": 0,
+    "class_T2": 1,
+    "class_T3": 0,
+    "class_T4": 0,
+    "sequence_T1": 0,
+    "sequence_T2": 0,
+    "sequence_T3": 4,
+    "sequence_T4": 0,
+    "total": 5
+   },
+   "b": {
+    "class_T1": 7,
+    "class_T2": 4,
+    "class_T3": 0,
+    "class_T4": 0,
+    "sequence_T1": 16,
+    "sequence_T2": 1,
+    "sequence_T3": 1,
+    "sequence_T4": 0,
+    "total": 29
+   }
+  },
+  "largest_value_among_kept": {
+   "a": {
+    "value": 0.6568627450980392,
+    "candidate": "bd30cf898991efb44a45ab0933189bbf5b38e890.puml",
+    "reference": "a19f4cff8396aba21d5ce2a4b1993adcaf6c5119_03.puml",
+    "cell": "sequence_T1"
+   },
+   "b": {
+    "value": 0.7987421383647799,
+    "candidate": "3aa55f29040d22010789264ba01c186fcab2ad54.puml",
+    "reference": "2cd6b3e3d4e346c03ddfb10babfab1248bb39a02.puml",
+    "cell": "class_T1"
+   },
+   "c": {
+    "value": 0.7272727272727273,
+    "candidate": "dcd41440f1020c089650d9954edb4bfab887a882.puml",
+    "reference": "f93df43120942cb95da23d6049a5515be365bd9d.puml",
+    "cell": "sequence_T1"
+   }
+  },
+  "reference_diagrams_with_a_removed_candidate": {
+   "a": 9,
+   "b": 15,
+   "c": 3,
+   "any": 15
+  }
+ },
+ "training_sample": {
+  "diagrams": 20000,
+  "training_diagrams_on_which_an_arm_fires": {
+   "test": {
+    "a": 0,
+    "b": 0,
+    "c": 0
+   },
+   "dev": {
+    "a": 0,
+    "b": 0,
+    "c": 0
+   },
+   "loss_curve": {
+    "a": 0,
+    "b": 0,
+    "c": 0
+   }
+  },
+  "against_the_test_set": {
+   "reference_diagrams": 1000,
+   "jaccard_5gram": {
+    "reference_diagrams_with_a_value": 1000,
+    "largest": {
+     "value": 0.6979591836734694,
+     "train_key": "83693f57748606421a672fe0256e8a0d1d7a9ce8.puml",
+     "reference": "b3a6060ed4cd6a6c9cd21910f1d57f32d9048784.puml",
+     "cell_of_the_train_key": "sequence_T1"
+    },
+    "reference_diagrams_at_or_above": {
+     "0.5": 36,
+     "0.6": 15,
+     "0.7": 0,
+     "0.8": 0
+    }
+   },
+   "edit_similarity": {
+    "reference_diagrams_with_a_value": 1000,
+    "largest": {
+     "value": 0.7994428969359332,
+     "train_key": "92299f89807c19aba10f1d54556ba4744bf36948.puml",
+     "reference": "cdb4cab594e857c56c87cf0eeb72386c841b150e.puml",
+     "cell_of_the_train_key": "class_T2"
+    },
+    "reference_diagrams_at_or_above": {
+     "0.5": 351,
+     "0.6": 137,
+     "0.7": 55,
+     "0.8": 0
+    }
+   },
+   "lines_held": {
+    "reference_diagrams_with_a_value": 791,
+    "largest": {
+     "value": 0.7058823529411765,
+     "train_key": "d0fd7587d43316af33d2c8c6c67af20026abc91f.puml",
+     "reference": "c0837e9218c67a5e5f9639ccd92e3f66ded69936.puml",
+     "cell_of_the_train_key": "class_T3"
+    },
+    "reference_diagrams_at_or_above": {
+     "0.5": 22,
+     "0.6": 8,
+     "0.7": 1,
+     "0.8": 0
+    }
+   }
+  },
+  "against_the_dev_set": {
+   "reference_diagrams": 200,
+   "jaccard_5gram": {
+    "reference_diagrams_with_a_value": 200,
+    "largest": {
+     "value": 0.6568627450980392,
+     "train_key": "bd30cf898991efb44a45ab0933189bbf5b38e890.puml",
+     "reference": "a19f4cff8396aba21d5ce2a4b1993adcaf6c5119_03.puml",
+     "cell_of_the_train_key": "sequence_T1"
+    },
+    "reference_diagrams_at_or_above": {
+     "0.5": 4,
+     "0.6": 2,
+     "0.7": 0,
+     "0.8": 0
+    }
+   },
+   "edit_similarity": {
+    "reference_diagrams_with_a_value": 200,
+    "largest": {
+     "value": 0.7987421383647799,
+     "train_key": "3aa55f29040d22010789264ba01c186fcab2ad54.puml",
+     "reference": "2cd6b3e3d4e346c03ddfb10babfab1248bb39a02.puml",
+     "cell_of_the_train_key": "class_T1"
+    },
+    "reference_diagrams_at_or_above": {
+     "0.5": 78,
+     "0.6": 35,
+     "0.7": 12,
+     "0.8": 0
+    }
+   },
+   "lines_held": {
+    "reference_diagrams_with_a_value": 155,
+    "largest": {
+     "value": 0.7272727272727273,
+     "train_key": "8aa1b51ac1a9ca66d8aa46399bbd165042ae9d38.puml",
+     "reference": "f93df43120942cb95da23d6049a5515be365bd9d.puml",
+     "cell_of_the_train_key": "sequence_T1"
+    },
+    "reference_diagrams_at_or_above": {
+     "0.5": 5,
+     "0.6": 2,
+     "0.7": 1,
+     "0.8": 0
+    }
+   }
+  },
+  "against_the_loss_curve_split": {
+   "reference_diagrams": 200,
+   "jaccard_5gram": {
+    "reference_diagrams_with_a_value": 200,
+    "largest": {
+     "value": 0.5612244897959183,
+     "train_key": "d6a8329fed9efb43b6ed64a168408677a81fa8ee.puml",
+     "reference": "40d46824e0a8d8c43254b1a5bea299948a3f90a6.puml",
+     "cell_of_the_train_key": "sequence_T1"
+    },
+    "reference_diagrams_at_or_above": {
+     "0.5": 3,
+     "0.6": 0,
+     "0.7": 0,
+     "0.8": 0
+    }
+   },
+   "edit_similarity": {
+    "reference_diagrams_with_a_value": 200,
+    "largest": {
+     "value": 0.7955056179775281,
+     "train_key": "7e6626aa490de8cf6b6e3aca9899a3c0ae5ff2a2.puml",
+     "reference": "40d46824e0a8d8c43254b1a5bea299948a3f90a6.puml",
+     "cell_of_the_train_key": "sequence_T1"
+    },
+    "reference_diagrams_at_or_above": {
+     "0.5": 81,
+     "0.6": 33,
+     "0.7": 10,
+     "0.8": 0
+    }
+   },
+   "lines_held": {
+    "reference_diagrams_with_a_value": 158,
+    "largest": {
+     "value": 0.7419354838709677,
+     "train_key": "0cf4d70f067b61b9700ba523c6d0c734be051755_02.puml",
+     "reference": "c6323c77976c7983c647460188dee2b9deaa1d07_10.puml",
+     "cell_of_the_train_key": "sequence_T4"
+    },
+    "reference_diagrams_at_or_above": {
+     "0.5": 6,
+     "0.6": 3,
+     "0.7": 2,
+     "0.8": 0
+    }
+   }
+  }
+ },
+ "block_alone": {
+  "A3": {
+   "candidates_compared": 66379,
+   "reference_diagrams": 1000,
+   "pairs": 66379000,
+   "excluded": {
+    "class_T1": 0,
+    "class_T2": 0,
+    "class_T3": 0,
+    "class_T4": 0,
+    "sequence_T1": 4,
+    "sequence_T2": 0,
+    "sequence_T3": 0,
+    "sequence_T4": 0,
+    "total": 4
+   },
+   "flagged_by_arm": {
+    "a": {
+     "class_T1": 0,
+     "class_T2": 0,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 2,
+     "sequence_T2": 0,
+     "sequence_T3": 0,
+     "sequence_T4": 0,
+     "total": 2
+    },
+    "b": {
+     "class_T1": 0,
+     "class_T2": 0,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 4,
+     "sequence_T2": 0,
+     "sequence_T3": 0,
+     "sequence_T4": 0,
+     "total": 4
+    },
+    "c": {
+     "class_T1": 0,
+     "class_T2": 0,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 0,
+     "sequence_T2": 0,
+     "sequence_T3": 0,
+     "sequence_T4": 0,
+     "total": 0
+    }
+   },
+   "excluded_by_combination_of_arms": {
+    "ab": {
+     "class_T1": 0,
+     "class_T2": 0,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 2,
+     "sequence_T2": 0,
+     "sequence_T3": 0,
+     "sequence_T4": 0,
+     "total": 2
+    },
+    "b": {
+     "class_T1": 0,
+     "class_T2": 0,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 2,
+     "sequence_T2": 0,
+     "sequence_T3": 0,
+     "sequence_T4": 0,
+     "total": 2
+    }
+   },
+   "largest_value_among_the_candidates_not_excluded": {
+    "a": {
+     "value": 0.6979591836734694,
+     "candidate": "83693f57748606421a672fe0256e8a0d1d7a9ce8.puml",
+     "reference": "b3a6060ed4cd6a6c9cd21910f1d57f32d9048784.puml",
+     "cell": "sequence_T1"
+    },
+    "b": {
+     "value": 0.7994652406417112,
+     "candidate": "913ed2a19afd69325f5b039a93c40d5139c347f6.puml",
+     "reference": "fc69add8ac9e455182051911d9ae90a4726809cf.puml",
+     "cell": "class_T1"
+    },
+    "c": {
+     "value": 0.7692307692307693,
+     "candidate": "3c6989bb37bd833602c907efb4fec69d769eafc0.puml",
+     "reference": "04642e29bba49ac98e4b8f634ef22a1592362841.puml",
+     "cell": "sequence_T3"
+    }
+   },
+   "reference_diagrams_with_an_excluded_candidate": {
+    "a": 2,
+    "b": 3,
+    "c": 0,
+    "any": 3
+   }
+  },
+  "A4": {
+   "candidates_compared": 63646,
+   "reference_diagrams": 200,
+   "pairs": 12729200,
+   "excluded": {
+    "class_T1": 1,
+    "class_T2": 0,
+    "class_T3": 0,
+    "class_T4": 0,
+    "sequence_T1": 1,
+    "sequence_T2": 0,
+    "sequence_T3": 0,
+    "sequence_T4": 0,
+    "total": 2
+   },
+   "flagged_by_arm": {
+    "a": {
+     "class_T1": 1,
+     "class_T2": 0,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 1,
+     "sequence_T2": 0,
+     "sequence_T3": 0,
+     "sequence_T4": 0,
+     "total": 2
+    },
+    "b": {
+     "class_T1": 1,
+     "class_T2": 0,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 1,
+     "sequence_T2": 0,
+     "sequence_T3": 0,
+     "sequence_T4": 0,
+     "total": 2
+    },
+    "c": {
+     "class_T1": 0,
+     "class_T2": 0,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 0,
+     "sequence_T2": 0,
+     "sequence_T3": 0,
+     "sequence_T4": 0,
+     "total": 0
+    }
+   },
+   "excluded_by_combination_of_arms": {
+    "ab": {
+     "class_T1": 1,
+     "class_T2": 0,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 1,
+     "sequence_T2": 0,
+     "sequence_T3": 0,
+     "sequence_T4": 0,
+     "total": 2
+    }
+   },
+   "largest_value_among_the_candidates_not_excluded": {
+    "a": {
+     "value": 0.6568627450980392,
+     "candidate": "bd30cf898991efb44a45ab0933189bbf5b38e890.puml",
+     "reference": "a19f4cff8396aba21d5ce2a4b1993adcaf6c5119_03.puml",
+     "cell": "sequence_T1"
+    },
+    "b": {
+     "value": 0.7987421383647799,
+     "candidate": "3aa55f29040d22010789264ba01c186fcab2ad54.puml",
+     "reference": "2cd6b3e3d4e346c03ddfb10babfab1248bb39a02.puml",
+     "cell": "class_T1"
+    },
+    "c": {
+     "value": 0.7272727272727273,
+     "candidate": "dcd41440f1020c089650d9954edb4bfab887a882.puml",
+     "reference": "f93df43120942cb95da23d6049a5515be365bd9d.puml",
+     "cell": "sequence_T1"
+    }
+   },
+   "reference_diagrams_with_an_excluded_candidate": {
+    "a": 2,
+    "b": 2,
+    "c": 0,
+    "any": 2
+   }
+  },
+  "training_sample": {
+   "diagrams": 20000,
+   "training_diagrams_on_which_an_arm_fires": {
+    "test": {
+     "a": 0,
+     "b": 0,
+     "c": 0
+    },
+    "dev": {
+     "a": 0,
+     "b": 0,
+     "c": 0
+    },
+    "loss_curve": {
+     "a": 0,
+     "b": 0,
+     "c": 0
+    }
+   },
+   "against_the_test_set": {
+    "reference_diagrams": 1000,
+    "jaccard_5gram": {
+     "reference_diagrams_with_a_value": 1000,
+     "largest": {
+      "value": 0.6979591836734694,
+      "train_key": "83693f57748606421a672fe0256e8a0d1d7a9ce8.puml",
+      "reference": "b3a6060ed4cd6a6c9cd21910f1d57f32d9048784.puml",
+      "cell_of_the_train_key": "sequence_T1"
+     },
+     "reference_diagrams_at_or_above": {
+      "0.5": 36,
+      "0.6": 16,
+      "0.7": 0,
+      "0.8": 0
+     }
+    },
+    "edit_similarity": {
+     "reference_diagrams_with_a_value": 1000,
+     "largest": {
+      "value": 0.7994428969359332,
+      "train_key": "92299f89807c19aba10f1d54556ba4744bf36948.puml",
+      "reference": "cdb4cab594e857c56c87cf0eeb72386c841b150e.puml",
+      "cell_of_the_train_key": "class_T2"
+     },
+     "reference_diagrams_at_or_above": {
+      "0.5": 350,
+      "0.6": 137,
+      "0.7": 56,
+      "0.8": 0
+     }
+    },
+    "lines_held": {
+     "reference_diagrams_with_a_value": 789,
+     "largest": {
+      "value": 0.7058823529411765,
+      "train_key": "d0fd7587d43316af33d2c8c6c67af20026abc91f.puml",
+      "reference": "c0837e9218c67a5e5f9639ccd92e3f66ded69936.puml",
+      "cell_of_the_train_key": "class_T3"
+     },
+     "reference_diagrams_at_or_above": {
+      "0.5": 22,
+      "0.6": 8,
+      "0.7": 1,
+      "0.8": 0
+     }
+    }
+   },
+   "against_the_dev_set": {
+    "reference_diagrams": 200,
+    "jaccard_5gram": {
+     "reference_diagrams_with_a_value": 200,
+     "largest": {
+      "value": 0.6568627450980392,
+      "train_key": "bd30cf898991efb44a45ab0933189bbf5b38e890.puml",
+      "reference": "a19f4cff8396aba21d5ce2a4b1993adcaf6c5119_03.puml",
+      "cell_of_the_train_key": "sequence_T1"
+     },
+     "reference_diagrams_at_or_above": {
+      "0.5": 4,
+      "0.6": 2,
+      "0.7": 0,
+      "0.8": 0
+     }
+    },
+    "edit_similarity": {
+     "reference_diagrams_with_a_value": 200,
+     "largest": {
+      "value": 0.7987421383647799,
+      "train_key": "3aa55f29040d22010789264ba01c186fcab2ad54.puml",
+      "reference": "2cd6b3e3d4e346c03ddfb10babfab1248bb39a02.puml",
+      "cell_of_the_train_key": "class_T1"
+     },
+     "reference_diagrams_at_or_above": {
+      "0.5": 79,
+      "0.6": 35,
+      "0.7": 12,
+      "0.8": 0
+     }
+    },
+    "lines_held": {
+     "reference_diagrams_with_a_value": 154,
+     "largest": {
+      "value": 0.7272727272727273,
+      "train_key": "8aa1b51ac1a9ca66d8aa46399bbd165042ae9d38.puml",
+      "reference": "f93df43120942cb95da23d6049a5515be365bd9d.puml",
+      "cell_of_the_train_key": "sequence_T1"
+     },
+     "reference_diagrams_at_or_above": {
+      "0.5": 5,
+      "0.6": 2,
+      "0.7": 1,
+      "0.8": 0
+     }
+    }
+   },
+   "against_the_loss_curve_split": {
+    "reference_diagrams": 200,
+    "jaccard_5gram": {
+     "reference_diagrams_with_a_value": 200,
+     "largest": {
+      "value": 0.5612244897959183,
+      "train_key": "d6a8329fed9efb43b6ed64a168408677a81fa8ee.puml",
+      "reference": "40d46824e0a8d8c43254b1a5bea299948a3f90a6.puml",
+      "cell_of_the_train_key": "sequence_T1"
+     },
+     "reference_diagrams_at_or_above": {
+      "0.5": 3,
+      "0.6": 0,
+      "0.7": 0,
+      "0.8": 0
+     }
+    },
+    "edit_similarity": {
+     "reference_diagrams_with_a_value": 200,
+     "largest": {
+      "value": 0.7955056179775281,
+      "train_key": "7e6626aa490de8cf6b6e3aca9899a3c0ae5ff2a2.puml",
+      "reference": "40d46824e0a8d8c43254b1a5bea299948a3f90a6.puml",
+      "cell_of_the_train_key": "sequence_T1"
+     },
+     "reference_diagrams_at_or_above": {
+      "0.5": 82,
+      "0.6": 33,
+      "0.7": 10,
+      "0.8": 0
+     }
+    },
+    "lines_held": {
+     "reference_diagrams_with_a_value": 158,
+     "largest": {
+      "value": 0.7419354838709677,
+      "train_key": "0cf4d70f067b61b9700ba523c6d0c734be051755_02.puml",
+      "reference": "c6323c77976c7983c647460188dee2b9deaa1d07_10.puml",
+      "cell_of_the_train_key": "sequence_T4"
+     },
+     "reference_diagrams_at_or_above": {
+      "0.5": 6,
+      "0.6": 3,
+      "0.7": 2,
+      "0.8": 0
+     }
+    }
+   }
+  }
+ },
+ "A6": {
+  "whole_file": {
+   "candidates_compared": 63646,
+   "reference_diagrams": 200,
+   "pairs": 12729200,
+   "excluded": {
+    "class_T1": 28,
+    "class_T2": 1,
+    "class_T3": 0,
+    "class_T4": 0,
+    "sequence_T1": 6,
+    "sequence_T2": 2,
+    "sequence_T3": 9,
+    "sequence_T4": 1,
+    "total": 47
+   },
+   "flagged_by_arm": {
+    "a": {
+     "class_T1": 2,
+     "class_T2": 0,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 0,
+     "sequence_T2": 2,
+     "sequence_T3": 4,
+     "sequence_T4": 0,
+     "total": 8
+    },
+    "b": {
+     "class_T1": 28,
+     "class_T2": 1,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 5,
+     "sequence_T2": 2,
+     "sequence_T3": 9,
+     "sequence_T4": 0,
+     "total": 45
+    },
+    "c": {
+     "class_T1": 0,
+     "class_T2": 0,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 0,
+     "sequence_T2": 2,
+     "sequence_T3": 2,
+     "sequence_T4": 1,
+     "total": 5
+    }
+   },
+   "excluded_by_combination_of_arms": {
+    "ab": {
+     "class_T1": 2,
+     "class_T2": 0,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 0,
+     "sequence_T2": 0,
+     "sequence_T3": 2,
+     "sequence_T4": 0,
+     "total": 4
+    },
+    "abc": {
+     "class_T1": 0,
+     "class_T2": 0,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 0,
+     "sequence_T2": 2,
+     "sequence_T3": 2,
+     "sequence_T4": 0,
+     "total": 4
+    },
+    "b": {
+     "class_T1": 26,
+     "class_T2": 1,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 5,
+     "sequence_T2": 0,
+     "sequence_T3": 5,
+     "sequence_T4": 0,
+     "total": 37
+    },
+    "c": {
+     "class_T1": 0,
+     "class_T2": 0,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 0,
+     "sequence_T2": 0,
+     "sequence_T3": 0,
+     "sequence_T4": 1,
+     "total": 1
+    },
+    "none": {
+     "class_T1": 0,
+     "class_T2": 0,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 1,
+     "sequence_T2": 0,
+     "sequence_T3": 0,
+     "sequence_T4": 0,
+     "total": 1
+    }
+   },
+   "largest_value_among_the_candidates_not_excluded": {
+    "a": {
+     "value": 0.6023622047244095,
+     "candidate": "5efb58d51a9d876ed0875c3a8122015a023a58bf.puml",
+     "reference": "969821e629c05df063ff8aca17ea09419692f6e0.puml",
+     "cell": "sequence_T3"
+    },
+    "b": {
+     "value": 0.7955555555555556,
+     "candidate": "32748600250f11c16a207470158c58a3e865375c.puml",
+     "reference": "40d46824e0a8d8c43254b1a5bea299948a3f90a6.puml",
+     "cell": "sequence_T1"
+    },
+    "c": {
+     "value": 0.7741935483870968,
+     "candidate": "0cf4d70f067b61b9700ba523c6d0c734be051755_04.puml",
+     "reference": "c6323c77976c7983c647460188dee2b9deaa1d07_10.puml",
+     "cell": "sequence_T4"
+    }
+   },
+   "reference_diagrams_with_an_excluded_candidate": {
+    "a": 4,
+    "b": 12,
+    "c": 3,
+    "any": 12
+   }
+  },
+  "block_alone": {
+   "candidates_compared": 63646,
+   "reference_diagrams": 200,
+   "pairs": 12729200,
+   "excluded": {
+    "class_T1": 28,
+    "class_T2": 1,
+    "class_T3": 0,
+    "class_T4": 0,
+    "sequence_T1": 6,
+    "sequence_T2": 2,
+    "sequence_T3": 9,
+    "sequence_T4": 1,
+    "total": 47
+   },
+   "flagged_by_arm": {
+    "a": {
+     "class_T1": 2,
+     "class_T2": 0,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 0,
+     "sequence_T2": 2,
+     "sequence_T3": 4,
+     "sequence_T4": 0,
+     "total": 8
+    },
+    "b": {
+     "class_T1": 28,
+     "class_T2": 1,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 6,
+     "sequence_T2": 2,
+     "sequence_T3": 9,
+     "sequence_T4": 0,
+     "total": 46
+    },
+    "c": {
+     "class_T1": 0,
+     "class_T2": 0,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 0,
+     "sequence_T2": 2,
+     "sequence_T3": 2,
+     "sequence_T4": 1,
+     "total": 5
+    }
+   },
+   "excluded_by_combination_of_arms": {
+    "ab": {
+     "class_T1": 2,
+     "class_T2": 0,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 0,
+     "sequence_T2": 0,
+     "sequence_T3": 2,
+     "sequence_T4": 0,
+     "total": 4
+    },
+    "abc": {
+     "class_T1": 0,
+     "class_T2": 0,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 0,
+     "sequence_T2": 2,
+     "sequence_T3": 2,
+     "sequence_T4": 0,
+     "total": 4
+    },
+    "b": {
+     "class_T1": 26,
+     "class_T2": 1,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 6,
+     "sequence_T2": 0,
+     "sequence_T3": 5,
+     "sequence_T4": 0,
+     "total": 38
+    },
+    "c": {
+     "class_T1": 0,
+     "class_T2": 0,
+     "class_T3": 0,
+     "class_T4": 0,
+     "sequence_T1": 0,
+     "sequence_T2": 0,
+     "sequence_T3": 0,
+     "sequence_T4": 1,
+     "total": 1
+    }
+   },
+   "largest_value_among_the_candidates_not_excluded": {
+    "a": {
+     "value": 0.6023622047244095,
+     "candidate": "5efb58d51a9d876ed0875c3a8122015a023a58bf.puml",
+     "reference": "969821e629c05df063ff8aca17ea09419692f6e0.puml",
+     "cell": "sequence_T3"
+    },
+    "b": {
+     "value": 0.7955555555555556,
+     "candidate": "32748600250f11c16a207470158c58a3e865375c.puml",
+     "reference": "40d46824e0a8d8c43254b1a5bea299948a3f90a6.puml",
+     "cell": "sequence_T1"
+    },
+    "c": {
+     "value": 0.7741935483870968,
+     "candidate": "0cf4d70f067b61b9700ba523c6d0c734be051755_04.puml",
+     "reference": "c6323c77976c7983c647460188dee2b9deaa1d07_10.puml",
+     "cell": "sequence_T4"
+    }
+   },
+   "reference_diagrams_with_an_excluded_candidate": {
+    "a": 4,
+    "b": 12,
+    "c": 3,
+    "any": 12
+   }
+  }
+ },
+ "set_keys_on_which_an_arm_fires": {
+  "whole_file": {
+   "train_against_test": {
+    "a": 0,
+    "b": 0,
+    "c": 0
+   },
+   "dev_against_test": {
+    "a": 0,
+    "b": 0,
+    "c": 0
+   },
+   "loss_curve_against_test": {
+    "a": 0,
+    "b": 0,
+    "c": 0
+   },
+   "train_against_dev": {
+    "a": 0,
+    "b": 0,
+    "c": 0
+   },
+   "train_against_loss_curve": {
+    "a": 0,
+    "b": 0,
+    "c": 0
+   }
+  },
+  "block_alone": {
+   "train_against_test": {
+    "a": 0,
+    "b": 0,
+    "c": 0
+   },
+   "dev_against_test": {
+    "a": 0,
+    "b": 0,
+    "c": 0
+   },
+   "loss_curve_against_test": {
+    "a": 0,
+    "b": 0,
+    "c": 0
+   },
+   "train_against_dev": {
+    "a": 0,
+    "b": 0,
+    "c": 0
+   },
+   "train_against_loss_curve": {
+    "a": 0,
+    "b": 0,
+    "c": 0
+   }
+  }
+ }
+}
