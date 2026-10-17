@@ -3,8 +3,8 @@
 benchmark's images.
 
 Compared, per diagram:
-  final    <work>/render/puml_images_1568  against  baseline-evaluation/data/puml_images_1568
-  raw      <work>/render/puml_images       against  baseline-evaluation/data/puml_images
+  final    <work>/render/puml_images_1568  against  plantuml-recognition-evaluation/data/puml_images_1568
+  raw      <work>/render/puml_images       against  plantuml-recognition-evaluation/data/puml_images
            (the image after stages 1 and 2, before the downscale)
   stage 3  stage 3 applied to the benchmark's raw image, against the benchmark's final image
   stock    with --stock: the PNG file generate_images_hidpi.sh writes for the same source, against
@@ -40,7 +40,7 @@ from PIL import Image, ImageChops
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import render as R  # noqa: E402
 
-BENCH = R.UNI / "baseline-evaluation/data"
+BENCH = R.UNI / "plantuml-recognition-evaluation/data"
 _CLOCK = re.compile(r"%(date|now)\b")
 
 

@@ -3,8 +3,8 @@
 Status: draft for author review · 2026-09-21
 Feeds: dissertation Розділ 4 and the fine-tuning paper
 Benchmark repo: `../plantuml-recognition-evaluation` (test set, prompt, scorer, analysis pipeline).
-`data/` comes from its `data.zip`; the 1,000 standardized test images (`data/puml_images_1568/`) are
-not in the release and must be placed there separately (deposit them, see ASSESSMENT §4e).
+`data/` comes from its `data.zip`; the 1,000 standardized test images are tracked in that repository
+as `data/puml_images_1568/` since 2026-10-13. They are not yet in a Zenodo record (ASSESSMENT §4e).
 
 ---
 
@@ -85,7 +85,7 @@ Output: tagged scorer v2, and the stored 8 runs re-scored under v2.
 ### Phase A — Training set
 
 **Rule: the training pool is built under the same construction rules as the test set, and its images
-come from the same rendering pipeline.** (`../baseline-evaluation/methodology/test-set-construction.md` §3–§9.)
+come from the same rendering pipeline.** (`../plantuml-recognition-evaluation/methodology/test-set-construction.md` §3–§9.)
 
 Pool construction, in order (as planned; what was decided and built is in
 `decisions/training-pool-rules/record.md` and `methodology/training-set-construction.md` §2–§8,
@@ -266,8 +266,8 @@ Three ladder trainings, two data-efficiency runs, headroom for one failed run pe
 ```
 fine-tune/
   FINETUNE_PLAN.md
-  data/          train/dev key lists, jsonl, leakage report   (images gitignored; as of 2026-10-11
-                 this folder is not under version control, the freeze is `data/*/SHA256SUMS`)
+  data/          train/dev key lists, jsonl, leakage report   (images gitignored; the freeze is
+                 `data/*/SHA256SUMS`; the folder is a git repository since 2026-10-13)
   build/         pool construction, rendering, formatting; assembly of the scorer-v2 extractor
                  JAR and the v1-to-v2 bridge of the stored runs
   train/         configs (one per size, identical recipe), launch scripts
@@ -341,3 +341,4 @@ once the core results exist. An optional item that is not done moves to §6 with
 | difficulty-regression | implementation | optional | which diagram properties predict compile failure and low Element F1, before and after fine-tuning. Publication target (author, 2026-10-10, provisional): one conference thesis holding both, submitted after the Р.4 article; the article keeps gains by tier and one sentence. Thesis candidate R in `../theses/next-theses-probes/CANDIDATES.md` | ASSESSMENT §6 weeks 9–12 | — | |
 | edit-readiness-rate | implementation | optional | share of predictions that compile and reach a stated structural threshold | ASSESSMENT §6 weeks 9–12 | — | |
 | prototype | implementation | optional | demo: image in, PlantUML out, live render, edit | ASSESSMENT §6 weeks 9–12 | — | |
+| benchmark-paths | implementation | core | every benchmark file the study reads is read from the public repository `../plantuml-recognition-evaluation`: code paths, the pin of the test-set rules, the six frozen records and both checksum lists re-frozen with the new path labels and code hashes | header; §9 | recorded 2026-10-15 (verified 2026-10-15, `verify.md`, third pass; the first two passes failed) | `decisions/benchmark-paths/` · `methodology/training-set-construction.md` §7 (re-freeze of 2026-10-14); paths and hashes in §1.1, §2, §7 |

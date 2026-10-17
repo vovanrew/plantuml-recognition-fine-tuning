@@ -2,7 +2,7 @@
 """Render PlantUML sources to the benchmark's image standard.
 
 One command for the three stages that produced the test images
-(baseline-evaluation/data/puml_images_1568):
+(plantuml-recognition-evaluation/data/puml_images_1568):
 
   1. PlantUML 1.2025.9 with `skinparam dpi 300` and PLANTUML_LIMIT_SIZE 16384: the java command of
      dataset/plantuml-in-wild-dataset/phase2/4.generate_images/generate_images_hidpi.sh, with the
@@ -10,7 +10,7 @@ One command for the three stages that produced the test images
   2. Pad any side below 512 px and convert to RGB: `postprocess_one` of
      dataset/plantuml-in-wild-dataset/phase2/5.postprocess_images/postprocess_images.py.
   3. Flatten transparency on white and downscale the long edge to 1,568 px:
-     `standardize` of baseline-evaluation/util/standardize_images.py.
+     `standardize` of plantuml-recognition-evaluation/util/standardize_images.py.
 
 Stages 2 and 3 run the code of those two files, loaded by path. The renderer JAR and both files are
 pinned by sha256 (PINS); a file that differs stops the run.
@@ -70,8 +70,8 @@ _STAGE1_DIR = UNI / "dataset/plantuml-in-wild-dataset/phase2/4.generate_images"
 RENDERER_JAR = _STAGE1_DIR / "plantuml-1.2025.9.jar"
 STAGE1_SCRIPT = _STAGE1_DIR / "generate_images_hidpi.sh"
 STAGE2_SCRIPT = UNI / "dataset/plantuml-in-wild-dataset/phase2/5.postprocess_images/postprocess_images.py"
-STAGE3_SCRIPT = UNI / "baseline-evaluation/util/standardize_images.py"
-TEST_IMAGES = UNI / "baseline-evaluation/data"   # the benchmark's puml_images and puml_images_1568
+STAGE3_SCRIPT = UNI / "plantuml-recognition-evaluation/util/standardize_images.py"
+TEST_IMAGES = UNI / "plantuml-recognition-evaluation/data"   # the benchmark's puml_images and puml_images_1568
 DEFAULT_JAVA_HOME = "/Library/Java/JavaVirtualMachines/temurin-26.jdk/Contents/Home"
 DOT_GUARD = Path(__file__).resolve().parent / "dot_guard.sh"
 
@@ -94,7 +94,7 @@ LIMIT_SIZE = 16384
 CRASH_MARKS = (((0, 0, 150, 20), "baa68a88a4079e94808f72adce4f2d17"),
                ((0, 40, 200, 62), "dfcbc4863a4a4bf9230244c08d72a060"))
 
-_TRAILING_PAGE = re.compile(r"_\d+$")   # as in baseline-evaluation/util/build_test_set.py
+_TRAILING_PAGE = re.compile(r"_\d+$")   # as in plantuml-recognition-evaluation/util/build_test_set.py
 _TRACE = re.compile(r'^(?:Exception in thread "[^"]*" )?((?:[\w$]+\.)+[\w$]*(?:Error|Exception))\b', re.M)
 _SYNTAX_ERROR = re.compile(r"^Error line \d+ in file: (.*)$", re.M)
 _NO_DIAGRAM = re.compile(r"^Warning: no image in (.*)$", re.M)

@@ -31,7 +31,7 @@ JAR's own usage text and, for such a JAR, runs the levels as they were then: no 
 
 Usage (from anywhere; Java on PATH):
   python3 bridge.py --scorer ../plantuml-recognition-evaluation \
-      --data ../baseline-evaluation/data \
+      --data ../plantuml-recognition-evaluation/data \
       --jar ../plantuml-recognition-evaluation/plantuml-stats-extractor-v2.jar \
       --out ../plantuml-recognition-evaluation/data_v2
 """

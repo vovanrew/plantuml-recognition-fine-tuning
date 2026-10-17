@@ -32,7 +32,7 @@ TEMPLATE_SHA256 = {"2B": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4
                    "27B": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715"}
 PROMPT_PATH = UNI / "plantuml-recognition-evaluation/prompts/zero_shot.txt"
 PROMPT_SHA256 = "097351ffce6134cb903322718facca5488f978766d46381de03934c8c9f01552"
-IMAGE = UNI / "baseline-evaluation/data/puml_images_1568/000133b38e70cfb70834681221553363e9f37714.png"
+IMAGE = UNI / "plantuml-recognition-evaluation/data/puml_images_1568/000133b38e70cfb70834681221553363e9f37714.png"
 # What the official template renders for the runner's text-only opening call (Scout of
 # prompt-arrangement, out/render_arrangements_2b.json, arrangement `text_only`): 93 tokens.
 TEXT_ONLY_SHA256 = "3415139c468464294201ba306a80f8e3152c75cdf9746e0dd7b021ea2433a390"

@@ -20,7 +20,7 @@ rule is applied in the same way to the ground truth and to an answer.
 Scorer v1 is the scorer of the benchmark, and every published number is a v1 number. It stays
 runnable, and scoring is offline over stored answers, so any run can be scored under both versions
 (§7). The stored runs are the eight registered runs of the benchmark under
-`../baseline-evaluation/data/`: the seven published models and Claude Sonnet 4.6, a supplementary
+`../plantuml-recognition-evaluation/data/`: the seven published models and Claude Sonnet 4.6, a supplementary
 run.
 
 ## 2. Names
@@ -63,7 +63,8 @@ draws largest in that diagram, in a ground-truth file and in an answer alike. `<
 above the unsized `DimensionComponent` is `DimensionComponent`, because the default of 14 pt is the
 larger size. The base size was checked for a class name, a participant and a note, each without an
 override and with three. In 12 of 12 cases it equalled the size at which the stock renderer
-(`../baseline-evaluation/plantuml-1.2025.9.jar`) drew the unsized line.
+(`../dataset/plantuml-in-wild-dataset/phase2/4.generate_images/plantuml-1.2025.9.jar`) drew the
+unsized line.
 
 **Spot letter.** The letter of a stereotype spot is not part of the name. A spot such as
 `<< (C,#ADD1B2) >>` sets the letter and the colour of the circle that PlantUML draws beside the name,
@@ -113,8 +114,9 @@ that of the dev set and 0 of 991 in the answers of the eight stored runs.
 
 Element F1, Relationship F1 and type accuracy are computed on the first diagram of an answer that
 holds several. PlantUML's online editor displays only the first diagram of such a file, and scorer
-v1 keeps the last one. In the answer blocks under
-`../baseline-evaluation/data/element_f1/<run>/pred_extracted/`, 6 of the 1,000 answers of Claude
+v1 keeps the last one. In the answer blocks that the v1 element scorer writes
+(`../plantuml-recognition-evaluation/data/element_f1/<run>/pred_extracted/`; they are not in
+`data.zip`), 6 of the 1,000 answers of Claude
 Opus 4.6 held several diagrams, and no answer of the other 7 runs did. In one of the 6 (key
 `819e9bd5`) the third diagram does not parse: Element F1 was 0.000 under v1 and is 1.000 on the
 first diagram. No ground-truth file of the test set or the dev set holds several diagrams.
@@ -128,8 +130,8 @@ sources of the two sets:
 java -cp <jar> net.sourceforge.plantuml.stats.DiagramStatsExtractor --dir <folder of sources>
 ```
 
-The test sources are `../baseline-evaluation/data/puml_files/` with the keys of
-`../baseline-evaluation/data/test_set.json`, and the dev sources are
+The test sources are `../plantuml-recognition-evaluation/data/puml_files/` with the keys of
+`../plantuml-recognition-evaluation/data/test_set.json`, and the dev sources are
 `../herald/zenodo_content/puml_files/` with the keys of `data/sets/dev.json`. The rows by rule are
 from `build/audit_gt.py` and are not a partition.
 
@@ -170,7 +172,7 @@ cumulative level between v1 and v2 (`build/bridge.py`). `build/bridge_table.py` 
 differences of the table below, and `build/spot_effect.py` gives its two spot-letter rows. The result files lie under
 `../plantuml-recognition-evaluation/data_v2/`: `element_f1/<run>/` and `relationship_f1/<run>/` hold
 scorer v2, and `_bridge/<level>/` holds each level, with its switches in `_bridge/levels.json`. The
-v1 result files lie under `../baseline-evaluation/data/`.
+v1 result files lie under `../plantuml-recognition-evaluation/data/`.
 
 The table gives micro F1 of the three dense Qwen sizes as full-set / compiled-only. Full-set is the
 zeros-for-failed population of the baseline record (§3). Each row with a plus sign is the change
@@ -206,7 +208,7 @@ drawn-edge rule by -0.0464 to +0.0077.
 **Rankings.** Full-set rankings of the seven published models are unchanged under v2 in all four
 tables (Element F1 and Relationship F1, micro and macro). In the compiled-only tables three adjacent
 pairs whose v1 intervals include zero change order
-(`../baseline-evaluation/analysis/out/ci_table_pairwise.csv`):
+(`../plantuml-recognition-evaluation/analysis/out/ci_table_pairwise.csv`):
 
 - Element F1, macro: Qwen3.5-2B and Qwen3.5-9B;
 - Relationship F1, micro: Qwen3.5-27B and Claude Opus 4.6;
@@ -222,7 +224,7 @@ other runs and the figures per relation are in the result files.
 | Scorer repository, `../plantuml-recognition-evaluation` | tag `scorer-v2` on commit `f460b35` | tag `scorer-v1` on commit `8f85611` |
 | Extractor fork `vovanrew/plantuml`, branch `stats-extractor-graph` (`../plantuml`) | commit `549fe8ec08` | commit `7d2292dab1` |
 | Extractor JAR | `plantuml-stats-extractor-v2.jar`, sha256 `2747a72aec9206e424ddf9ed659f9eceb96730444a68b1fe99094317400f555b` | `plantuml-stats-extractor-v1.jar`, sha256 `f6e76d4973ce12c23cb15dff6420726f7d2203a80c1761d1454b5a2c5a91777b` |
-| Result files of the stored runs | `../plantuml-recognition-evaluation/data_v2/` | `../baseline-evaluation/data/element_f1/`, `relationship_f1/` |
+| Result files of the stored runs | `../plantuml-recognition-evaluation/data_v2/` | `../plantuml-recognition-evaluation/data/element_f1/`, `relationship_f1/` |
 
 The message of a tag names the fork commit and the sha256 of the JAR, so one tag identifies the whole
 scorer. The two JARs and `data_v2/` lie in the folder of the scorer repository and are not tracked

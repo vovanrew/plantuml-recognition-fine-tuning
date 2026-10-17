@@ -19,7 +19,7 @@ those scores.
 
 Usage:
   python3 bridge_table.py --scorer ../plantuml-recognition-evaluation \
-      --v1 ../baseline-evaluation/data --v2 ../plantuml-recognition-evaluation/data_v2 --out ..
+      --v1 ../plantuml-recognition-evaluation/data --v2 ../plantuml-recognition-evaluation/data_v2 --out ..
 """
 import argparse
 import json

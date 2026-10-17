@@ -14,7 +14,7 @@ and puts the row into the bridge table.
 Usage (Java on PATH):
   python3 spot_effect.py --scorer ../plantuml-recognition-evaluation \
       --jar ../plantuml-recognition-evaluation/plantuml-stats-extractor-v2.jar \
-      --v2 ../plantuml-recognition-evaluation/data_v2 --csr-root ../baseline-evaluation/data/csr --out ..
+      --v2 ../plantuml-recognition-evaluation/data_v2 --csr-root ../plantuml-recognition-evaluation/data/csr --out ..
 """
 import argparse
 import copy

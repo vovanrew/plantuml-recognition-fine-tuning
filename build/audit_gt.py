@@ -18,7 +18,7 @@ pool ground truth, which must be audited before scorer v2 is tagged.
 Usage (Java on PATH):
   python3 audit_gt.py --scorer ../plantuml-recognition-evaluation \
       --jar ../plantuml-recognition-evaluation/plantuml-stats-extractor-v2.jar \
-      --gt-dir ../baseline-evaluation/data/puml_files [--keys ../baseline-evaluation/data/test_set.json]
+      --gt-dir ../plantuml-recognition-evaluation/data/puml_files [--keys ../plantuml-recognition-evaluation/data/test_set.json]
 """
 import argparse
 import collections

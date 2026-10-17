@@ -1,7 +1,7 @@
 # Training Set Construction
 
 Methodological record for how the training and dev sets of the fine-tuning study are built. The
-rules of the test set are in `../baseline-evaluation/methodology/test-set-construction.md`, called
+rules of the test set are in `../plantuml-recognition-evaluation/methodology/test-set-construction.md`, called
 the baseline record below. Paths are relative to `fine-tune/`. §1 records the rendering of images;
 §2 to §8 record the pool of candidates, the sets drawn from it and their frozen artifacts.
 
@@ -41,17 +41,17 @@ a file that differs stops the run.
 
 | File | Role | sha256 |
 |---|---|---|
-| `build/render.py` | the command | `8626a6f6be5b6b6008d4fa8dfb40334b232eae7118407780ced41acacd1405dd` |
+| `build/render.py` | the command | `a23d0f29e47564ed7d1bf2cefb195e4ff79a56429b384b815c728b8f1b9b85f0` |
 | `build/dot_guard.sh` | script between PlantUML and Graphviz `dot` (§1.3) | `5d2209008f64d362c55a6b78da443d169a484b3ed0f7d4771ff9767f14ff9113` |
-| `build/acceptance_check.py` | acceptance check (§1.5) | `46aeed7c14cd6fb7f4803e790929703bc71426ea154361e9d6a070c55481ac20` |
+| `build/acceptance_check.py` | acceptance check (§1.5) | `e53e04bfe851d68d47b34e7df290b2fc34a7027104825379bf4b58acba4509a7` |
 | `../dataset/plantuml-in-wild-dataset/phase2/4.generate_images/plantuml-1.2025.9.jar` | renderer, pinned | `280f4aa97f4f3b7af39358dd0d79f65e353b54a1630b5f121a13b1651162185d` |
 | `../dataset/plantuml-in-wild-dataset/phase2/4.generate_images/generate_images_hidpi.sh` | the stock script; `render.py` does not run it, and a test compares its java command with `plantuml_command()` | `68722e410a71b125fb91663c4505362a4ef544a03f8a1a5574b39fef5b300e0e` |
 | `../dataset/plantuml-in-wild-dataset/phase2/5.postprocess_images/postprocess_images.py` | stage 2, pinned | `53742a3d8ec4414bbc4829a3b5d5c92f21be5754ffdafb2bb5c6fb8925c4b3fc` |
-| `../baseline-evaluation/util/standardize_images.py` | stage 3, pinned | `726d80a77092e817d517807e77043c61a55f2e9b659631b8a3f01aff21b8caf3` |
+| `../plantuml-recognition-evaluation/util/standardize_images.py` | stage 3, pinned | `726d80a77092e817d517807e77043c61a55f2e9b659631b8a3f01aff21b8caf3` |
 
 `render.py` writes only under its output folder. Final images go to `puml_images_1568/`, and raw
 images to `puml_images/` when `--keep-raw` is given. The folder that holds the test images,
-`../baseline-evaluation/data`, is refused as output folder.
+`../plantuml-recognition-evaluation/data`, is refused as output folder.
 
 ### 1.2 Framework and outcomes
 
@@ -175,7 +175,8 @@ PNGs had the same bytes on 1,000 of 1,000
 
 ### 1.6 Environment of the measurements
 
-The acceptance check of §1.5 and the trial on `dot` of §1.3 ran on 2026-10-09 in this environment.
+The acceptance check of §1.5 and the trial on `dot` of §1.3 ran on 2026-10-09 in this environment,
+before the re-freeze of §7; the hashes of §1.1 are those after it.
 The run of `render.py` on the 200 largest diagrams (§1.3) was made on 2026-10-08 with an earlier
 version of the file (sha256 `5943cb3f2c46fbea4eb7876f0d78cd5710a473a1db1af943335f858b0c354839`);
 `decisions/render-pipeline/verify.md` carries its result and gives the reason the later changes do
@@ -192,7 +193,8 @@ not affect it.
 
 ## 2. The training pool
 
-Every measured number in §2 to §8 is taken from `decisions/training-pool-rules/verify.md`, section
+Every measured number in §2 to §8, apart from the re-freeze in §7, is taken from
+`decisions/training-pool-rules/verify.md`, section
 "Numbers that describe the final build". `build/pool.py` builds the pool, and `build/sample.py`
 draws and renders the sets; §7 lists both files with their sections.
 
@@ -200,7 +202,7 @@ Four rules build the pool. The table below gives the order of the steps. A diagr
 the steps so far is called a candidate.
 
 **Rule 1: the stages of the test set, then its repositories removed.** The test set's own code
-(`../baseline-evaluation/util/build_test_set.py`) runs its stages over the whole corpus: inclusion, degeneracy labels,
+(`../plantuml-recognition-evaluation/util/build_test_set.py`) runs its stages over the whole corpus: inclusion, degeneracy labels,
 deduplication and type agreement (baseline record, §3, §4, §8 and §9). Type agreement uses the
 extractor JAR that typed the test set (§7). Every diagram of the 815 repositories of the test set is
 removed after these stages, 33,690 diagrams (baseline record, §6). This is the code path of the test set, and with
@@ -231,7 +233,7 @@ returns on the day.
 tokens is the output cap of `FINETUNE_PLAN.md`, Phase A. The length counted is that of the
 diagram block as rule 3 isolates it. It is counted with the tokenizer of `Qwen/Qwen3.5-2B`, with
 the settings recorded in `data/pool/config.json` (`D4` and `environment`). On the 1,000 test files this
-count equalled the count stored in `../baseline-evaluation/data/gt_token_stats.json` in every
+count equalled the count stored in `../plantuml-recognition-evaluation/data/gt_token_stats.json` in every
 case.
 
 | After step | Class | Sequence | Total |
@@ -389,8 +391,8 @@ both texts.
 
 ## 7. Frozen artifacts
 
-`fine-tune/` is not under version control. The freeze is therefore two lists of sha256 values,
-`data/pool/SHA256SUMS` (13 files) and `data/sets/SHA256SUMS` (29 files). Both verified with
+The freeze is two lists of sha256 values, `data/pool/SHA256SUMS` (13 files) and
+`data/sets/SHA256SUMS` (29 files). Both verified with
 `shasum -a 256 -c`. The code is under `build/`, with its tests under `build/tests/`.
 
 The two lists name every file. The table gives the files a reader needs first.
@@ -404,12 +406,13 @@ The two lists name every file. The table gives the files a reader needs first.
 
 | File | sha256 |
 |---|---|
-| `data/pool/SHA256SUMS` | `4a3ebab67cf730ee975eff9497e4b51173f746bbfd49eddf56f9b5617d9d8c53` |
-| `data/sets/SHA256SUMS` | `b307f75fb14d80c67abdeea1420ed1ace3037e9d94d8f9980b6b2bbba0df980e` |
-| `build/pool.py` (§2, and §3 on the whole file) | `977000c2311ff4675cbef7ba02e8fb4a92117fbfb9a0c7123662dee2e462cde1` |
+| `data/pool/SHA256SUMS` | `8379ddb063b397077a439c2e0f019e76029a43af9eb81bd60aba2d0558b02b74` |
+| `data/sets/SHA256SUMS` | `153d25b30a8ab8e73ee829ba59e00886438ce56a9fe17823e0e67d446cf1c053` |
+| `build/pool.py` (§2, and §3 on the whole file) | `f8c95091eddc5b32096909bc8c5f87e1b755838c41e3772d00540ea09c1c82bd` |
 | `build/leakage.py` (the measures of §3) | `d71399b23527b5541c5c0afdab9eb471bed7efd4108bc1c516252269c79fb824` |
 | `build/sample.py` (§3 on the block alone, §4 to §6) | `b9ed9c982ca69bdabcc63a9269b9c5b1198cb8c9d5b376999f2f3b66514ce35b` |
 | `../plantuml-recognition-evaluation/plantuml-stats-extractor-v1.jar` (the extractor of rules 1 and 3) | `f6e76d4973ce12c23cb15dff6420726f7d2203a80c1761d1454b5a2c5a91777b` |
+| `../plantuml-recognition-evaluation/util/build_test_set.py` (the test set's code of rule 1 and §4, pinned in `build/pool.py`) | `4be04fadf02b87f94a54591612b58a31f24adbb7ad0986b1e27abf635ec54d53` |
 
 **Images.** The images lie under `data/sets/render/<set>/puml_images_1568/` and are not in the two
 lists. Each image is fixed by the pixel hash (`pixels_sha256`) of its line in the render manifest of
@@ -425,6 +428,31 @@ The training folder holds the images of the 20,000 keys of `train.json` and no o
 images of the keys replaced under the rule of §3 (§5) were moved to `data/replaced_images/train/`
 after the verification, and their lines stay in the manifest. The render command checks a folder
 against its manifest, so it runs on this folder again only with the 19 put back.
+
+**Re-freeze of 2026-10-14.** Until 2026-10-14 the code read some benchmark files from a local
+working copy of the benchmark repository. These are the test set with its sources, images and token
+counts, the test set's code, and the stage 3 file of §1.1. Since then the code reads them from
+`../plantuml-recognition-evaluation`, and the records name that folder. Six records were frozen
+again: `data/pool/config.json`, `data/pool/d2_render/render_env.json`, `data/sets/config.json` and
+the `render_env.json` of `data/sets/render/train/`, `dev/` and `loss_curve/`. They changed in path
+labels and hashes only. The changed hashes are those of `build/pool.py` and `build/render.py` and
+the pin of the test set's code, called the rules file below. In `data/sets/config.json` they also
+include the hashes of `data/pool/config.json` and `data/pool/SHA256SUMS`. The two lists were frozen
+again with the new hashes of these files. No key list, manifest, image or other artifact changed.
+
+The hashes of `build/render.py` and `build/acceptance_check.py` in §1.1, and of `build/pool.py`
+in the sha256 table above, are those of the files after this change. The code that built the data is commit `5b91797`
+of the git repository of `fine-tune/`. Its files differ from those hashed here only in the lines
+that name the benchmark folder and in the pin of the rules file.
+
+**The rules file.** The sha256 table above gives the public repository's copy. It differs from the copy
+that the build ran in 2 of its 42 top-level statements, the defaults `DATASET` and
+`EXTRACTOR_JAR`. The hash of that copy is the pin in `build/pool.py` of commit `5b91797`. Only the
+file's own `main()` uses the two defaults and the defaults built from them. Every name that the
+study's code takes from the file is therefore unchanged. The other benchmark files that the code
+reads have the same bytes in both copies: `util/standardize_images.py`, `data/test_set.json`,
+`data/gt_token_stats.json`, and the 1,000 files of each of `data/puml_files/`,
+`data/puml_images_1568/` and `data/puml_images/`.
 
 ## 8. Rules that differ from the test set's
 

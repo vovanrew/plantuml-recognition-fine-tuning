@@ -29,7 +29,7 @@ PROMPT = (UNI / "plantuml-recognition-evaluation/prompts/zero_shot.txt").read_te
 # that test ran on this Mac with these libraries and this arrangement, so its stored answer is
 # the reference the study's server must reproduce.
 KEY = "46701d87f11434bfe1cae06f2715ae74a91e0fcd"
-IMAGE = UNI / "baseline-evaluation/data/puml_images_1568" / (KEY + ".png")
+IMAGE = UNI / "plantuml-recognition-evaluation/data/puml_images_1568" / (KEY + ".png")
 REFERENCE = FT / "decisions/gpu-precision/precision_test/runs/bf16" / (KEY + ".json")
 TEXT_ONLY_TOKENS = 93                                # the runner's text-only baseline
 

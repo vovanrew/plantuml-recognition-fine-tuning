@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import render as R  # noqa: E402
 
 FIX = Path(__file__).parent / "fixtures"
-BENCH = R.UNI / "baseline-evaluation/data"
+BENCH = R.UNI / "plantuml-recognition-evaluation/data"
 
 
 def manifest(out):

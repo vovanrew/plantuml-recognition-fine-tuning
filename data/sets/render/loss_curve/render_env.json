@@ -23,7 +23,7 @@
    "sha256": "53742a3d8ec4414bbc4829a3b5d5c92f21be5754ffdafb2bb5c6fb8925c4b3fc"
   },
   "stage3": {
-   "path": "/Users/vovapolishchuk/indiehacker/projects/university/baseline-evaluation/util/standardize_images.py",
+   "path": "/Users/vovapolishchuk/indiehacker/projects/university/plantuml-recognition-evaluation/util/standardize_images.py",
    "sha256": "726d80a77092e817d517807e77043c61a55f2e9b659631b8a3f01aff21b8caf3"
   }
  },
@@ -57,7 +57,7 @@
    "heap_mb": 32768,
    "solo_heap_mb": 32768,
    "batch_size": 200,
-   "render_py_sha256": "8626a6f6be5b6b6008d4fa8dfb40334b232eae7118407780ced41acacd1405dd"
+   "render_py_sha256": "a23d0f29e47564ed7d1bf2cefb195e4ff79a56429b384b815c728b8f1b9b85f0"
   }
  ]
 }

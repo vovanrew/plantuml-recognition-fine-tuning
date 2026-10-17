@@ -6,27 +6,27 @@
    "sha256": "0a13a7d22e434386f470c065881686b0f1b307601da821c21523073f4747f3fc"
   },
   "test_set": {
-   "path": "baseline-evaluation/data/test_set.json",
+   "path": "plantuml-recognition-evaluation/data/test_set.json",
    "sha256": "e233e56968f90c7411d7c6b27cdd5c81f801fcc47fd1c7b45d174918a440744c"
   },
   "sources": "dataset/puml_files",
   "deposit_images_96dpi": "herald/zenodo_content/puml_images",
-  "test_sources": "baseline-evaluation/data/puml_files",
+  "test_sources": "plantuml-recognition-evaluation/data/puml_files",
   "gt_token_stats": {
-   "path": "baseline-evaluation/data/gt_token_stats.json",
+   "path": "plantuml-recognition-evaluation/data/gt_token_stats.json",
    "sha256": "5f897f2e7dd4cbeb3278186fac7966df50546041c36b8541120b973bb80959f9"
   }
  },
  "pins": {
-  "build_test_set": "b4e25bfc067ee55c119dd16a86152dd2f89e09fb04890625a912edf182454e0d",
+  "build_test_set": "4be04fadf02b87f94a54591612b58a31f24adbb7ad0986b1e27abf635ec54d53",
   "extract_puml_source": "a9053594872aa83ad11a39d69630ee8d6bd623dfbde2be94ffc19ea795bed62a",
   "extractor_v1": "f6e76d4973ce12c23cb15dff6420726f7d2203a80c1761d1454b5a2c5a91777b",
   "extractor_v2": "7eb9436b790239e70a2ef40c72227954500b3721059812e2d50640d4acb88f1a"
  },
  "code": {
-  "pool.py": "977000c2311ff4675cbef7ba02e8fb4a92117fbfb9a0c7123662dee2e462cde1",
+  "pool.py": "f8c95091eddc5b32096909bc8c5f87e1b755838c41e3772d00540ea09c1c82bd",
   "leakage.py": "d71399b23527b5541c5c0afdab9eb471bed7efd4108bc1c516252269c79fb824",
-  "render.py": "8626a6f6be5b6b6008d4fa8dfb40334b232eae7118407780ced41acacd1405dd"
+  "render.py": "a23d0f29e47564ed7d1bf2cefb195e4ff79a56429b384b815c728b8f1b9b85f0"
  },
  "parameters": {
   "tiers_content_lines": {

@@ -15,7 +15,7 @@ Steps, in this order (one stage name each; `--until` stops after a stage):
   d4           D4: targets of at most 5,376 tokens (Qwen/Qwen3.5-2B, slow tokenizer class)
   d6           D5, D6: near-duplicates of the 1,000 test diagrams removed (build/leakage.py)
 
-The rules of the test set are run from baseline-evaluation/util/build_test_set.py, loaded by
+The rules of the test set are run from plantuml-recognition-evaluation/util/build_test_set.py, loaded by
 path; the scorer's block isolation from plantuml-recognition-evaluation/evaluation/csr_runner.py.
 Both files and the two extractor JARs are pinned by sha256 (PINS); a file that differs stops
 the run.
@@ -67,10 +67,10 @@ UNI = HERE.parents[1]
 METADATA = UNI / "herald/zenodo_content/uml_metadata_enriched.json"
 PUML_DIR = UNI / "dataset/puml_files"
 IMG96_DIR = UNI / "herald/zenodo_content/puml_images"
-TEST_SET = UNI / "baseline-evaluation/data/test_set.json"
-TEST_PUML_DIR = UNI / "baseline-evaluation/data/puml_files"
-GT_TOKENS = UNI / "baseline-evaluation/data/gt_token_stats.json"
-BUILD_TEST_SET = UNI / "baseline-evaluation/util/build_test_set.py"
+TEST_SET = UNI / "plantuml-recognition-evaluation/data/test_set.json"
+TEST_PUML_DIR = UNI / "plantuml-recognition-evaluation/data/puml_files"
+GT_TOKENS = UNI / "plantuml-recognition-evaluation/data/gt_token_stats.json"
+BUILD_TEST_SET = UNI / "plantuml-recognition-evaluation/util/build_test_set.py"
 CSR_RUNNER = UNI / "plantuml-recognition-evaluation/evaluation/csr_runner.py"
 EXTRACTOR_V1 = UNI / "plantuml-recognition-evaluation/plantuml-stats-extractor-v1.jar"
 EXTRACTOR_V2 = UNI / "plantuml-recognition-evaluation/plantuml-stats-extractor-v2.jar"
@@ -79,7 +79,7 @@ RENDER_PY = HERE / "render.py"
 DEFAULT_JAVA_HOME = "/Library/Java/JavaVirtualMachines/temurin-26.jdk/Contents/Home"
 
 PINS = {
-    "build_test_set": "b4e25bfc067ee55c119dd16a86152dd2f89e09fb04890625a912edf182454e0d",
+    "build_test_set": "4be04fadf02b87f94a54591612b58a31f24adbb7ad0986b1e27abf635ec54d53",
     "extract_puml_source": "a9053594872aa83ad11a39d69630ee8d6bd623dfbde2be94ffc19ea795bed62a",
     "extractor_v1": "f6e76d4973ce12c23cb15dff6420726f7d2203a80c1761d1454b5a2c5a91777b",
     "extractor_v2": "7eb9436b790239e70a2ef40c72227954500b3721059812e2d50640d4acb88f1a",
@@ -696,7 +696,7 @@ def target_text(text):
 
 
 def read_for_tokens(path):
-    """Text mode as baseline-evaluation/util/measure_gt_tokens.py reads a test file (UTF-8,
+    """Text mode as plantuml-recognition-evaluation/util/measure_gt_tokens.py reads a test file (UTF-8,
     newlines translated); a byte that is not UTF-8 becomes U+FFFD."""
     with open(path, encoding="utf-8", errors="replace") as f:
         return f.read()
