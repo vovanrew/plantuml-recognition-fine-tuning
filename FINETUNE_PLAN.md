@@ -251,10 +251,16 @@ items listed here before 2026-09-22 are now rows in §10 (`training-stack`, `ser
     a debug pragma line in its target (`a416dd4f5567…`, in the 20,000 and the 5,000). Since Amendment 2 of
     2026-10-11 the near-duplicate rule is also run between the training pool and the loss-curve
     split; the split is not compared with the dev set (12 of its 200 diagrams reach a threshold
-    against a dev diagram).
+    against a dev diagram). The images are not in either repository: the training machine gets
+    them from the private Hugging Face dataset `vovanrew/plantuml-finetune-backup`, whose
+    `README.md` says where each archive unpacks and whose `SHA256SUMS` checks them
+    (`training-pool-rules` record, Open threads, 2026-10-17).
   - `adapter-release`: whether the training set is distributed as a key list or as the stored
     images (a second render does not repeat 11 of 20,000 images; author, 2026-10-10: decided
-    later), and the backup of the images, which exist on one machine.
+    later). The images are backed up since 2026-10-17 in a private Hugging Face dataset,
+    `vovanrew/plantuml-finetune-backup`, which is not the release. 7 training sources name a
+    picture at a URL, which the render fetched: 2 stored images show the picture and 4 show
+    "Cannot decode" in its place; the sets are kept as built (author, 2026-10-17).
 
 ## 8. Budget
 
