@@ -406,9 +406,9 @@ The two lists name every file. The table gives the files a reader needs first.
 
 | File | sha256 |
 |---|---|
-| `data/pool/SHA256SUMS` | `8379ddb063b397077a439c2e0f019e76029a43af9eb81bd60aba2d0558b02b74` |
-| `data/sets/SHA256SUMS` | `153d25b30a8ab8e73ee829ba59e00886438ce56a9fe17823e0e67d446cf1c053` |
-| `build/pool.py` (§2, and §3 on the whole file) | `f8c95091eddc5b32096909bc8c5f87e1b755838c41e3772d00540ea09c1c82bd` |
+| `data/pool/SHA256SUMS` | `76a150ab091fab652f5112923462bb2043b332cfd8beb7922002aefc9b15eeaf` |
+| `data/sets/SHA256SUMS` | `2d3f1b5101826a6092c81311816228a2d287075c22932c3ac45ba5f06a90f96a` |
+| `build/pool.py` (§2, and §3 on the whole file) | `cc7f9bd16e47f8e0c7ac9f06714bb46739fc684cc4adb6f0d81a90cd4cd59980` |
 | `build/leakage.py` (the measures of §3) | `d71399b23527b5541c5c0afdab9eb471bed7efd4108bc1c516252269c79fb824` |
 | `build/sample.py` (§3 on the block alone, §4 to §6) | `b9ed9c982ca69bdabcc63a9269b9c5b1198cb8c9d5b376999f2f3b66514ce35b` |
 | `../plantuml-recognition-evaluation/plantuml-stats-extractor-v1.jar` (the extractor of rules 1 and 3) | `f6e76d4973ce12c23cb15dff6420726f7d2203a80c1761d1454b5a2c5a91777b` |
@@ -441,9 +441,16 @@ include the hashes of `data/pool/config.json` and `data/pool/SHA256SUMS`. The tw
 again with the new hashes of these files. No key list, manifest, image or other artifact changed.
 
 The hashes of `build/render.py` and `build/acceptance_check.py` in §1.1, and of `build/pool.py`
-in the sha256 table above, are those of the files after this change. The code that built the data is commit `5b91797`
-of the git repository of `fine-tune/`. Its files differ from those hashed here only in the lines
-that name the benchmark folder and in the pin of the rules file.
+in the sha256 table above, are those of the files after this change and the one of 2026-10-17
+below. The code that built the data is commit `5b91797` of the git repository of `fine-tune/`.
+Its files differ from those hashed here only in the lines that name the benchmark folder and in
+two pins, those of the rules file and of the scorer-v2 extractor.
+
+**Re-freeze of 2026-10-17.** `build/pool.py` pins the scorer-v2 extractor, from which rule 3
+reads the diagram type and the error of each candidate as a cross-check. The pin now names the JAR
+of scorer v2 as tagged, which replaced the earlier build of the same extractor. Both give the same
+type and error for every candidate (`decisions/scorer-v2-freeze/verify.md`, tenth pass). The two
+`config.json` files and the two lists were frozen again in these hashes only.
 
 **The rules file.** The sha256 table above gives the public repository's copy. It differs from the copy
 that the build ran in 2 of its 42 top-level statements, the defaults `DATASET` and

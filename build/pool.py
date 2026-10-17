@@ -82,7 +82,7 @@ PINS = {
     "build_test_set": "4be04fadf02b87f94a54591612b58a31f24adbb7ad0986b1e27abf635ec54d53",
     "extract_puml_source": "a9053594872aa83ad11a39d69630ee8d6bd623dfbde2be94ffc19ea795bed62a",
     "extractor_v1": "f6e76d4973ce12c23cb15dff6420726f7d2203a80c1761d1454b5a2c5a91777b",
-    "extractor_v2": "7eb9436b790239e70a2ef40c72227954500b3721059812e2d50640d4acb88f1a",
+    "extractor_v2": "2747a72aec9206e424ddf9ed659f9eceb96730444a68b1fe99094317400f555b",
 }
 
 TYPES = ("class", "sequence")

@@ -11,7 +11,7 @@
   },
   "pool_config": {
    "path": "data/pool/config.json",
-   "sha256": "5b71f1ccf62593afe1c07a462f4bdf22f1a9ce3273fb923f216568f28ca9d71b",
+   "sha256": "ad5805936536e60d3c79e89c89bf05e807ab27cb42e3bca16c73cc3fd408f01c",
    "parameters": {
     "tiers_content_lines": {
      "class": [
@@ -83,7 +83,7 @@
   },
   "pool_sha256sums": {
    "path": "data/pool/SHA256SUMS",
-   "sha256": "8379ddb063b397077a439c2e0f019e76029a43af9eb81bd60aba2d0558b02b74"
+   "sha256": "76a150ab091fab652f5112923462bb2043b332cfd8beb7922002aefc9b15eeaf"
   },
   "test_set": {
    "path": "plantuml-recognition-evaluation/data/test_set.json",
@@ -94,7 +94,7 @@
  },
  "code": {
   "sample.py": "b9ed9c982ca69bdabcc63a9269b9c5b1198cb8c9d5b376999f2f3b66514ce35b",
-  "pool.py": "f8c95091eddc5b32096909bc8c5f87e1b755838c41e3772d00540ea09c1c82bd",
+  "pool.py": "cc7f9bd16e47f8e0c7ac9f06714bb46739fc684cc4adb6f0d81a90cd4cd59980",
   "leakage.py": "d71399b23527b5541c5c0afdab9eb471bed7efd4108bc1c516252269c79fb824",
   "render.py": "a23d0f29e47564ed7d1bf2cefb195e4ff79a56429b384b815c728b8f1b9b85f0"
  },
