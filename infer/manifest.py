@@ -15,19 +15,26 @@ identity of what produced it, and a manifest is written beside each run. The run
 Checks, each recorded with its result:
   one_configuration   every answered cell carries the same identity (the per-request fields
                       removed): a run cannot mix a base server and an adapter server, two
-                      revisions, two GPU models or two implementations of the recurrent layers
+                      revisions, two GPU models, two library versions or two implementations of
+                      the recurrent layers
   server_matches      with --server: the live server's identity is that one
+  frozen_files        the serving files the server ran (their sha256 in the identity) are those
+                      of the tag FREEZE_TAG of the study repository
+  environment         the server checked every pin of requirements-card.txt (on a card);
+                      a run on the Mac, which checks only the core packages, fails it
+  recurrent_layers    the run used the study's implementation of the recurrent layers,
+                      flash-linear-attention (author, 2026-10-18); a run on the Mac fails it
   not_timing_mode     the server ran without --timing (no forced answer lengths)
   user_turn_file      the identity's hash of build/user_turn.py is the file's hash today
   rendered_turn       every answered cell carries the expected rendered-turn hash: by default the
                       frozen one of build/user_turn.py (picture, newline, prompts/zero_shot.txt);
-                      a run with another prompt passes its own with --rendered-sha256
+                      a run with another prompt (a control of `controls-definition`) passes its
+                      own with --rendered-sha256, which the manifest records
   decoding            run_meta: temperature 0, max_tokens 5,376, thinking off
   deadline            run_meta: the per-answer deadline is 600 s (author, 2026-10-17)
-  no_timeouts         no cell ended at the deadline
+  every_cell_answered no cell ended in a failure record of the runner (timeout, http_error,
+                      network_error, image_dropped, bad_response): resume the run until none is left
   served_name         the runner asked for the name the server serves
-  recurrent_layers    the run used the study's implementation of the recurrent layers,
-                      flash-linear-attention (author, 2026-10-18); a run on the Mac fails it
 
 Usage, from fine-tune/:
   .venv/bin/python infer/manifest.py write <run dir> --server http://127.0.0.1:8000
@@ -50,6 +57,7 @@ import recurrent_layers  # noqa: E402
 import user_turn  # noqa: E402
 
 PER_REQUEST = ("rendered_sha256", "min_tokens", "generate_seconds", "first_token_seconds")
+FREEZE_TAG = "serving-v2"
 DEADLINE_SECONDS = 600
 MAX_TOKENS = 5376
 NOT_CELLS = {"run_meta.json", "manifest.json"}
@@ -68,16 +76,17 @@ def canonical(obj):
     return json.dumps(obj, sort_keys=True, ensure_ascii=False)
 
 
-def study_commit():
-    """The study repository's commit, and whether build/ or infer/ differ from it."""
-    try:
-        def git(*args):
-            return subprocess.run(["git", "-C", str(ROOT), *args], capture_output=True, text=True,
-                                  check=True).stdout.strip()
-        return {"commit": git("rev-parse", "HEAD"),
-                "build_or_infer_differ_from_commit": git("status", "--porcelain", "--", "build", "infer") != ""}
-    except (OSError, subprocess.CalledProcessError):
-        return None
+def frozen_hashes(paths, tag=FREEZE_TAG):
+    """sha256 of each file at the tag of the study repository; None where it cannot be read."""
+    out = {}
+    for rel in paths:
+        try:
+            data = subprocess.run(["git", "-C", str(ROOT), "show", f"{tag}:{rel}"], capture_output=True,
+                                  check=True).stdout
+            out[rel] = hashlib.sha256(data).hexdigest()
+        except (OSError, subprocess.CalledProcessError):
+            out[rel] = None
+    return out
 
 
 def summarise(run_dir):
@@ -106,15 +115,27 @@ def summarise(run_dir):
             "configurations": list(configurations.values())}
 
 
-def checks(summary, run_meta, rendered_expected, server_identity=None):
-    """(name, passed, detail) for every check of the module docstring."""
+def checks(summary, run_meta, rendered_expected, server_identity=None, frozen=None):
+    """(name, passed, detail) for every check of the module docstring. `frozen`: the sha256 of the
+    serving files at FREEZE_TAG (read from git when not given)."""
     configs = summary["configurations"]
     identity = configs[0]["identity"] if len(configs) == 1 else None
     answered = summary["outcomes"].get("ok", 0)
+    failures = {k: v for k, v in summary["outcomes"].items() if k not in ("ok",)}
     extra = run_meta.get("extra_body") or {}
+    served_files = (identity or {}).get("files") or {}
+    if frozen is None:
+        frozen = frozen_hashes(sorted(served_files))
+    environment = (identity or {}).get("environment") or {}
     out = [
         ("one_configuration", len(configs) == 1 and summary["outcomes"].get("ok_without_identity", 0) == 0,
          f"{len(configs)} configuration(s); {summary['outcomes'].get('ok_without_identity', 0)} answers without identity"),
+        ("frozen_files", bool(served_files) and all(frozen.get(k) == v for k, v in served_files.items()),
+         f"files differing from {FREEZE_TAG} or unreadable there: "
+         f"{sorted(k for k, v in served_files.items() if frozen.get(k) != v) if served_files else 'no files in the identity'}"),
+        ("environment", environment.get("checked") == "all",
+         f"the server checked {environment.get('checked')} pins of requirements-card.txt "
+         f"({environment.get('packages_checked')} packages)"),
         ("not_timing_mode", identity is not None and identity.get("timing") is False,
          f"timing {None if identity is None else identity.get('timing')}"),
         ("user_turn_file", identity is not None
@@ -128,8 +149,8 @@ def checks(summary, run_meta, rendered_expected, server_identity=None):
          f"temperature {run_meta.get('temperature')}, max_tokens {run_meta.get('max_tokens')}, extra_body {extra}"),
         ("deadline", run_meta.get("timeout") == DEADLINE_SECONDS,
          f"timeout {run_meta.get('timeout')} s, the rule says {DEADLINE_SECONDS} s"),
-        ("no_timeouts", summary["outcomes"].get("timeout", 0) == 0,
-         f"{summary['outcomes'].get('timeout', 0)} cells timed out"),
+        ("every_cell_answered", answered > 0 and not failures,
+         f"{answered} answered; failure records {failures or 'none'}"),
         ("recurrent_layers", identity is not None
          and (identity.get("recurrent_layers") or {}).get("active") == recurrent_layers.FLA,
          f"active {None if identity is None else (identity.get('recurrent_layers') or {}).get('active')}, "
@@ -145,22 +166,23 @@ def checks(summary, run_meta, rendered_expected, server_identity=None):
     return [{"check": n, "passed": bool(p), "detail": d} for n, p, d in out]
 
 
-def build(run_dir, rendered_expected, server_identity=None):
+def build(run_dir, rendered_expected, server_identity=None, frozen=None):
     run_dir = Path(run_dir)
     meta_path = run_dir / "run_meta.json"
     if not meta_path.exists():
         raise SystemExit(f"{meta_path} not found: not a run directory of infer_runner.py")
     run_meta = json.loads(meta_path.read_text(encoding="utf-8"))
     summary = summarise(run_dir)
-    result = checks(summary, run_meta, rendered_expected, server_identity)
+    result = checks(summary, run_meta, rendered_expected, server_identity, frozen)
+    configs = summary["configurations"]
+    identity = configs[0]["identity"] if len(configs) == 1 else {}
     return {
         "run_dir": str(run_dir), "run_meta_sha256": sha256_file(meta_path),
         "prompt_sha256": hashlib.sha256(run_meta.get("prompt", "").encode()).hexdigest(),
         "rendered_sha256_expected": rendered_expected,
-        "files": {"infer/server.py": sha256_file(ROOT / "infer/server.py"),
-                  "build/user_turn.py": user_turn.FILE_SHA256,
-                  "build/recurrent_layers.py": sha256_file(ROOT / "build/recurrent_layers.py"),
-                  "infer/manifest.py": sha256_file(Path(__file__))},
+        "freeze_tag": FREEZE_TAG, "served_files": identity.get("files"),
+        "study_commit_of_the_server": identity.get("study_commit"),
+        "manifest_py_sha256": sha256_file(Path(__file__)),
         "summary": summary, "checks": result, "passed": all(c["passed"] for c in result),
     }
 
@@ -170,20 +192,20 @@ def server_identity(url):
         return json.loads(r.read())
 
 
-def write(run_dir, rendered_expected, url=None):
-    manifest = build(run_dir, rendered_expected, server_identity(url) if url else None)
+def write(run_dir, rendered_expected, url=None, frozen=None):
+    manifest = build(run_dir, rendered_expected, server_identity(url) if url else None, frozen)
     manifest.update(written=datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    server_url=url, study_repository=study_commit())
+                    server_url=url)
     (Path(run_dir) / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=1), encoding="utf-8")
     return manifest
 
 
-def check(run_dir):
+def check(run_dir, frozen=None):
     """Failures: failed checks, and every field that differs from manifest.json."""
     stored = json.loads((Path(run_dir) / "manifest.json").read_text(encoding="utf-8"))
-    now = build(run_dir, stored["rendered_sha256_expected"])
+    now = build(run_dir, stored["rendered_sha256_expected"], frozen=frozen)
     problems = [f"check {c['check']} fails: {c['detail']}" for c in now["checks"] if not c["passed"]]
-    for field in ("run_meta_sha256", "prompt_sha256", "files", "summary"):
+    for field in ("run_meta_sha256", "prompt_sha256", "served_files", "summary"):
         if canonical(now[field]) != canonical(stored[field]):
             problems.append(f"{field} differs from manifest.json")
     return problems

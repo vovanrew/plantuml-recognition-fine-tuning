@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import recurrent_layers as R  # noqa: E402
 
 FLA_VERSIONS = {"flash-linear-attention": "0.5.2", "fla-core": "0.5.2", "einops": "0.8.2",
-                "causal-conv1d": None, "triton": "3.8.0"}
+                "triton": "3.8.0", "causal-conv1d": None}
 
 
 @contextmanager
@@ -39,9 +39,9 @@ def installed(functions=R.FLA_FUNCTIONS, versions=None):
                 sys.modules[n] = m
 
 
-def refusal(choice, device):
+def refusal(choice, device, diagnostic=False):
     try:
-        R.require(choice, device)
+        R.require(choice, device, diagnostic)
     except SystemExit as exc:
         return str(exc)
     return None
@@ -72,8 +72,10 @@ def test_the_kernels_at_the_pinned_versions_pass():
 
 
 def test_other_versions_are_refused():
-    with installed(versions=dict(FLA_VERSIONS, **{"flash-linear-attention": "0.5.3"})):
-        assert "pins" in refusal(R.FLA, "cuda")
+    for name, other in (("flash-linear-attention", "0.5.3"), ("fla-core", "0.5.1"), ("einops", "0.8.3"),
+                        ("triton", "3.8.1")):
+        with installed(versions=dict(FLA_VERSIONS, **{name: other})):
+            assert "pins" in refusal(R.FLA, "cuda"), name
 
 
 def test_a_package_without_both_functions_counts_as_the_reference_path():
@@ -84,7 +86,16 @@ def test_a_package_without_both_functions_counts_as_the_reference_path():
 
 def test_the_reference_path_is_refused_when_the_kernels_would_be_used():
     with installed():
-        assert "transformers would use flash-linear-attention" in refusal(R.REFERENCE, "cuda")
+        assert "transformers would use flash-linear-attention" in refusal(R.REFERENCE, "cuda", diagnostic=True)
+        assert "transformers would use flash-linear-attention" in refusal(R.REFERENCE, "mps")
+
+
+def test_on_a_card_the_reference_path_is_refused_unless_diagnostic():
+    # a card without the kernels: the reference path would be active, and is still refused
+    assert "diagnostic" in refusal(R.REFERENCE, "cuda")
+    state = R.require(R.REFERENCE, "cuda", diagnostic=True)
+    assert state["chosen"] == R.REFERENCE and state["diagnostic"] is True
+    assert R.require(R.REFERENCE, "mps")["diagnostic"] is False
 
 
 def test_causal_conv1d_installed_is_refused():

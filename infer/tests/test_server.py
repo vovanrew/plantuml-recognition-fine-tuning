@@ -12,6 +12,9 @@ import hashlib
 import json
 import os
 import sys
+import threading
+import time
+import urllib.request
 from pathlib import Path
 
 FT = Path(__file__).resolve().parents[2]
@@ -143,6 +146,71 @@ def test_the_revision_must_be_a_full_commit():
             raise AssertionError("started")
 
 
+def test_one_request_is_answered_at_a_time():
+    active, most = [0], [0]
+    lock = threading.Lock()
+    real = S.complete
+
+    def slow(body):
+        with lock:
+            active[0] += 1
+            most[0] = max(most[0], active[0])
+        time.sleep(0.3)
+        with lock:
+            active[0] -= 1
+        return {"ok": True}
+
+    S.complete = slow
+    httpd = S.make_http_server("127.0.0.1", 0)
+    thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+    thread.start()
+    try:
+        url = f"http://127.0.0.1:{httpd.server_address[1]}/v1/chat/completions"
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        def post():
+            opener.open(urllib.request.Request(url, data=b"{}", headers={"Content-Type": "application/json"}),
+                        timeout=10).read()
+        clients = [threading.Thread(target=post) for _ in range(3)]
+        t0 = time.time()
+        for c in clients:
+            c.start()
+        for c in clients:
+            c.join()
+        assert most[0] == 1 and time.time() - t0 >= 0.9, (most[0], time.time() - t0)
+    finally:
+        S.complete = real
+        httpd.shutdown()
+        httpd.server_close()
+
+
+def test_the_attachment_is_read_from_the_model():
+    import torch.nn as nn
+    from peft import LoraConfig, get_peft_model
+
+    class Tiny(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.proj = nn.Linear(4, 4)
+
+        def forward(self, x):
+            return self.proj(x)
+
+    assert S.adapter_state(Tiny())["attached"] == "absent"
+    model = get_peft_model(Tiny(), LoraConfig(r=2, target_modules=["proj"]))
+    assert S.adapter_state(model) == {"lora_layers": 1, "merged_layers": 0, "attached": "not merged"}
+    model.merge_adapter()
+    assert S.adapter_state(model) == {"lora_layers": 1, "merged_layers": 1, "attached": "merged"}
+
+
+def test_the_reference_path_is_refused_on_a_card():
+    try:
+        S.start(args(device="cuda"))
+    except SystemExit as exc:
+        assert "diagnostic" in str(exc) or "differ from requirements-card.txt" in str(exc)
+    else:
+        raise AssertionError("started")
+
+
 def test_the_study_s_recurrent_layers_are_refused_where_they_cannot_run():
     # this Mac: no CUDA, no flash-linear-attention; refused before any weights load
     try:
@@ -171,6 +239,10 @@ def live(adapter):
     assert served["revision"] == REVISION and served["dtype"] == "bfloat16" and served["adapter"] is None
     assert served["eos_token_id"] == S.EOS and served["versions"]["transformers"] and served["device"]
     assert served["recurrent_layers"]["chosen"] == served["recurrent_layers"]["active"] == "reference"
+    assert served["environment"]["checked"] == "core" and served["environment"]["versions"]["torch"] == "2.14.1"
+    for rel in S.SERVING_FILES:
+        assert served["files"][rel] == hashlib.sha256((FT / rel).read_bytes()).hexdigest(), rel
+    assert served["study_commit"]["commit"]
     assert served["generate_seconds"] > 0 and served["first_token_seconds"] > 0
     # the answer stops at <|im_end|>, and nothing of the stop token reaches the text
     assert base["choices"][0]["finish_reason"] == "stop", base["choices"][0]
@@ -188,7 +260,7 @@ def live(adapter):
     identity = tuned["x_served_by"]["adapter"]
     for name in ("adapter_model.safetensors", "adapter_config.json"):
         assert identity[name] == hashlib.sha256((Path(adapter) / name).read_bytes()).hexdigest()
-    assert identity["attached"] == "not merged"
+    assert identity["attached"] == "not merged" and identity["merged_layers"] == 0 and identity["lora_layers"] == 186
     assert tuned["usage"]["prompt_tokens"] == reference["usage"]["prompt_tokens"]
     assert tuned["choices"][0]["message"]["content"] != base["choices"][0]["message"]["content"], \
         "the adapter does not change the answer"

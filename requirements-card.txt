@@ -3,30 +3,73 @@
 # serving software, the implementation of the recurrent layers of 2026-10-18).
 # Machine: "NVIDIA RTX PRO 6000 Blackwell Server Edition", image
 # runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404, host CUDA 13.0 or later; a fresh virtual
-# environment of the image's Python 3.12 (the image's own torch is not used).
-# These versions ran on the card on 2026-10-12 (decisions/gpu-precision/card_session_1/results/
-# pip_freeze_with_fla.txt). torch 2.14.1 on Linux is a CUDA 13 build and brings its own CUDA
-# libraries and Triton 3.8.0. Not installed on purpose: causal-conv1d (its two functions stay on
-# the library's reference path), bitsandbytes (nothing is quantized), kernels (hub kernels are not
-# used). build/recurrent_layers.py refuses a process whose versions differ from these three pins.
+# environment of the image's Python 3.12 (the image's own torch is not used):
+#   python3 -m venv <work>/venv && <work>/venv/bin/python -m pip install --no-deps -r requirements-card.txt
+# Every package is pinned: these are the 61 that ran on the card on 2026-10-12 after
+# flash-linear-attention was added (decisions/gpu-precision/card_session_1/results/
+# pip_freeze_with_fla.txt), Triton and the CUDA libraries included. The list resolves for Linux,
+# Python 3.12, wheels only, with dependency resolution and nothing added (pip --dry-run, 2026-10-18).
+# Not installed on purpose: causal-conv1d (its two functions stay on the library's reference path),
+# bitsandbytes (nothing is quantized), kernels (hub kernels are not used).
+# build/card_environment.py refuses a process on CUDA whose installed versions differ from this file.
+accelerate==1.15.0
+annotated-doc==0.0.5
+anyio==4.15.1
+click==8.5.0
+cuda-bindings==13.4.3
+cuda-pathfinder==1.8.3
+cuda-toolkit==13.0.3.0
+einops==0.8.2
+filelock==4.1.1
+fla-core==0.5.2
+flash-linear-attention==0.5.2
+fsspec==2026.9.0
+h11==0.16.0
+hf-xet==1.7.0
+httpcore2==2.13.1
+httpx2==2.13.1
+huggingface_hub==2.2.0
+idna==3.20
+Jinja2==3.1.6
+markdown-it-py==4.2.0
+MarkupSafe==3.0.4
+mdurl==0.1.2
+mpmath==1.3.0
+networkx==3.7
+numpy==2.5.3
+nvidia-cublas==13.1.1.3
+nvidia-cuda-cupti==13.0.85
+nvidia-cuda-nvrtc==13.0.88
+nvidia-cuda-runtime==13.0.96
+nvidia-cudnn-cu13==9.24.0.43
+nvidia-cufft==12.0.0.61
+nvidia-cufile==1.15.1.6
+nvidia-curand==10.4.0.35
+nvidia-cusolver==12.0.4.66
+nvidia-cusparse==12.6.3.3
+nvidia-cusparselt-cu13==0.8.1
+nvidia-nccl-cu13==2.30.7
+nvidia-nvjitlink==13.4.92
+nvidia-nvshmem-cu13==3.4.5
+nvidia-nvtx==13.0.85
+packaging==26.3
+peft==0.21.2
+pillow==12.3.0
+psutil==7.2.2
+Pygments==2.21.0
+PyYAML==6.0.3
+regex==2026.9.29
+rich==15.0.0
+safetensors==0.8.0
+setuptools==84.0.0
+shellingham==1.5.4
+sympy==1.14.0
+tokenizers==0.23.3
 torch==2.14.1
 torchvision==0.29.1
-transformers==5.18.0
-peft==0.21.2
-accelerate==1.15.0
-tokenizers==0.23.3
-safetensors==0.8.0
-huggingface_hub==2.2.0
-hf-xet==1.7.0
-pillow==12.3.0
-numpy==2.5.3
-Jinja2==3.1.6
-MarkupSafe==3.0.4
-regex==2026.9.29
-PyYAML==6.0.3
 tqdm==4.70.1
-packaging==26.3
-psutil==7.2.2
-flash-linear-attention==0.5.2
-fla-core==0.5.2
-einops==0.8.2
+transformers==5.18.0
+triton==3.8.0
+truststore==0.10.4
+typer==0.27.3
+typing_extensions==4.16.0

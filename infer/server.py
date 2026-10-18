@@ -15,20 +15,25 @@ request field this server does not implement, and a user turn outside the domain
 build/user_turn.py. With an adapter the served name must differ from the base model's name, so a
 base server left on a fine-tuned run's port refuses the run.
 
-Every response carries `x_served_by`: model revision, adapter hashes, stop tokens, device and GPU
-model, library versions, the hash of build/user_turn.py and of the rendered turn, and the
-generation time. `GET /` returns the same identity without the per-request fields.
+Every response carries `x_served_by`: model revision, adapter hashes and the attachment read from
+the loaded model, stop tokens, device, GPU model and driver, library versions as checked against
+requirements-card.txt, the implementation of the recurrent layers, the sha256 of the serving files
+and the study repository's commit, the hash of the rendered turn, and the generation time.
+`GET /` returns the same identity without the per-request fields. The server answers one request
+at a time (`make_http_server`: a single-threaded HTTPServer; tested).
 
 `--timing` accepts `min_tokens` (an answer forced to a length, for measuring the time of an
 answer at the output cap). It is shown in the identity and is not used for scored runs.
 
 `--recurrent-layers` names the implementation of the Gated DeltaNet layers the server must run:
 `flash-linear-attention` (the study's, decided 2026-10-18; needs CUDA) or `reference` (the
-library's own PyTorch code, the only one on the Mac). The server refuses to start when the
-process would run the other one (build/recurrent_layers.py); the identity carries what runs.
+library's own PyTorch code, the only one on the Mac, refused on a card). The server refuses to
+start when the process would run the other one (build/recurrent_layers.py), when the installed
+versions differ from requirements-card.txt (build/card_environment.py; on the Mac only the core
+packages are checked), or when an adapter is not attached as LoRA layers or any layer is merged.
 
-First version 2026-10-12; the guard of the recurrent layers added 2026-10-18. The manifest
-written beside each run is infer/manifest.py.
+First version 2026-10-12; the guards added 2026-10-18. The manifest written beside each run is
+infer/manifest.py; infer/adapter_check.py runs the check "the adapter changes the output".
 
 Usage:
   python infer/server.py --model Qwen/Qwen3.5-2B --revision <commit> --port 8000
@@ -44,6 +49,7 @@ import json
 import os
 import platform
 import re
+import subprocess
 import sys
 import time
 import traceback
@@ -55,8 +61,14 @@ from transformers import AutoModelForImageTextToText, AutoProcessor
 from transformers.generation.streamers import BaseStreamer
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "build"))
+import card_environment  # noqa: E402
 import recurrent_layers  # noqa: E402
 import user_turn  # noqa: E402
+
+ROOT = Path(__file__).resolve().parents[1]
+# The files that make the serving configuration; their sha256 is in every response.
+SERVING_FILES = ("infer/server.py", "build/user_turn.py", "build/recurrent_layers.py",
+                 "build/card_environment.py", "requirements-card.txt")
 
 # <|im_end|>, <|endoftext|>: the 27B's generation_config.json. The 2B and 9B ship none and would
 # stop at <|endoftext|> only (challenge.md, CHANGES 2).
@@ -91,11 +103,34 @@ def sha256_file(path):
     return h.hexdigest()
 
 
+def gpu_driver():
+    try:
+        out = subprocess.run(["nvidia-smi", "--query-gpu=driver_version", "--format=csv,noheader"],
+                             capture_output=True, text=True, timeout=20)
+        return out.stdout.strip().splitlines()[0] if out.returncode == 0 and out.stdout.strip() else None
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+def serving_files():
+    """sha256 of the serving files, and the study repository's commit if this is a checkout of it."""
+    files = {rel: sha256_file(ROOT / rel) for rel in SERVING_FILES}
+    try:
+        head = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True,
+                              text=True, check=True).stdout.strip()
+        clean = subprocess.run(["git", "-C", str(ROOT), "diff", "--quiet", "HEAD", "--", *SERVING_FILES]).returncode == 0
+        commit = {"commit": head, "serving_files_equal_commit": clean}
+    except (OSError, subprocess.CalledProcessError):
+        commit = None
+    return files, commit
+
+
 def environment(device):
     """Where and with what an answer was produced."""
     return {
         "device": device,
         "gpu": torch.cuda.get_device_name(0) if device == "cuda" else None,
+        "driver": gpu_driver() if device == "cuda" else None,
         "versions": {"python": platform.python_version(), "torch": torch.__version__,
                      "cuda": torch.version.cuda, "transformers": version("transformers"),
                      "peft": version("peft"), "tokenizers": version("tokenizers"),
@@ -109,12 +144,22 @@ def environment(device):
 
 
 def adapter_identity(adapter):
+    """The adapter's files."""
     if adapter is None:
         return None
     adapter = Path(adapter)
-    return {"path": str(adapter), "attached": "not merged",
+    return {"path": str(adapter),
             "adapter_model.safetensors": sha256_file(adapter / "adapter_model.safetensors"),
             "adapter_config.json": sha256_file(adapter / "adapter_config.json")}
+
+
+def adapter_state(model):
+    """How the adapter sits in the loaded model: its LoRA layers, and how many are merged."""
+    from peft.tuners.lora import LoraLayer
+    layers = [m for m in model.modules() if isinstance(m, LoraLayer)]
+    merged = sum(bool(m.merged) for m in layers)
+    return {"lora_layers": len(layers), "merged_layers": merged,
+            "attached": "not merged" if layers and not merged else ("merged" if merged else "absent")}
 
 
 def load_model(model_id, revision, device, adapter=None):
@@ -246,20 +291,33 @@ def start(args):
     if args.adapter and served_name == args.model:
         raise SystemExit("with --adapter, --served-name is required and must differ from --model")
     device = args.device or pick_device()
-    layers = recurrent_layers.require(args.recurrent_layers, device)      # before any weights load
+    versions = card_environment.require(device)                          # before any weights load
+    layers = recurrent_layers.require(args.recurrent_layers, device)
+    files, commit = serving_files()
     processor = AutoProcessor.from_pretrained(args.model, revision=args.revision)
     model = load_model(args.model, args.revision, device, args.adapter)
+    adapter = None
+    if args.adapter:
+        adapter = {**adapter_identity(args.adapter), **adapter_state(model)}
+        if adapter["attached"] != "not merged":
+            raise SystemExit(f"the adapter must be attached as unmerged LoRA layers; found {adapter}")
     STATE.update(processor=processor, model=model, served_name=served_name, served=0,
                  timing=args.timing)
     STATE["identity"] = {
         "served_name": served_name, "model": args.model, "revision": args.revision,
         "dtype": str(next(model.parameters()).dtype).replace("torch.", ""),
-        "adapter": adapter_identity(args.adapter), "decoding": "greedy", "eos_token_id": EOS,
+        "adapter": adapter, "decoding": "greedy", "eos_token_id": EOS,
         "chat_template_kwargs": {"enable_thinking": False},
         "user_turn": {"file_sha256": user_turn.FILE_SHA256,
                       "rendered_sha256_frozen": user_turn.RENDERED_SHA256},
-        "recurrent_layers": layers, "timing": args.timing, **environment(device),
+        "recurrent_layers": layers, "environment": versions, "files": files, "study_commit": commit,
+        "timing": args.timing, **environment(device),
     }
+
+
+def make_http_server(host, port):
+    """Single-threaded: one request is answered at a time, the next waits for it."""
+    return HTTPServer((host, port), Handler)
 
 
 def main():
@@ -277,7 +335,7 @@ def main():
     args = ap.parse_args()
     start(args)
     print("serving", json.dumps(STATE["identity"]), flush=True)
-    HTTPServer((args.host, args.port), Handler).serve_forever()
+    make_http_server(args.host, args.port).serve_forever()
 
 
 if __name__ == "__main__":
