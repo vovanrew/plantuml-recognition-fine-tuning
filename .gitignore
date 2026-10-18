@@ -14,3 +14,4 @@ __pycache__/
 *.tar
 *.safetensors
 checkpoint-*/
+data/examples/*.jsonl

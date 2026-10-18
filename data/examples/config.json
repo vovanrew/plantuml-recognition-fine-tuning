@@ -1,0 +1,19 @@
+{
+ "decision": "decisions/pilot-run/record.md",
+ "counts": {
+  "train": 20000,
+  "loss_curve": 200
+ },
+ "sources": "../dataset/puml_files",
+ "set_files_sha256": {
+  "train.json": "25a6cc0dfe29b2a9198104b9e621bc9366bbaa9da0254ffffdbe61d70c2cb155",
+  "loss_curve.json": "897dc6d402f9e960ad184e785d2a07490751506cf7dfe01c6f69fa8b56f6c6d6",
+  "dev.json": "3bb1e474562e6c0a654c82e702f311fa83dbd492b500fda99d63cfac84790dcf"
+ },
+ "prompt_sha256": "097351ffce6134cb903322718facca5488f978766d46381de03934c8c9f01552",
+ "code_sha256": {
+  "build/examples.py": "93825e443b425af3367866c79117103fcf34c8093ede4917318e7479d5fdd56e",
+  "build/pool.py": "cc7f9bd16e47f8e0c7ac9f06714bb46739fc684cc4adb6f0d81a90cd4cd59980"
+ },
+ "extract_puml_source_sha256": "a9053594872aa83ad11a39d69630ee8d6bd623dfbde2be94ffc19ea795bed62a"
+}
