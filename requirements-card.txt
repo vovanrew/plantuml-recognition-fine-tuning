@@ -1,0 +1,32 @@
+# The Python environment of every run of the study on the rented card: training, dev scoring and
+# serving, at every size (decisions/gpu-precision/record.md, Decision Part 2: training software,
+# serving software, the implementation of the recurrent layers of 2026-10-18).
+# Machine: "NVIDIA RTX PRO 6000 Blackwell Server Edition", image
+# runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404, host CUDA 13.0 or later; a fresh virtual
+# environment of the image's Python 3.12 (the image's own torch is not used).
+# These versions ran on the card on 2026-10-12 (decisions/gpu-precision/card_session_1/results/
+# pip_freeze_with_fla.txt). torch 2.14.1 on Linux is a CUDA 13 build and brings its own CUDA
+# libraries and Triton 3.8.0. Not installed on purpose: causal-conv1d (its two functions stay on
+# the library's reference path), bitsandbytes (nothing is quantized), kernels (hub kernels are not
+# used). build/recurrent_layers.py refuses a process whose versions differ from these three pins.
+torch==2.14.1
+torchvision==0.29.1
+transformers==5.18.0
+peft==0.21.2
+accelerate==1.15.0
+tokenizers==0.23.3
+safetensors==0.8.0
+huggingface_hub==2.2.0
+hf-xet==1.7.0
+pillow==12.3.0
+numpy==2.5.3
+Jinja2==3.1.6
+MarkupSafe==3.0.4
+regex==2026.9.29
+PyYAML==6.0.3
+tqdm==4.70.1
+packaging==26.3
+psutil==7.2.2
+flash-linear-attention==0.5.2
+fla-core==0.5.2
+einops==0.8.2

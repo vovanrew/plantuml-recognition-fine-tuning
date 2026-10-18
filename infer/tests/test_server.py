@@ -27,10 +27,11 @@ MODEL, REVISION = "Qwen/Qwen3.5-2B", "15852e8c16360a2fea060d615a32b45270f8a8fc"
 PROMPT = (UNI / "plantuml-recognition-evaluation/prompts/zero_shot.txt").read_text(encoding="utf-8").strip()
 # A test diagram whose bf16 answer in the precision test of gpu-precision stops after 38 tokens;
 # that test ran on this Mac with these libraries and this arrangement, so its stored answer is
-# the reference the study's server must reproduce.
+# the reference the study's server must reproduce. The stored response is copied unchanged into
+# fixtures/ (from decisions/gpu-precision/precision_test/runs/bf16/, 2026-10-17).
 KEY = "46701d87f11434bfe1cae06f2715ae74a91e0fcd"
 IMAGE = UNI / "plantuml-recognition-evaluation/data/puml_images_1568" / (KEY + ".png")
-REFERENCE = FT / "decisions/gpu-precision/precision_test/runs/bf16" / (KEY + ".json")
+REFERENCE = Path(__file__).resolve().parent / "fixtures/precision_test_bf16_46701d87.json"
 TEXT_ONLY_TOKENS = 93                                # the runner's text-only baseline
 
 
@@ -61,7 +62,8 @@ def stub(served_name=MODEL, timing=False):
 
 
 def args(**changes):
-    values = dict(model=MODEL, revision=REVISION, adapter=None, served_name=None, device=None, timing=False)
+    values = dict(model=MODEL, revision=REVISION, adapter=None, served_name=None, device=None, timing=False,
+                  recurrent_layers="reference")       # the only implementation this Mac can run
     values.update(changes)
     return argparse.Namespace(**values)
 
@@ -141,6 +143,16 @@ def test_the_revision_must_be_a_full_commit():
             raise AssertionError("started")
 
 
+def test_the_study_s_recurrent_layers_are_refused_where_they_cannot_run():
+    # this Mac: no CUDA, no flash-linear-attention; refused before any weights load
+    try:
+        S.start(args(recurrent_layers="flash-linear-attention"))
+    except SystemExit as exc:
+        assert "flash-linear-attention" in str(exc)
+    else:
+        raise AssertionError("started")
+
+
 # --------------------------------------------------------------------------- #
 # With weights (--live)
 # --------------------------------------------------------------------------- #
@@ -158,6 +170,7 @@ def live(adapter):
     assert served["user_turn"]["file_sha256"] == S.user_turn.FILE_SHA256
     assert served["revision"] == REVISION and served["dtype"] == "bfloat16" and served["adapter"] is None
     assert served["eos_token_id"] == S.EOS and served["versions"]["transformers"] and served["device"]
+    assert served["recurrent_layers"]["chosen"] == served["recurrent_layers"]["active"] == "reference"
     assert served["generate_seconds"] > 0 and served["first_token_seconds"] > 0
     # the answer stops at <|im_end|>, and nothing of the stop token reaches the text
     assert base["choices"][0]["finish_reason"] == "stop", base["choices"][0]

@@ -22,14 +22,20 @@ generation time. `GET /` returns the same identity without the per-request field
 `--timing` accepts `min_tokens` (an answer forced to a length, for measuring the time of an
 answer at the output cap). It is shown in the identity and is not used for scored runs.
 
-First version, 2026-10-12, for the first session on the rented card. Not tagged; the manifest
-written beside each run is not built yet.
+`--recurrent-layers` names the implementation of the Gated DeltaNet layers the server must run:
+`flash-linear-attention` (the study's, decided 2026-10-18; needs CUDA) or `reference` (the
+library's own PyTorch code, the only one on the Mac). The server refuses to start when the
+process would run the other one (build/recurrent_layers.py); the identity carries what runs.
+
+First version 2026-10-12; the guard of the recurrent layers added 2026-10-18. The manifest
+written beside each run is infer/manifest.py.
 
 Usage:
   python infer/server.py --model Qwen/Qwen3.5-2B --revision <commit> --port 8000
   python infer/server.py --model Qwen/Qwen3.5-2B --revision <commit> --adapter <dir> \
       --served-name Qwen3.5-2B-ft --port 8001
-On Apple MPS set HF_DEACTIVATE_ASYNC_LOAD=1 (the 4-thread weight copy crashed or hung there).
+  on the Mac: add --recurrent-layers reference, and set HF_DEACTIVATE_ASYNC_LOAD=1 (the
+  4-thread weight copy crashed or hung on Apple MPS)
 """
 import argparse
 import hashlib
@@ -49,6 +55,7 @@ from transformers import AutoModelForImageTextToText, AutoProcessor
 from transformers.generation.streamers import BaseStreamer
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "build"))
+import recurrent_layers  # noqa: E402
 import user_turn  # noqa: E402
 
 # <|im_end|>, <|endoftext|>: the 27B's generation_config.json. The 2B and 9B ship none and would
@@ -239,6 +246,7 @@ def start(args):
     if args.adapter and served_name == args.model:
         raise SystemExit("with --adapter, --served-name is required and must differ from --model")
     device = args.device or pick_device()
+    layers = recurrent_layers.require(args.recurrent_layers, device)      # before any weights load
     processor = AutoProcessor.from_pretrained(args.model, revision=args.revision)
     model = load_model(args.model, args.revision, device, args.adapter)
     STATE.update(processor=processor, model=model, served_name=served_name, served=0,
@@ -250,7 +258,7 @@ def start(args):
         "chat_template_kwargs": {"enable_thinking": False},
         "user_turn": {"file_sha256": user_turn.FILE_SHA256,
                       "rendered_sha256_frozen": user_turn.RENDERED_SHA256},
-        "timing": args.timing, **environment(device),
+        "recurrent_layers": layers, "timing": args.timing, **environment(device),
     }
 
 
@@ -264,6 +272,8 @@ def main():
     ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--port", type=int, default=8000)
     ap.add_argument("--timing", action="store_true", help="accept min_tokens; not for scored runs")
+    ap.add_argument("--recurrent-layers", default=recurrent_layers.FLA, choices=recurrent_layers.CHOICES,
+                    help="the implementation the server must run (default: the study's)")
     args = ap.parse_args()
     start(args)
     print("serving", json.dumps(STATE["identity"]), flush=True)

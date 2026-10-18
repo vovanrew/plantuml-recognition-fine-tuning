@@ -5,8 +5,8 @@ Run from fine-tune/:  .venv/bin/python build/tests/test_user_turn.py
 (pytest collects the same functions; the environment that holds transformers has no pytest.)
 
 Reads, without model weights: the Qwen3.5-2B processor in .local/hf at the pinned revision, the
-chat templates of the three sizes saved by the Scout of prompt-arrangement
-(decisions/prompt-arrangement/scripts/out/hf_small_files, hashes in its SHA256SUMS; tokenizer.json
+chat templates of the three sizes (fixtures/chat_templates/, copied 2026-10-17 from the files the
+Scout of prompt-arrangement fetched at the pinned revisions, hashes checked below; tokenizer.json
 and preprocessor_config.json are byte-identical at the three sizes), the benchmark prompt and one
 standardized test image.
 """
@@ -26,7 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import user_turn as U  # noqa: E402
 
 MODEL, REVISION = "Qwen/Qwen3.5-2B", "15852e8c16360a2fea060d615a32b45270f8a8fc"
-TEMPLATES = FT / "decisions/prompt-arrangement/scripts/out/hf_small_files"
+TEMPLATES = Path(__file__).resolve().parent / "fixtures/chat_templates"
 TEMPLATE_SHA256 = {"2B": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
                    "9B": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
                    "27B": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715"}
@@ -58,7 +58,7 @@ def processor():
 
 
 def template(size):
-    raw = (TEMPLATES / size / "chat_template.jinja").read_bytes()
+    raw = (TEMPLATES / f"{size}.jinja").read_bytes()
     assert hashlib.sha256(raw).hexdigest() == TEMPLATE_SHA256[size]
     return raw.decode("utf-8")
 

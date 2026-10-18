@@ -1,0 +1,46 @@
+{
+  "id": "precision-test-34",
+  "object": "chat.completion",
+  "created": 1791642605,
+  "model": "Qwen/Qwen3.5-2B",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "@startuml\nparticipant \"a\" as a\nparticipant \"b\" as b\nparticipant \"c\" as c\n\na ..> b\nb ..> c\n\n@enduml"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 432,
+    "completion_tokens": 38,
+    "total_tokens": 470
+  },
+  "x_precision_test": {
+    "mode": "bf16",
+    "model": "Qwen/Qwen3.5-2B",
+    "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+    "arrangement": "image_nl_text",
+    "eos_token_id": [
+      248046,
+      248044
+    ],
+    "device": "mps",
+    "quantization_config": null,
+    "linear_modules": {
+      "language:Linear": 187,
+      "vision:Linear": 98
+    },
+    "versions": {
+      "torch": "2.14.1",
+      "transformers": "5.18.0",
+      "bitsandbytes": "0.50.2"
+    },
+    "chat_template_kwargs": {
+      "enable_thinking": false
+    },
+    "generate_seconds": 1.14
+  }
+}
