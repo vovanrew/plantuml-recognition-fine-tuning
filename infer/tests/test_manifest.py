@@ -38,9 +38,11 @@ def response(identity=None, rendered=None, finish="stop"):
 
 
 def run_dir(cells=None, meta=None):
+    """A run directory; `n_cells` is the number of cells written unless `meta` sets it."""
     d = Path(tempfile.mkdtemp())
-    (d / "run_meta.json").write_text(json.dumps(meta or RUN_META))
-    for i, cell in enumerate(cells if cells is not None else [response(), response(), response()]):
+    cells = cells if cells is not None else [response(), response(), response()]
+    (d / "run_meta.json").write_text(json.dumps({"n_cells": len(cells), **(meta or RUN_META)}))
+    for i, cell in enumerate(cells):
         (d / f"key{i}.json").write_text(json.dumps(cell))
     return d
 
@@ -140,6 +142,15 @@ def test_a_cell_changed_after_the_manifest_is_reported():
     assert M.check(d, frozen=FROZEN) == ["summary differs from manifest.json"]
     (d / "key9.json").write_text(json.dumps({"error": "timeout"}))
     assert any(p.startswith("check every_cell_answered fails") for p in M.check(d, frozen=FROZEN))
+
+
+def test_a_run_stopped_part_way_fails():
+    assert failed(run_dir(meta=dict(RUN_META, n_cells=1000))) == {"complete_run"}
+    meta = dict(RUN_META)
+    meta.pop("n_cells", None)
+    d = run_dir()
+    (d / "run_meta.json").write_text(json.dumps(meta))             # no n_cells recorded
+    assert failed(d) == {"complete_run"}
 
 
 def test_a_folder_without_run_meta_is_refused():

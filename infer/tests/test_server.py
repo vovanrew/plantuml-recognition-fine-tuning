@@ -15,6 +15,7 @@ import sys
 import threading
 import time
 import urllib.request
+from contextlib import contextmanager
 from pathlib import Path
 
 FT = Path(__file__).resolve().parents[2]
@@ -202,13 +203,40 @@ def test_the_attachment_is_read_from_the_model():
     assert S.adapter_state(model) == {"lora_layers": 1, "merged_layers": 1, "attached": "merged"}
 
 
-def test_the_reference_path_is_refused_on_a_card():
+@contextmanager
+def card_versions(**override):
+    """Stand-in installed versions equal to requirements-card.txt (a card), with overrides."""
+    versions = dict(S.card_environment.pins(), **override)
+    real = S.card_environment.version
+    S.card_environment.version = lambda d: versions.get(S.card_environment.normalise(d))
     try:
-        S.start(args(device="cuda"))
+        yield
+    finally:
+        S.card_environment.version = real
+
+
+def refused_at_start(**changes):
+    try:
+        S.start(args(**changes))
     except SystemExit as exc:
-        assert "diagnostic" in str(exc) or "differ from requirements-card.txt" in str(exc)
-    else:
-        raise AssertionError("started")
+        return str(exc)
+    raise AssertionError("started")
+
+
+def test_on_a_card_the_reference_path_is_refused_before_any_weights_load():
+    with card_versions():                      # the environment check passes: the next guard must refuse
+        message = refused_at_start(device="cuda", recurrent_layers="reference")
+    assert "the reference path only in a diagnostic process" in message, message
+
+
+def test_on_a_card_other_library_versions_are_refused_before_any_weights_load():
+    # nvidia-cublas is not among the Mac's core packages and not pinned by the recurrent layers'
+    # guard: only the full check of requirements-card.txt on CUDA refuses it
+    for name, other in (("torch", "2.15.0"), ("transformers", "5.19.0"), ("peft", "0.22.0"),
+                        ("nvidia-cublas", "13.1.1.4")):
+        with card_versions(**{name: other}):
+            message = refused_at_start(device="cuda", recurrent_layers="flash-linear-attention")
+        assert "differ from requirements-card.txt" in message and name in message, (name, message)
 
 
 def test_the_study_s_recurrent_layers_are_refused_where_they_cannot_run():

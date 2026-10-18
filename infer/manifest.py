@@ -34,6 +34,8 @@ Checks, each recorded with its result:
   deadline            run_meta: the per-answer deadline is 600 s (author, 2026-10-17)
   every_cell_answered no cell ended in a failure record of the runner (timeout, http_error,
                       network_error, image_dropped, bad_response): resume the run until none is left
+  complete_run        the run directory holds one stored cell for each of the `n_cells` cells
+                      run_meta.json says the run was started with (a run stopped part way fails)
   served_name         the runner asked for the name the server serves
 
 Usage, from fine-tune/:
@@ -57,7 +59,7 @@ import recurrent_layers  # noqa: E402
 import user_turn  # noqa: E402
 
 PER_REQUEST = ("rendered_sha256", "min_tokens", "generate_seconds", "first_token_seconds")
-FREEZE_TAG = "serving-v2"
+FREEZE_TAG = "serving-v3"
 DEADLINE_SECONDS = 600
 MAX_TOKENS = 5376
 NOT_CELLS = {"run_meta.json", "manifest.json"}
@@ -151,6 +153,8 @@ def checks(summary, run_meta, rendered_expected, server_identity=None, frozen=No
          f"timeout {run_meta.get('timeout')} s, the rule says {DEADLINE_SECONDS} s"),
         ("every_cell_answered", answered > 0 and not failures,
          f"{answered} answered; failure records {failures or 'none'}"),
+        ("complete_run", isinstance(run_meta.get("n_cells"), int) and summary["cells"] == run_meta["n_cells"],
+         f"{summary['cells']} stored cells of the {run_meta.get('n_cells')} the run was started with"),
         ("recurrent_layers", identity is not None
          and (identity.get("recurrent_layers") or {}).get("active") == recurrent_layers.FLA,
          f"active {None if identity is None else (identity.get('recurrent_layers') or {}).get('active')}, "
