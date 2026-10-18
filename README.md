@@ -14,8 +14,8 @@ diagrams, with the same images, prompt, decoding and scorer in both conditions.
 Work in progress, state of 2026-10-18. There are no results here yet.
 
 - Done: scorer v2 is frozen; the training, dev and loss-curve sets are drawn and frozen; the image
-  pipeline passes its acceptance check on the 1,000 test diagrams; the compute platform and the
-  prompt arrangement are decided; the training recipe and the checkpoint rule are frozen.
+  pipeline passes its acceptance check on the 1,000 test diagrams; the compute platform is
+  frozen (tag `serving-v3`) and the prompt arrangement is decided; the training recipe and the checkpoint rule are frozen.
 - Not done: the pilot, the three trainings and the evaluation runs.
 
 [FINETUNE_PLAN.md](FINETUNE_PLAN.md) §10 lists every step with its status.
@@ -25,9 +25,9 @@ Work in progress, state of 2026-10-18. There are no results here yet.
 | Path | Content |
 |---|---|
 | [FINETUNE_PLAN.md](FINETUNE_PLAN.md) | The plan: question, design, phases, item table |
-| [methodology/](methodology/) | What was built and how: [scorer v2](methodology/scorer-v2.md), [training set construction](methodology/training-set-construction.md), [training recipe](methodology/training-recipe.md) |
+| [methodology/](methodology/) | What was built and how: [scorer v2](methodology/scorer-v2.md), [training set construction](methodology/training-set-construction.md), [training recipe](methodology/training-recipe.md), [compute and serving](methodology/compute-and-serving.md) |
 | `build/` | Training pool, near-duplicate check against the test set, sampling, image rendering, the user turn, the scorer v1 to v2 bridge; tests in `build/tests/` |
-| `infer/` | The serving endpoint used for both conditions; tests in `infer/tests/` |
+| `infer/` | The server used for both conditions, the run manifest and the adapter check; tests in `infer/tests/` |
 | `train/` | The training recipe and the checkpoint rule; tests in `train/tests/` |
 | `data/pool/`, `data/sets/` | Frozen outputs of `build/`, each folder with a `SHA256SUMS` list |
 
@@ -66,6 +66,10 @@ versions used are recorded in `data/sets/render/train/render_env.json`.
 ```
 python3 -m pytest build/tests -q
 ```
+
+The tests of the user turn, the server, the manifest and the adapter check need the libraries of
+[requirements-card.txt](requirements-card.txt), the environment of every run on the card; locally
+the core packages listed in `build/card_environment.py` are enough.
 
 Working records of each decision are kept outside this repository, so paths that start with
 `decisions/` do not resolve here.
