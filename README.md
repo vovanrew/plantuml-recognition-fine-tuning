@@ -11,12 +11,12 @@ diagrams, with the same images, prompt, decoding and scorer in both conditions.
 
 ## Status
 
-Work in progress, state of 2026-10-13. There are no results here yet.
+Work in progress, state of 2026-10-18. There are no results here yet.
 
 - Done: scorer v2 is frozen; the training, dev and loss-curve sets are drawn and frozen; the image
   pipeline passes its acceptance check on the 1,000 test diagrams; the compute platform and the
-  prompt arrangement are decided.
-- Not done: the training recipe, the pilot, the three trainings and the evaluation runs.
+  prompt arrangement are decided; the training recipe and the checkpoint rule are frozen.
+- Not done: the pilot, the three trainings and the evaluation runs.
 
 [FINETUNE_PLAN.md](FINETUNE_PLAN.md) §10 lists every step with its status.
 
@@ -25,9 +25,10 @@ Work in progress, state of 2026-10-13. There are no results here yet.
 | Path | Content |
 |---|---|
 | [FINETUNE_PLAN.md](FINETUNE_PLAN.md) | The plan: question, design, phases, item table |
-| [methodology/](methodology/) | What was built and how: [scorer v2](methodology/scorer-v2.md), [training set construction](methodology/training-set-construction.md) |
+| [methodology/](methodology/) | What was built and how: [scorer v2](methodology/scorer-v2.md), [training set construction](methodology/training-set-construction.md), [training recipe](methodology/training-recipe.md) |
 | `build/` | Training pool, near-duplicate check against the test set, sampling, image rendering, the user turn, the scorer v1 to v2 bridge; tests in `build/tests/` |
 | `infer/` | The serving endpoint used for both conditions; tests in `infer/tests/` |
+| `train/` | The training recipe and the checkpoint rule; tests in `train/tests/` |
 | `data/pool/`, `data/sets/` | Frozen outputs of `build/`, each folder with a `SHA256SUMS` list |
 
 ## Data
