@@ -116,6 +116,40 @@ def test_on_this_machine_only_the_reference_path_runs():
     assert guarded["recurrent_layers"]["chosen"] == "reference"
 
 
+class _Loaded(Exception):
+    pass
+
+
+def test_run_json_names_the_active_recurrent_layer_path():
+    """main() writes run.json before any weight loads; it carries what the recurrent-layer guard
+    found active, whether causal-conv1d is installed, and the environment guard's result. The
+    model load is replaced by a stand-in that stops the run there."""
+    device = T.pick_device()
+    layers = "flash-linear-attention" if device == "cuda" else "reference"
+
+    def stand_in(size, dev):
+        raise _Loaded
+
+    saved = T.load
+    T.load = stand_in
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "probe"
+            try:
+                T.main(["probe", "--size", "2B", "--out", str(out), "--device", device, "--recurrent-layers", layers])
+            except _Loaded:
+                pass
+            else:
+                raise AssertionError("main() did not reach the model load")
+            written = json.loads((out / "run.json").read_text())
+    finally:
+        T.load = saved
+    assert written["mode"] == "probe" and written["device"] == device
+    assert written["recurrent_layers"]["chosen"] == written["recurrent_layers"]["active"] == layers
+    assert "causal-conv1d" in written["recurrent_layers"]["versions"]
+    assert written["environment"]["checked"] in ("all", "core")
+
+
 # --------------------------------------------------------------------------- #
 # With weights (--live)
 # --------------------------------------------------------------------------- #

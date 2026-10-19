@@ -40,10 +40,8 @@ if [[ $step == pack ]]; then
     if [[ -n $changed ]]; then
         echo "commit these first; the pod runs a checkout of a commit:"; echo $changed; exit 1
     fi
-    tag=$(sed -n 's/^FREEZE_TAG = "\(.*\)"/\1/p' $FT/infer/manifest.py)
-    git -C $FT rev-parse -q --verify "refs/tags/$tag" >/dev/null || { echo "tag $tag is missing"; exit 1; }
+    bash $FT/train/study_bundle.sh create $FT $LOCAL/study.bundle
     git -C $FT rev-parse HEAD > $LOCAL/commit.txt
-    git -C $FT bundle create $LOCAL/study.bundle HEAD --tags 2>/dev/null
     cd $FT
     HF_HOME=$FT/.local/hf HF_HUB_OFFLINE=1 TRANSFORMERS_VERBOSITY=error $FT/.venv/bin/python - $LOCAL/data_files.txt <<'EOF'
 import sys
@@ -86,7 +84,7 @@ case $step in
     scp -q -i $KEY -P $POD_PORT -o IdentitiesOnly=yes -o UserKnownHostsFile=$LOCAL/known_hosts \
         $LOCAL/{commit.txt,study.bundle,data.tar,instrument.tar,pod_setup.sh,SHA256SUMS} $POD:$WORK/pack/
     ssh $SSH_OPTS $POD "cd $WORK/pack && sha256sum --quiet -c SHA256SUMS && echo pack ok" ;;
-  setup)     ssh $SSH_OPTS $POD "bash $WORK/pack/pod_setup.sh $WORK 2>&1 | tee $WORK/pack/setup.log" ;;
+  setup)     ssh $SSH_OPTS $POD "bash $WORK/pack/pod_setup.sh $WORK 2>&1 | tee $WORK/pack/setup.log; exit \${PIPESTATUS[0]}" ;;
   download)
     logged "$PY train/download_models.py $WORK/results/downloads_2B.json 2B" download_2B
     remote "nohup $PY train/download_models.py $WORK/results/downloads_9B_27B.json 9B 27B > $WORK/results/logs/download.log 2>&1 &" ;;
