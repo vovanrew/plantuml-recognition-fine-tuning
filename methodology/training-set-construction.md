@@ -7,10 +7,7 @@ the baseline record below. Paths are relative to `fine-tune/`. §1 records the r
 
 ## 1. Image rendering
 
-Every measured number in this section is taken from `decisions/render-pipeline/verify.md`, table
-"Numbers that describe the final build". The command behind a number is named where the number
-stands. The settings (DPI, sizes, heap, threads, batch size) are constants of the code named in
-§1.1.
+The settings (DPI, sizes, heap, threads, batch size) are constants of the code named in §1.1.
 
 ### 1.1 The command
 
@@ -57,7 +54,7 @@ images to `puml_images/` when `--keep-raw` is given. The folder that holds the t
 
 The command works within a framework of one diagram per source file. For a source with more than
 one diagram block its behaviour is not determined. None of the 1,000 test sources has more than one
-block (`decisions/render-pipeline/scripts/verify_r4_corpus_several_blocks_final_build.py`).
+block.
 
 Within this framework a source gets an image only if it compiles and renders to exactly one page
 (the one-image rule of the baseline record, §4). Every key gets one line
@@ -90,22 +87,11 @@ status `crash` if it gets the picture again. If the renderer exits abnormally, t
 more fatal errors than there are crash pictures, or leaves a PNG under a name no key has, every
 diagram of the batch is rendered again alone.
 
-The effect was measured on the 200 largest of 1,668 single-page corpus diagrams with stored render
-sizes (114.6 to 268.4 megapixels). In each of 12 runs the stock script wrote 189 to 200 crash
-pictures and counted 0 or 1 files as failed
-(`decisions/render-pipeline/scripts/heavy_stock_script_repeat.py`). `render.py` with its defaults
-gave all 200 status `ok`, and PlantUML wrote 0 crash pictures
-(`decisions/render-pipeline/scripts/verify_r2_heavy_batch.py`).
-
 **Graphviz `dot` behind a script.** PlantUML does not report a `dot` that ends without output. It
 draws the diagram in another layout mode or, if `dot` fails again, a failure picture in the
 diagram's own scale and colours. `build/dot_guard.sh` therefore stands between PlantUML and `dot`.
 It hands every call and its output on unchanged, and prints one error line when `dot` returns no
-output. PlantUML then draws the crash picture, and the rule above applies. A trial used one source
-in 14 variants and a `dot` that returned nothing. `is_crash_image()` recognised 0 of 14 outputs
-without the script and 14 of 14 with it.
-`render.py` gave all 14 status `crash` and wrote 0 images
-(`decisions/render-pipeline/scripts/graphviz_silent_death_check.py`).
+output. PlantUML then draws the crash picture, and the rule above applies.
 
 **Graphviz present.** Before it makes an output folder, the command runs PlantUML's Graphviz test
 (`-testdot`) and stops if the test fails. Without Graphviz a class diagram renders to a notice that
@@ -138,16 +124,14 @@ exception is recorded on its line (`renderer_trace`).
 `build/acceptance_check.py` renders the 1,000 test diagrams (baseline record, §1) through
 `render.py` and compares every image with the benchmark's. It passes when all diagrams are rendered
 and every raw and final image has the pixel dimensions of the benchmark's image. Equal dimensions
-are the criterion `FINETUNE_PLAN.md` sets for this check (Phase A). The check passed on 2026-10-09:
+are the criterion `FINETUNE_PLAN.md` sets for this check (Phase A). The check passes, and its
+report gives the counts below:
 
 ```
 python3 build/acceptance_check.py --work <scratch> --report <file> --stock
 ```
 
-The counts below are those of
-`decisions/render-pipeline/scripts/verify_acceptance_independent.py`, a second implementation of the
-comparison. All 1,000 final images and all 1,000 raw images had the pixel dimensions of the
-benchmark's images.
+All 1,000 final images and all 1,000 raw images have the pixel dimensions of the benchmark's images.
 
 | Count of test diagrams | All | Class | Sequence |
 |---|---|---|---|
@@ -165,22 +149,14 @@ The 226 raw images that differed held a median of 72 differing pixels and at mos
 **Stage 3.** Applied to the benchmark's raw images, stage 3 gave the benchmark's final images on
 1,000 of 1,000.
 
-**Stage 1 against the stock script.** Two comparisons measured whether `render.py` changes the
-stage 1 output of the stock script. First, the stock script's PNG had the sha256 that `render.py`
-recorded for its own stage 1 output on 999 of the 1,000 test diagrams. The other diagram prints the
-time of the render, and its bytes differed between two renders in different minutes. Second, the
-stock script was run twice inside one minute, without and with `dot_guard.sh` in front of `dot`. The
-PNGs had the same bytes on 1,000 of 1,000
-(`decisions/render-pipeline/scripts/verify_r2_stock_vs_guard_bytes.py`).
+**Stage 1 against the stock script.** The stock script's PNG has the sha256 that `render.py`
+records for its own stage 1 output on 999 of the 1,000 test diagrams. The other diagram prints the
+time of the render.
 
-### 1.6 Environment of the measurements
+### 1.6 Environment of the renders
 
-The acceptance check of §1.5 and the trial on `dot` of §1.3 ran on 2026-10-09 in this environment,
-before the re-freeze of §7; the hashes of §1.1 are those after it.
-The run of `render.py` on the 200 largest diagrams (§1.3) was made on 2026-10-08 with an earlier
-version of the file (sha256 `5943cb3f2c46fbea4eb7876f0d78cd5710a473a1db1af943335f858b0c354839`);
-`decisions/render-pipeline/verify.md` carries its result and gives the reason the later changes do
-not affect it.
+Every render records its environment in `render_env.json` (§1.4). The three sets
+(`data/sets/render/<set>/render_env.json`) and the acceptance check were rendered in this one:
 
 | Component | Version |
 |---|---|
@@ -193,10 +169,9 @@ not affect it.
 
 ## 2. The training pool
 
-Every measured number in §2 to §8, apart from the re-freeze in §7, is taken from
-`decisions/training-pool-rules/verify.md`, section
-"Numbers that describe the final build". `build/pool.py` builds the pool, and `build/sample.py`
-draws and renders the sets; §7 lists both files with their sections.
+`build/pool.py` builds the pool, and `build/sample.py` draws and renders the sets; §7 lists both
+files with their sections. The counts of §2 and §3 are those of `data/pool/funnel.json`, and those
+of §4 to §8 of `data/sets/counts.json` and `data/sets/d8_report.json`.
 
 Four rules build the pool. The table below gives the order of the steps. A diagram that has passed
 the steps so far is called a candidate.
@@ -416,50 +391,21 @@ The two lists name every file. The table gives the files a reader needs first.
 
 **Images.** The images lie under `data/sets/render/<set>/puml_images_1568/` and are not in the two
 lists. Each image is fixed by the pixel hash (`pixels_sha256`) of its line in the render manifest of
-its set (`data/sets/render/<set>/manifest.jsonl`, §1.4), which the lists hold.
-All 20,419 stored files gave the pixel hash and the size of their line. The training images are
-these stored files. A second render gave the stored pixels for 200 of 200 dev images and 200 of 200
-loss-curve images, twice each. For the training sample it gave other pixels for 11 of 20,000
-images: 6 from clock sources and 5 from sources without a clock. This was measured before the
-19 replacements under the rule of §3 (§5). The 11 keys are in the final list, and the 19 keys
-that entered gave their stored image in two further renders each.
+its set (`data/sets/render/<set>/manifest.jsonl`, §1.4), which the lists hold. The training images
+are these stored files.
 
 The training folder holds the images of the 20,000 keys of `train.json` and no other. The 19
 images of the keys replaced under the rule of §3 (§5) were moved to `data/replaced_images/train/`
 after the verification, and their lines stay in the manifest. The render command checks a folder
 against its manifest, so it runs on this folder again only with the 19 put back.
 
-**Re-freeze of 2026-10-14.** Until 2026-10-14 the code read some benchmark files from a local
-working copy of the benchmark repository. These are the test set with its sources, images and token
-counts, the test set's code, and the stage 3 file of §1.1. Since then the code reads them from
-`../plantuml-recognition-evaluation`, and the records name that folder. Six records were frozen
-again: `data/pool/config.json`, `data/pool/d2_render/render_env.json`, `data/sets/config.json` and
-the `render_env.json` of `data/sets/render/train/`, `dev/` and `loss_curve/`. They changed in path
-labels and hashes only. The changed hashes are those of `build/pool.py` and `build/render.py` and
-the pin of the test set's code, called the rules file below. In `data/sets/config.json` they also
-include the hashes of `data/pool/config.json` and `data/pool/SHA256SUMS`. The two lists were frozen
-again with the new hashes of these files. No key list, manifest, image or other artifact changed.
-
-The hashes of `build/render.py` and `build/acceptance_check.py` in §1.1, and of `build/pool.py`
-in the sha256 table above, are those of the files after this change and the one of 2026-10-17
-below. The code that built the data is commit `5b91797` of the git repository of `fine-tune/`.
-Its files differ from those hashed here only in the lines that name the benchmark folder and in
-two pins, those of the rules file and of the scorer-v2 extractor.
-
-**Re-freeze of 2026-10-17.** `build/pool.py` pins the scorer-v2 extractor, from which rule 3
-reads the diagram type and the error of each candidate as a cross-check. The pin now names the JAR
-of scorer v2 as tagged, which replaced the earlier build of the same extractor. Both give the same
-type and error for every candidate (`decisions/scorer-v2-freeze/verify.md`, tenth pass). The two
-`config.json` files and the two lists were frozen again in these hashes only.
-
-**The rules file.** The sha256 table above gives the public repository's copy. It differs from the copy
-that the build ran in 2 of its 42 top-level statements, the defaults `DATASET` and
-`EXTRACTOR_JAR`. The hash of that copy is the pin in `build/pool.py` of commit `5b91797`. Only the
-file's own `main()` uses the two defaults and the defaults built from them. Every name that the
-study's code takes from the file is therefore unchanged. The other benchmark files that the code
-reads have the same bytes in both copies: `util/standardize_images.py`, `data/test_set.json`,
-`data/gt_token_stats.json`, and the 1,000 files of each of `data/puml_files/`,
-`data/puml_images_1568/` and `data/puml_images/`.
+**The code that built the data.** The data were built by commit `5b91797` of the study repository.
+The files hashed here differ from it only in the lines that name the benchmark folder and in two
+pins: those of the test set's code and of the scorer-v2 extractor. No key list, manifest or image
+depends on them. The copy of the test set's code in the table above is the public repository's. It
+differs from the copy the build ran only in the defaults `DATASET` and `EXTRACTOR_JAR`, which only
+the file's own `main()` uses. The other benchmark files the code reads have the same bytes in both
+copies.
 
 ## 8. Rules that differ from the test set's
 
