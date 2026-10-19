@@ -2,19 +2,24 @@
 
 Run from fine-tune/:
   .venv/bin/python train/tests/test_dev_scoring.py            without weights
-  HF_DEACTIVATE_ASYNC_LOAD=1 .venv/bin/python train/tests/test_dev_scoring.py --live
-      also answers 2 diagrams with Qwen3.5-2B from .local/hf through the server and scores them
+  HF_DEACTIVATE_ASYNC_LOAD=1 .venv/bin/python train/tests/test_dev_scoring.py --live [--adapter <dir>]
+      also answers 2 diagrams with Qwen3.5-2B from .local/hf through the server and scores them;
+      with --adapter, with that adapter attached, after its adapter check
 (or with pytest: .venv/bin/python -m pytest <this file>)
 
 The tests use diagrams of the loss-curve split, never the dev set: no dev-set answer exists
 before the recipe's checkpoint rule is frozen.
 """
 import argparse
+import http.server
 import json
 import os
 import shutil
+import socket
+import subprocess
 import sys
 import tempfile
+import threading
 from pathlib import Path
 
 FT = Path(__file__).resolve().parents[2]
@@ -85,28 +90,161 @@ def test_the_sources_scored_as_answers_get_full_marks():
         assert result["answer_manifest"] is None
 
 
-def live():
-    """The base 2B answers 2 loss-curve diagrams through the server; the answers are scored."""
+def test_relative_paths_score_as_absolute_ones():
+    """The runners run from the benchmark's folder; relative paths given from elsewhere still
+    name the answers here, and nothing is written into the benchmark's folder."""
+    before = sorted(p.name for p in D.INSTRUMENT.iterdir())
+    with tempfile.TemporaryDirectory() as tmp:
+        set_file, rows = loss_curve_set(tmp, 4)
+        answers = Path(tmp) / "answers"
+        answers.mkdir()
+        for r in rows[:3]:
+            shutil.copy(D.GT_DIR / r["key"], answers / r["key"])
+        cwd = os.getcwd()
+        os.chdir(tmp)
+        try:
+            result = D.score(score_args("answers", "scores", "set.json"))
+        finally:
+            os.chdir(cwd)
+        assert result["csr"] == {"n": 4, "compiled": 3, "csr": 0.75}, result["csr"]
+        assert (Path(tmp) / "scores" / "scores.json").is_file()
+    assert sorted(p.name for p in D.INSTRUMENT.iterdir()) == before
+
+
+def test_the_adapter_check_pictures_are_three_rank_1_training_pairs():
+    pictures = D.check_pictures()
+    rows = {FT / r["picture"]: r for r in E.load_examples(FT / "data/examples/train.jsonl")}
+    assert len(pictures) == D.ADAPTER_CHECK_PICTURES == 3
+    assert all(rows[p]["rank"] == 1 and p.is_file() for p in pictures)
+    assert len({(rows[p]["primary_type"], rows[p]["tier"]) for p in pictures}) == 3
+    assert all("/render/train/" in str(p) for p in pictures)
+
+
+def free_port():
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0))
+        return s.getsockname()[1]
+
+
+def answer_argv(out, port, adapter=None):
+    argv = ["answer", "--size", "2B", "--out", str(out), "--timeout", "600", "--port", str(port)]
+    return argv + (["--adapter", str(adapter)] if adapter else [])
+
+
+def test_a_port_in_use_is_refused_before_anything_starts():
+    with tempfile.TemporaryDirectory() as tmp, socket.socket() as taken:
+        taken.bind(("127.0.0.1", 0))
+        taken.listen()
+        port = taken.getsockname()[1]
+        try:
+            D.main(answer_argv(Path(tmp) / "run", port))
+        except SystemExit as exc:
+            assert "in use" in str(exc), exc
+        else:
+            raise AssertionError("a port in use was accepted")
+        assert not (Path(tmp) / "run").exists()
+
+
+def test_a_failing_adapter_check_stops_before_any_answer():
+    calls = []
+
+    def run(command, **kwargs):
+        calls.append(command)
+        return subprocess.CompletedProcess(command, 1)
+
+    def popen(*a, **k):
+        raise AssertionError("the server was started after a failed adapter check")
+
+    saved = D.subprocess.run, D.subprocess.Popen
+    D.subprocess.run, D.subprocess.Popen = run, popen
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            try:
+                D.main(answer_argv(Path(tmp) / "run", free_port(), adapter=Path(tmp) / "step_00032"))
+            except SystemExit as exc:
+                assert "adapter check failed" in str(exc), exc
+            else:
+                raise AssertionError("answers went ahead after a failed adapter check")
+            assert not (Path(tmp) / "run" / "answers").exists()
+    finally:
+        D.subprocess.run, D.subprocess.Popen = saved
+    assert len(calls) == 1 and str(D.ADAPTER_CHECK) in calls[0]
+    assert calls[0][calls[0].index("--pictures") + 1:][:3] == [str(p) for p in D.check_pictures()]
+
+
+class _Alive:
+    returncode = None
+
+    def poll(self):
+        return None
+
+
+def serve_once(body):
+    """A server on a free port that answers every GET with `body`."""
+    class Handler(http.server.BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, *args):
+            pass
+
+    httpd = http.server.HTTPServer(("127.0.0.1", 0), Handler)
+    threading.Thread(target=httpd.serve_forever, daemon=True).start()
+    return httpd
+
+
+def test_a_port_that_answers_as_another_server_is_refused():
+    for body, words in ((b"<html>nginx</html>", "something other"),
+                        (json.dumps({"served_name": "Qwen/Qwen3.5-2B"}).encode(), "serves")):
+        httpd = serve_once(body)
+        try:
+            D.wait_for(httpd.server_address[1], _Alive(), 5, "Qwen3.5-2B-adapter")
+        except SystemExit as exc:
+            assert words in str(exc), exc
+        else:
+            raise AssertionError(f"{body[:20]!r} was taken for the study's server")
+        finally:
+            httpd.shutdown()
+    httpd = serve_once(json.dumps({"served_name": "Qwen3.5-2B-adapter"}).encode())
+    try:
+        assert D.wait_for(httpd.server_address[1], _Alive(), 5, "Qwen3.5-2B-adapter")["served_name"] == "Qwen3.5-2B-adapter"
+    finally:
+        httpd.shutdown()
+
+
+def live(adapter=None):
+    """The 2B answers 2 loss-curve diagrams through the server, the base model alone or with
+    `adapter` attached (after its adapter check); the answers are scored."""
     with tempfile.TemporaryDirectory() as tmp:
         set_file, rows = loss_curve_set(tmp, 2)
         out = Path(tmp) / "run"
-        manifest = D.main(["answer", "--size", "2B", "--out", str(out), "--timeout", "900",
-                           "--max-tokens", "256", "--port", "8791", "--set-file", str(set_file),
-                           "--images", str(FT / "data/sets/render/loss_curve/puml_images_1568"),
-                           "--recurrent-layers", "reference"])
+        argv = ["answer", "--size", "2B", "--out", str(out), "--timeout", "900",
+                "--max-tokens", "256", "--port", "8791", "--set-file", str(set_file),
+                "--images", str(FT / "data/sets/render/loss_curve/puml_images_1568"),
+                "--recurrent-layers", "reference"]
+        manifest = D.main(argv + (["--adapter", str(adapter)] if adapter else []))
         assert manifest["answers_stored"] == 2 and manifest["runner_exit_code"] == 0, manifest
         server = manifest["server"]
-        assert server["adapter"] is None and server["revision"] == "15852e8c16360a2fea060d615a32b45270f8a8fc"
+        assert server["revision"] == "15852e8c16360a2fea060d615a32b45270f8a8fc"
+        if adapter:
+            assert server["adapter"]["attached"] == "not merged" and manifest["adapter_check"]["passed"] is True
+            assert (out / "adapter_check.json").is_file()
+        else:
+            assert server["adapter"] is None and manifest["adapter_check"] is None
         assert server["recurrent_layers"]["chosen"] == "reference"
         assert server["user_turn"]["rendered_sha256_frozen"] == E.user_turn.RENDERED_SHA256
         result = D.score(score_args(out / "answers", out / "scores", set_file))
         assert result["csr"]["n"] == 2 and result["answer_manifest"]["server"] == server
-        print("ok   live:", json.dumps({"csr": result["csr"], "element_f1": result["element_f1"]}))
+        print("ok   live:", json.dumps({"adapter": bool(adapter), "csr": result["csr"],
+                                        "element_f1": result["element_f1"]}))
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--live", action="store_true")
+    ap.add_argument("--adapter", default=None, help="with --live: an adapter folder to answer with")
     cli = ap.parse_args()
     tests = [(n, f) for n, f in sorted(globals().items()) if n.startswith("test_") and callable(f)]
     failed = 0
@@ -119,7 +257,7 @@ if __name__ == "__main__":
             print("FAIL", name, f"{type(exc).__name__}: {exc}", flush=True)
     if cli.live:
         try:
-            live()
+            live(cli.adapter)
         except BaseException as exc:  # noqa: BLE001
             failed += 1
             print("FAIL live", f"{type(exc).__name__}: {exc}", flush=True)

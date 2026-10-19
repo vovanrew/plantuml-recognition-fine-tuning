@@ -21,6 +21,10 @@ if [ ! -d "$WORK/fine-tune/.git" ]; then
 fi
 git -C "$WORK/fine-tune" checkout --quiet "$(cat "$PACK/commit.txt")"
 git -C "$WORK/fine-tune" rev-parse HEAD | tee "$WORK/results/study_commit.txt"
+tag=$(sed -n 's/^FREEZE_TAG = "\(.*\)"/\1/p' "$WORK/fine-tune/infer/manifest.py")
+git -C "$WORK/fine-tune" rev-parse -q --verify "refs/tags/$tag" >/dev/null \
+    || { echo "tag $tag is not in the checkout; infer/manifest.py's frozen_files reads it"; exit 1; }
+echo "tag $tag present"
 tar -xf "$PACK/data.tar" -C "$WORK/fine-tune"
 mkdir -p "$WORK/plantuml-recognition-evaluation"
 tar -xf "$PACK/instrument.tar" -C "$WORK/plantuml-recognition-evaluation"

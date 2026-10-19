@@ -7,17 +7,20 @@
 #   POD_HOST=<ip> POD_PORT=<port> card_session.sh <step>
 #
 # Steps, in the plan's order:
-#   pack        refuse unless the session's code is committed; pack the commit as a git bundle, the
-#               files git does not hold (data/examples/*.jsonl, the pictures the session reads) and
-#               the benchmark's evaluation/ and prompts/; checksums
+#   pack        refuse unless the session's code is committed; pack the commit and the study's tags
+#               (infer/manifest.py reads `serving-v3`) as a git bundle, the files git does not hold
+#               (data/examples/*.jsonl, the pictures the session reads) and the benchmark's
+#               evaluation/ and prompts/; checksums
 #   push        copy the pack to the pod and check it
 #   setup       on the pod: the checkout, the data, the pinned environment, the card's record
 #   download    the 2B now, the 9B and 27B in the background;  downloads: how far they are
 #   probe <s>   the recipe's probe at size <s> (2B, 9B, 27B)
 #   memory      one step of the 27B over the 16 longest training sequences
 #   pilot       the 2B on the 1,000-pair run (126 steps, four checkpoints)
-#   answer      the 200 dev diagrams answered by each checkpoint in turn, one server per checkpoint,
-#               the run manifest written beside each
+#   answer      start, under nohup on the pod, the 200 dev diagrams answered by the four
+#               checkpoints side by side (train/answer_checkpoints.sh: one server per checkpoint,
+#               the adapter check first, the run manifest after); returns at once
+#   answering   how far the answers are; "all done" when every checkpoint has finished
 #   fetch       copy runs/ and the session's records to this Mac
 #   run <cmd>   any command on the pod, from the checkout
 # After fetch, on the Mac:  score and select (card_session_plan.md, "After the session").
@@ -37,8 +40,10 @@ if [[ $step == pack ]]; then
     if [[ -n $changed ]]; then
         echo "commit these first; the pod runs a checkout of a commit:"; echo $changed; exit 1
     fi
+    tag=$(sed -n 's/^FREEZE_TAG = "\(.*\)"/\1/p' $FT/infer/manifest.py)
+    git -C $FT rev-parse -q --verify "refs/tags/$tag" >/dev/null || { echo "tag $tag is missing"; exit 1; }
     git -C $FT rev-parse HEAD > $LOCAL/commit.txt
-    git -C $FT bundle create $LOCAL/study.bundle HEAD 2>/dev/null
+    git -C $FT bundle create $LOCAL/study.bundle HEAD --tags 2>/dev/null
     cd $FT
     HF_HOME=$FT/.local/hf HF_HUB_OFFLINE=1 TRANSFORMERS_VERBOSITY=error $FT/.venv/bin/python - $LOCAL/data_files.txt <<'EOF'
 import sys
@@ -90,9 +95,10 @@ case $step in
   memory)    logged "$PY train/train.py memory --size 27B --out runs/memory/27B" memory_27B ;;
   pilot)     logged "$PY train/train.py run --size 2B --pairs 1000 --out $PILOT" pilot ;;
   answer)
-    for s in 00032 00063 00095 00126; do
-      logged "$PY train/dev_scoring.py answer --size 2B --adapter $WORK/fine-tune/$PILOT/step_$s --out $DEV/step_$s --timeout 600 && $PY infer/manifest.py write $DEV/step_$s/answers" answer_$s
-    done ;;
+    remote "nohup bash train/answer_checkpoints.sh 2B $PILOT $DEV 4 step_00032 step_00063 step_00095 step_00126 < /dev/null > $WORK/results/logs/answers.log 2>&1 &"
+    echo "started; follow with: card_session.sh answering" ;;
+  answering)
+    remote "for f in $WORK/results/logs/answer_step_*.log; do s=\${f##*answer_}; s=\${s%.log}; echo \$s \$(ls $DEV/\$s/answers 2>/dev/null | grep -c '[.]puml\$') answers, \$(grep -h '^exit' \$f || echo running); done; tail -n 1 $WORK/results/logs/answers.log" ;;
   fetch)
     mkdir -p $FT/runs $LOCAL/results
     rsync -a -e "ssh ${SSH_OPTS[*]}" $POD:$WORK/fine-tune/runs/ $FT/runs/

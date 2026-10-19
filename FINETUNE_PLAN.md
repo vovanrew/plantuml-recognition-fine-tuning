@@ -284,7 +284,10 @@ fine-tune/
   train/         the recipe, one file for every size ("configs (one per size)" superseded by
                  `decisions/recipe/`, 2026-10-18), the checkpoint rule, launch scripts
   infer/         the study's server, the run manifest and the adapter check (the runner is the benchmark's, unchanged)
-  runs/          raw outputs, immutable
+  runs/          local working output of a card session, kept out of the repository; a finished run
+                 that is not final moves to its item's folder under `decisions/`; final runs are
+                 published by `adapter-release` ("raw outputs, immutable" superseded, author,
+                 2026-10-19)
   decisions/     one folder per §10 item: record.md plus the role outputs (plan-item skill);
                  kept out of the repository
   methodology/   facts about what exists, written after verification
@@ -292,8 +295,9 @@ fine-tune/
 
 `decisions/` is kept out of the repository (author, 2026-10-12). It holds the history of each
 decision, and that history is not what a reader reproduces. What is reproducible is the methodology,
-from `build/`, `train/`, `infer/`, `runs/` and the frozen files of `data/`. Anything a result, a
-test, a later item or a methodology entry depends on therefore lives in those folders. A script
+from `build/`, `train/`, `infer/` and the frozen files of `data/`. Anything a result, a test, a
+later item or a methodology entry depends on therefore lives in those folders; an adapter a later
+item builds on is restored from the private backup into `runs/`, not read from `decisions/`. A script
 under `decisions/<slug>/scripts/` measures or checks for a role: nothing outside `decisions/`
 imports it, runs it or is produced by it, and a methodology entry names no command or file under
 `decisions/`. A script that comes to be needed is moved out.
@@ -338,7 +342,7 @@ once the core results exist. An optional item that is not done moves to §6 with
 | adapter-release | frozen | optional | HuggingFace repository names, licence, what is deposited | §7 (former) | — |  |
 | graphviz-render-check | implementation | core | Graphviz installed; class diagrams render to diagrams, not the notice image | Phase A images | merged into render-pipeline 2026-10-04 (Graphviz 16.1.0 present; 500 of 500 class test diagrams re-render to benchmark dimensions) | `decisions/render-pipeline/` |
 | registry-condition-field | implementation | core | `analysis/registry.py` gains `condition`; `_VALID_ARM` accepts the fine-tuned runs | Phase D | recorded 2026-10-10 (verified 2026-10-10, `verify.md`); no methodology entry (author, 2026-10-11) | `decisions/registry-condition-field/` |
-| pilot-run | implementation | core | messages format, chat template pinned, byte-equality test; the training script; the recipe's 60-step probe at the three sizes and the 27B's memory at the longest sequence; the pilot: the 2B on the 1,000-pair subset under the recipe (2 epochs, 126 steps, four checkpoints scored on dev), exit criterion met ("1–2k" superseded by `decisions/recipe/`, 2026-10-18) | Phase B | framing: Implement Part 1 done 2026-10-17 (examples, byte-equality test, chunked loss, dev scoring); Part 2 built 2026-10-18 (training script, card-session tooling); the card session waits on the author's go | `decisions/pilot-run/` |
+| pilot-run | implementation | core | messages format, chat template pinned, byte-equality test; the training script; the recipe's 60-step probe at the three sizes and the 27B's memory at the longest sequence; the pilot: the 2B on the 1,000-pair subset under the recipe (2 epochs, 126 steps, four checkpoints scored on dev), exit criterion met ("1–2k" superseded by `decisions/recipe/`, 2026-10-18) | Phase B | implemented 2026-10-19: Implement Part 1 done 2026-10-17; Part 2 built 2026-10-18; card session done 2026-10-18 (probes pass at three sizes; pilot dev CSR 0.740, Element F1 0.762 at the selected step 126; exit criterion met); the session's fixes built into `train/` 2026-10-19; next Verify | `decisions/pilot-run/` |
 | ladder-training | implementation | core | 2B → 9B → 27B under the recipe; adapters, logs, dev-set score per checkpoint | Phase C | — |  |
 | data-efficiency-runs | implementation | optional | 1k and 5k at 2B | Phase C | — |  |
 | unfrozen-encoder-ablation | implementation | optional | one run at one size with the vision encoder unfrozen | Phase C | conditional: only if weeks 6–8 come in early |  |

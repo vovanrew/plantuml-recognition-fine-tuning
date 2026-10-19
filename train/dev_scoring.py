@@ -3,16 +3,22 @@
 
 decisions/pilot-run/record.md. Two steps, which may run on different machines:
 
-  answer   on the machine that holds the model. Starts infer/server.py with the checkpoint's
-           adapter attached, not merged (or the base model alone), runs the benchmark's own
-           evaluation/infer_runner.py over the 200 dev diagrams (data/examples/dev_runner_set.json,
-           pictures under data/sets/render/dev/puml_images_1568/), stops the server, and writes
-           the answers and answer_manifest.json (the server's identity, the runner's arguments).
+  answer   on the machine that holds the model. With an adapter, first runs infer/adapter_check.py
+           for it on three training pictures (check_pictures) and refuses to go on unless it
+           passes (methodology/compute-and-serving.md §8, rule 3). Refuses a --port something
+           already listens on. Starts infer/server.py with the checkpoint's adapter attached, not
+           merged (or the base model alone), runs the benchmark's own evaluation/infer_runner.py
+           over the 200 dev diagrams (data/examples/dev_runner_set.json, pictures under
+           data/sets/render/dev/puml_images_1568/), stops the server, and writes the answers and
+           answer_manifest.json (the server's identity, the runner's arguments, the adapter
+           check's result). Several checkpoints can be answered at once on one card, each with its
+           own server and port (train/answer_checkpoints.sh).
   score    on a machine with the scorer's Java and Graphviz. CSR and Element F1 of the answers
            under the tagged scorer v2 against the dev sources, through the benchmark's own
            evaluation/csr_runner.py and evaluation/element_f1_runner.py; writes scores.json.
            Runs only if the scorer's evaluation code equals tag `scorer-v2`, the extractor JAR and
-           the render JAR have their pinned sha256, and Graphviz answers.
+           the render JAR have their pinned sha256, and Graphviz answers. Its paths are made
+           absolute first: the runners run from the benchmark's folder.
 
 The output cap and the per-answer deadline of a dev scoring are arguments: the recipe fixes them
 (train/recipe.py DEV_MAX_TOKENS, DEV_TIMEOUT_S). Nothing here chooses a checkpoint: that is
@@ -30,6 +36,7 @@ import argparse
 import hashlib
 import json
 import os
+import socket
 import subprocess
 import sys
 import time
@@ -42,6 +49,8 @@ FT = HERE.parent
 UNI = FT.parent
 INSTRUMENT = UNI / "plantuml-recognition-evaluation"
 SERVER = FT / "infer" / "server.py"
+ADAPTER_CHECK = FT / "infer" / "adapter_check.py"
+ADAPTER_CHECK_PICTURES = 3
 DEV_SET = FT / "data" / "examples" / "dev_runner_set.json"
 DEV_IMAGES = FT / "data" / "sets" / "render" / "dev" / "puml_images_1568"
 GT_DIR = UNI / "herald" / "zenodo_content" / "puml_files"
@@ -81,17 +90,66 @@ def served_name(model, adapter):
     return model if adapter is None else model.split("/")[-1] + "-adapter"
 
 
-def wait_for(port, process, seconds):
+def port_free(port):
+    """Refuse a port something already listens on (on the card, the image's nginx holds 8001):
+    the identity read from it would not be the study's server's."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        try:
+            s.bind(("127.0.0.1", port))
+        except OSError:
+            raise SystemExit(f"port {port} is in use; give another --port") from None
+
+
+def wait_for(port, process, seconds, name):
     url = f"http://127.0.0.1:{port}/"
     for _ in range(seconds):
         if process.poll() is not None:
             raise SystemExit(f"the server exited during start with code {process.returncode}")
         try:
             with urllib.request.urlopen(url, timeout=2) as r:
-                return json.loads(r.read())
+                identity = json.loads(r.read())
         except OSError:
             time.sleep(1)
+            continue
+        except ValueError:
+            raise SystemExit(f"port {port} answered with something other than the study's server") from None
+        if identity.get("served_name") != name:
+            raise SystemExit(f"port {port} serves {identity.get('served_name')!r}, not {name!r}")
+        return identity
     raise SystemExit(f"the server did not answer on port {port} within {seconds} s")
+
+
+def check_pictures(examples=FT / "data" / "examples" / "train.jsonl"):
+    """The adapter check's pictures: the rank-1 training pair of each of the first
+    ADAPTER_CHECK_PICTURES type × tier cells, in data/examples/train.jsonl order. Training
+    pictures, so no fine-tuned answer to a dev or test diagram exists before its scored run."""
+    cells, pictures = set(), []
+    with open(examples, encoding="utf-8") as f:
+        for line in f:
+            row = json.loads(line)
+            cell = (row["primary_type"], row["tier"])
+            if row["rank"] == 1 and cell not in cells:
+                cells.add(cell)
+                pictures.append(FT / row["picture"])
+                if len(pictures) == ADAPTER_CHECK_PICTURES:
+                    break
+    return pictures
+
+
+def adapter_check(model, revision, adapter, out, recurrent_layers=None):
+    """infer/adapter_check.py for the adapter on this machine, before any answer of a scored run
+    (methodology/compute-and-serving.md §8, rule 3). Refuses to go on unless it passes."""
+    result = Path(out) / "adapter_check.json"
+    command = [sys.executable, str(ADAPTER_CHECK), "--model", model, "--revision", revision,
+               "--adapter", str(adapter), "--pictures", *map(str, check_pictures()), "--out", str(result)]
+    if recurrent_layers:
+        command += ["--recurrent-layers", recurrent_layers]
+    with open(Path(out) / "adapter_check.log", "a", encoding="utf-8") as log:
+        code = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT).returncode
+    if code != 0 or not result.is_file():
+        raise SystemExit(f"the adapter check failed for {adapter} (exit {code}; {Path(out) / 'adapter_check.log'}); "
+                         "no answer is made")
+    return {"file": result.name, "sha256": sha256_file(result), "passed": json.loads(result.read_text())["passed"]}
 
 
 def answer(args):
@@ -99,6 +157,9 @@ def answer(args):
     from models import SIZES
     model, revision = SIZES[args.size]
     out = Path(args.out)
+    port_free(args.port)
+    out.mkdir(parents=True, exist_ok=True)
+    checked = adapter_check(model, revision, args.adapter, out, args.recurrent_layers) if args.adapter else None
     answers = out / "answers"
     answers.mkdir(parents=True, exist_ok=True)
     rows = json.load(open(args.set_file, encoding="utf-8"))["diagrams"]
@@ -114,7 +175,7 @@ def answer(args):
     with open(out / "server.log", "a", encoding="utf-8") as log:
         server = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT, env=env)
     try:
-        identity = wait_for(args.port, server, args.start_seconds)
+        identity = wait_for(args.port, server, args.start_seconds, name)
         runner = [sys.executable, str(INSTRUMENT / "evaluation" / "infer_runner.py"),
                   "--base-url", f"http://127.0.0.1:{args.port}/v1", "--model", name,
                   "--test-set", str(args.set_file), "--images", str(args.images),
@@ -136,7 +197,7 @@ def answer(args):
                 "set_file": str(args.set_file), "set_file_sha256": sha256_file(args.set_file),
                 "images": str(args.images), "diagrams": len(rows), "answers_stored": len(stored),
                 "max_tokens": args.max_tokens, "timeout_seconds": args.timeout,
-                "runner_exit_code": code, "server": identity,
+                "runner_exit_code": code, "server": identity, "adapter_check": checked,
                 "dev_scoring_sha256": sha256_file(__file__)}
     with open(out / "answer_manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=1)
@@ -176,6 +237,9 @@ def check_pins(render_jar=RENDER_JAR, extractor_jar=EXTRACTOR_JAR, java_home=JAV
 
 
 def score(args):
+    # The runners run from the benchmark's folder: a relative path would resolve there.
+    for name in ("answers", "out", "set_file", "gt_dir", "render_jar"):
+        setattr(args, name, str(Path(getattr(args, name)).resolve()))
     scorer = check_pins(args.render_jar, EXTRACTOR_JAR, args.java_home, args.python)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
