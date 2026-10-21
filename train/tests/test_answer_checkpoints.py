@@ -44,7 +44,7 @@ def answers(lines):
     return [l.split() for l in lines if "train/dev_scoring.py" in l]
 
 
-def test_each_checkpoint_is_answered_on_its_own_port_then_its_manifest_written():
+def test_each_checkpoint_is_answered_on_its_own_port():
     done, lines, logs = run(4)
     assert done.returncode == 0 and done.stdout.strip().endswith("all done"), done.stdout + done.stderr
     starts = [a for a in answers(lines) if a[1] == "start"]
@@ -52,9 +52,10 @@ def test_each_checkpoint_is_answered_on_its_own_port_then_its_manifest_written()
     assert ports == ["8000", "8002", "8003", "8004"]
     for s in STEPS:
         assert any(a[a.index("--adapter") + 1].endswith(f"/runs/train/2B_1000/{s}") for a in starts)
-        assert any(f"start infer/manifest.py write runs/dev/2B_1000/{s}/answers" in l for l in lines)
         assert (logs / f"answer_{s}.log").read_text().strip().endswith("exit 0")
     assert all(a[a.index("--timeout") + 1] == "600" for a in starts)
+    # the run manifest is dev_scoring.py's to write, while its server runs; the script writes none
+    assert not any("infer/manifest.py" in l for l in lines)
 
 
 def test_no_more_servers_at_once_than_asked():

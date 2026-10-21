@@ -5,8 +5,9 @@ states at the positions that predict the answer go through the output layer `chu
 time; each chunk's loss is back-propagated to those hidden states and its logits freed; then the
 gradient gathered on the hidden states is back-propagated through the model once. The loss and the
 gradient are those of the library's own loss with -100 on the prompt positions
-(train/tests/test_loss.py). At the 27B's longest sequence this computation left 29.9 GB of the card
-free, against 8.0 GB for the library's own (decisions/gpu-precision/implement.md, check 2).
+(train/tests/test_loss.py). At a 7,874-token sequence of the 27B, under placeholder adapter
+settings, this computation left 29.9 GB of the card free, against 8.0 GB for the library's own
+(decisions/gpu-precision/implement.md, check 2).
 
 `backward` returns the sum of the per-token losses of one example and its number of answer
 tokens. How examples are weighted inside an optimizer step is the caller's: the gradient

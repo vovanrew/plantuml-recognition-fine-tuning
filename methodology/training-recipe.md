@@ -1,7 +1,8 @@
 # Training Recipe
 
-Methodological record for how the study trains its adapters and how it picks one adapter per
-training run. The recipe trains Qwen3.5-2B, Qwen3.5-9B and Qwen3.5-27B on the training sample of
+Methodological record for how the study trains its adapters, how it picks one adapter per
+training run, and how a pilot run checks the pipeline before the ladder. The recipe trains
+Qwen3.5-2B, Qwen3.5-9B and Qwen3.5-27B on the training sample of
 `methodology/training-set-construction.md` §4. Paths are relative to `fine-tune/`, and the scorer
 repository is `../plantuml-recognition-evaluation`. The analysis protocol of the benchmark,
 `../plantuml-recognition-evaluation/methodology/analysis-protocol.md`, is called the baseline
@@ -10,8 +11,8 @@ protocol below.
 ## 1. The recipe
 
 One recipe trains all three sizes: the same data, values, length and checkpoint rule at 2B, 9B and
-27B. No value in it depends on the model size. `train/recipe.py` holds every value of §1 and §3 as
-a constant, together with the functions that apply them.
+27B. No value in it depends on the model size. `train/recipe.py` holds every value of §1 and of
+the probe's rule in §3 as a constant, together with the functions that apply them.
 
 ### 1.1 Adapter
 
@@ -61,7 +62,8 @@ The loss is the cross-entropy on the answer tokens only, which are the target an
 `<|im_end|>`. A training sequence ends at `<|im_end|>`, and the newline that the chat template
 writes after it is not part of the sequence. The per-token losses are summed over the 16 pairs of a
 step and divided by the number of answer tokens in them (`loss_scale` in `train/recipe.py`). This
-weighting makes every answer token and every `<|im_end|>` weigh the same.
+weighting makes every answer token and every `<|im_end|>` weigh the same. §5.1 gives how a pair
+becomes this sequence.
 
 Under this weighting each cell of the training sample weighs in proportion to its answer tokens.
 For each cell, the share below is the sum over its 2,500 pairs of `target_tokens` plus one
@@ -96,7 +98,7 @@ five digits, inside the run's folder (`step_00625` to `step_02500` for a main ru
 |---|---|---|---|---|
 | 20,000 pairs, every size | 1,250 | 2,500 | 75 | 625, 1,250, 1,875, 2,500 |
 | 5,000 pairs, 2B (optional) | 313 | 626 | 19 | 157, 313, 470, 626 |
-| 1,000 pairs, 2B (optional) | 63 | 126 | 4 | 32, 63, 95, 126 |
+| 1,000 pairs, 2B (the pilot, §6) | 63 | 126 | 4 | 32, 63, 95, 126 |
 
 The 5,000 and 1,000 runs are the nested subsets of `methodology/training-set-construction.md` §4.
 Their sizes are not multiples of 16, so the last step of each of their epochs holds the remaining
@@ -110,12 +112,40 @@ scores on the dev set.
 ### 2.1 Dev scoring
 
 Each of the 4 checkpoints of a run is scored on the 200 diagrams of the dev set (`data/sets/dev.json`;
-`methodology/training-set-construction.md` §4), with the settings of the scored runs. The study's
-server (`infer/server.py`) serves the bf16 base with the checkpoint's adapter attached, not merged.
-It decodes greedily with `max_tokens` 5,376, `enable_thinking: false` and a deadline of 600 s per
-answer. It runs on the card model of the scored runs, with the recurrent-layer implementation of
-the main runs. `train/dev_scoring.py` produces and scores the answers under scorer v2, as frozen
-in `methodology/scorer-v2.md` §7.
+`methodology/training-set-construction.md` §4), with the settings of the scored runs. The dev
+scoring of a checkpoint is a scored run and follows the rules of
+`methodology/compute-and-serving.md` §8. The study's server (`infer/server.py`) serves the bf16
+base with the checkpoint's adapter attached, not merged. It decodes greedily with `max_tokens`
+5,376, `enable_thinking: false` and a deadline of 600 s per answer. It runs on the card model of
+the scored runs, with the recurrent-layer implementation of the main runs.
+
+`train/dev_scoring.py` makes and scores the answers in two steps, which may run on two machines.
+
+- `answer` runs on the card. It first runs the adapter check of
+  `methodology/compute-and-serving.md` §6 on three training pictures: the rank-1 pair of each of
+  the first three cells of `data/examples/train.jsonl`. It makes no answer unless the check passes.
+  It then starts the server and runs the benchmark's runner over
+  `data/examples/dev_runner_set.json`. That file holds the 200 rows of `dev.json` with the picture
+  sizes the runner reads, taken from the dev render manifest.
+- `score` runs on a machine with the scorer's Java and Graphviz. Without Graphviz a class diagram
+  renders to a notice image, which CSR would count as compiled. It scores CSR and Element F1 under
+  scorer v2 (`methodology/scorer-v2.md` §7) against the dev sources of `methodology/scorer-v2.md`
+  §5. It refuses to run unless the scorer repository's `evaluation/` and `prompts/` equal tag
+  `scorer-v2` and the extractor and renderer JARs have their pinned sha256 (§2.3).
+
+`train/answer_checkpoints.sh` answers the checkpoints of a run side by side on one card, which
+saves card time. Each checkpoint has its own server on its own port, and each server answers one
+request at a time (`methodology/compute-and-serving.md` §4). How many servers share the card is an
+argument, bounded by the card's memory. Before its server stops, `answer` writes the run's
+manifest with `infer/manifest.py write --server`, so the manifest records every check of
+`methodology/compute-and-serving.md` §5, `server_matches` included. A run whose manifest does not
+pass ends with a failure.
+
+```
+bash train/answer_checkpoints.sh <size> <run folder> <dev folder> <servers at once> <checkpoint> ...
+python3 train/dev_scoring.py score --answers <dev folder>/<checkpoint>/answers \
+    --out <dev folder>/<checkpoint>/scores
+```
 
 The rule reads two metrics: CSR, and Element F1 micro over the full set, where a failed answer
 scores 0 (baseline protocol, §1).
@@ -161,7 +191,9 @@ The command stops without a choice when its inputs do not show the dev scoring o
   `analysis/aggregate.py`) that differs from tag `scorer-v2`.
 
 Scorer v2 is pinned by its tag, its commit and its extractor JAR (`methodology/scorer-v2.md` §7),
-and by the renderer JAR (`methodology/training-set-construction.md` §1.1).
+and by the renderer JAR of `methodology/training-set-construction.md` §1.1. The renderer is
+identified by that JAR's sha256 wherever the file lies. Dev scoring reads a copy at
+`../plantuml-1.2025.9.jar` by default and refuses it unless its sha256 is the pinned one.
 
 ## 3. The probe before the ladder
 
@@ -176,13 +208,17 @@ or when the mean loss of its last 10 steps exceeds that of its first 10 (`probe_
 probe stops the ladder, and any change it brings to the recipe applies to all three sizes. After
 ladder training starts, no outcome of a run changes the recipe.
 
+`train/train.py probe --size <size> --out <folder>` runs the probe (§5.3) and writes its losses and
+verdict to `probe.json`. The probe passed at each of the three sizes on the study's card, so the
+recipe stands as §1 gives it.
+
 ## 4. Frozen artifacts
 
 The recipe and the rule are tagged `recipe-v1` in the study repository.
 
 | File | Role | sha256 |
 |---|---|---|
-| `train/recipe.py` | the recipe: every value of §1 and §3, and the functions that apply them | `1b21ee36ba45fc56cdbb9c9cc394aef462de88af6a623de54e3a75d8ce778596` |
+| `train/recipe.py` | the recipe: every value of §1 and of the probe's rule in §3, and the functions that apply them | `1b21ee36ba45fc56cdbb9c9cc394aef462de88af6a623de54e3a75d8ce778596` |
 | `train/select_checkpoint.py` | the checkpoint rule of §2 | `ba1d50f015882f9051b3e5c37493dac9764f3fa9b230bfd8bc775bd8cf6f74d2` |
 
 The rule runs with these two files, the scorer repository and its set file (by default
@@ -195,9 +231,9 @@ the data step, the loss and the dev scoring of the training script (`build/examp
 `train/loss.py`, `train/dev_scoring.py`).
 
 ```
-.venv/bin/python train/tests/test_recipe.py                                    12 of 12 passed
-HF_DEACTIVATE_ASYNC_LOAD=1 .venv/bin/python train/tests/test_recipe.py --live  13 of 13 passed
-/usr/bin/python3 train/tests/test_select_checkpoint.py   (Python 3.9.6)        14 of 14 passed
+.venv/bin/python train/tests/test_recipe.py
+HF_DEACTIVATE_ASYNC_LOAD=1 .venv/bin/python train/tests/test_recipe.py --live
+/usr/bin/python3 train/tests/test_select_checkpoint.py   (Python 3.9.6)
 ```
 
 The `--live` test loads the Qwen3.5-2B weights; the libraries are those of `requirements-card.txt`
@@ -205,3 +241,124 @@ The `--live` test loads the Qwen3.5-2B weights; the libraries are those of `requ
 of Qwen3.5-2B on 200 diagrams. On them the rule's metrics equalled the runners' own summaries.
 Its interval reproduced the stored paired comparison: CSR +0.015, 95% interval [−0.060, +0.085];
 Element F1 micro, full set, −0.0191, [−0.1091, +0.0700].
+
+The training script of §5 and the dev scoring of §2.1 are not part of the tag. Every training run
+records the sha256 of each file of its code in its `run.json`.
+
+The data step (§5.1) pins the benchmark prompt of the user turn,
+`../plantuml-recognition-evaluation/prompts/zero_shot.txt`, by its sha256 in `build/examples.py`:
+`097351ffce6134cb903322718facca5488f978766d46381de03934c8c9f01552`. It writes the checksums of the
+files it makes (`train.jsonl`, `loss_curve.jsonl`, `dev_runner_set.json` and `config.json`) to
+`data/examples/SHA256SUMS`. That file is tracked, so the checksums of the two `.jsonl` files, which
+git ignores, stay in the repository. The training script checks `train.jsonl` against it before
+any weights load (§5.3).
+
+The tests of §5 and of the dev scoring of §2.1 lie under `train/tests/` and `build/tests/`:
+
+```
+HF_DEACTIVATE_ASYNC_LOAD=1 .venv/bin/python -m pytest -q -p no:cacheprovider train/tests build/tests/test_user_turn.py \
+    build/tests/test_examples.py build/tests/test_recurrent_layers.py build/tests/test_card_environment.py \
+    infer/tests
+HF_DEACTIVATE_ASYNC_LOAD=1 .venv/bin/python train/tests/test_dev_scoring.py --live --adapter <checkpoint folder>
+```
+
+## 5. The training script
+
+`train/train.py` trains one run of the recipe on one card. It builds every pair of every step as a
+training example (§5.1) and computes the loss of §1.3 on it (§5.2).
+
+### 5.1 The training example
+
+A training example is one pair of the training sample as the model receives it in serving,
+followed by the answer it is trained to give. `build/examples.py` builds it.
+
+**The pairs.** `build/examples.py --out data/examples` writes the pairs of `data/sets/train.json`
+to `data/examples/train.jsonl`, in list order, each with its picture path and its target text. The
+training machine thus needs this file and the pictures, not the corpus. A run takes its pairs from
+this file, a subset by its rank bound (`methodology/training-set-construction.md` §7), and never
+from the image folder. The picture of a key is
+`data/sets/render/train/puml_images_1568/<key without .puml>.png`.
+
+**The user turn.** The prompt part of the example is `build/user_turn.py` `render` of the pair's
+picture and the benchmark prompt. This is the function the server calls, so the prompt part is the
+user turn of `methodology/compute-and-serving.md` §4.1, with the generation prompt and thinking off.
+The prompt is `prompts/zero_shot.txt` of the benchmark
+(`../plantuml-recognition-evaluation/methodology/benchmark-protocol.md` §1). It is read with
+`.strip()`, as the benchmark's runner reads it, and checked against its sha256 (§4).
+
+**The target.** The target is the text whose tokens rule 4 of
+`methodology/training-set-construction.md` §2 counted. It is the diagram block that the scorer's
+`extract_puml` isolates from the source (`build/pool.py` `target_text`). For the 6 training
+sources without an `@startuml` … `@enduml` pair in lower case, the block is isolated from the
+source less its three header lines. No target is edited. Its token ids come from the processor's
+tokenizer at the model's pinned revision, without special tokens. With this tokenizer no target
+has more tokens than rule 4 counted, so every target stays within the 5,376-token cap
+(`build/tests/test_examples.py`). The tokenizer normalizes text to Unicode NFC, so the one target of
+the 20,000 that is not in NFC trains as its NFC form.
+
+**The sequence and its labels.** After the target comes `<|im_end|>` (token 248046), and the
+sequence ends there (§1.3). The labels equal the input ids, with -100 on every position of the user
+turn. The loss thus covers the target and its `<|im_end|>`, and nothing of the prompt.
+
+**Byte-equality with serving.** Training appends the answer to the served prompt, so the prefix a
+model trains on is the prompt it is served, token for token. `build/tests/test_examples.py` checks
+this through the server's own request path, for one pair of each cell. The inputs that
+`infer/server.py` builds from the runner's request equal the example's prefix in every tensor:
+`input_ids`, `attention_mask`, `mm_token_type_ids`, `pixel_values` and `image_grid_thw`. With the
+template's newline added after `<|im_end|>`, the example equals the model's own chat template
+applied to the two-turn conversation, with the target as the assistant turn. This is the
+byte-equality test of `FINETUNE_PLAN.md`, Phase B.
+
+### 5.2 The loss in chunks
+
+`train/loss.py` computes the loss of §1.3 in chunks of 512 answer positions. The hidden states that
+predict the answer pass through the output layer one chunk at a time. The logits over the
+vocabulary therefore never exist for the whole sequence, which saves memory at the longest
+sequences. In float32 the loss and its gradient equal those of the library's own loss, with -100 on
+the prompt, up to rounding. In bf16 the chunked gradient is no farther from the float32 gradient
+than the library's own (`train/tests/test_loss.py`).
+
+### 5.3 A run
+
+```
+python train/train.py run --size <2B|9B|27B> --pairs <20000|5000|1000> --out <run folder>
+python train/train.py probe --size <size> --out <folder>
+python train/train.py memory --size <size> --out <folder>
+```
+
+Before any weights load, the script checks `train/recipe.py` against its sha256 at `recipe-v1`
+(§4). It checks `data/examples/train.jsonl` against `data/examples/SHA256SUMS`, and every picture
+of the run against its render manifest. It calls the server's two guards
+(`methodology/compute-and-serving.md` §3.1, §3.2), so training runs the library versions and the
+recurrent-layer implementation of serving. It then writes `run.json`: the recipe's values and
+sha256, the code's sha256, the examples' checksums, the model, the card and both guards' results.
+
+The script uses non-reentrant gradient checkpointing at every size, so one configuration serves
+the whole ladder. It moves the inputs to the card as the server does, without a change of dtype.
+It writes one line per optimizer step to `log.jsonl`, with the loss, the norm before clipping and
+the learning rate. It never writes into a folder that holds files.
+
+## 6. The pilot
+
+The pilot is the 1,000-pair run of Qwen3.5-2B in the table of §1.5, made once before the ladder.
+It checks that the pipeline runs end to end on the card: the training of §5, the dev scoring of
+§2.1 and the rule of §2.2. It fixes no value of the recipe. On the same card, a memory step checks
+the 27B under the recipe at the longest training sequences (§6.2).
+
+### 6.1 The run
+
+`train/train.py run --size 2B --pairs 1000` trains on the 1,000-pair subset for the recipe's 126
+optimizer steps over 2 epochs. It saves the adapter after steps 32, 63, 95 and 126 (§1.5). The four
+checkpoints are answered on the 200 dev diagrams side by side on the card, each after its adapter
+check, and scored under scorer v2 (§2.1). `train/select_checkpoint.py --pairs 1000` then applies
+the rule of §2.2. The exit criterion is CSR > 0 and Element F1 > 0 on the dev set for the selected
+adapter (`FINETUNE_PLAN.md`, Phase B). The selected adapter met the exit criterion.
+
+### 6.2 Memory at the longest sequences
+
+`train/train.py memory --size 27B --out <folder>` runs one optimizer step of the recipe. Its 16
+pairs (§1.2) are the 16 pairs of the 20,000 with the longest training sequences. Their lengths are
+computed from the picture sizes of the render manifest and the target tokens, and the script writes
+them to `run.json` before any weights load. The longest has 7,132 positions, the tokens of its
+prompt, its target and `<|im_end|>`. The card holds the 27B under the recipe at these sequences, so
+the one card model of `methodology/compute-and-serving.md` §2 serves the whole ladder.

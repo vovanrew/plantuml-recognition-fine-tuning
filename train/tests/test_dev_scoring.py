@@ -179,6 +179,46 @@ class _Alive:
         return None
 
 
+def test_the_run_manifest_is_written_with_the_server_still_running():
+    """answer writes the run manifest with --server before it stops the server, and reports
+    whether it passed; a manifest that fails makes the step fail."""
+    events = []
+
+    class Server(_Alive):
+        def terminate(self):
+            events.append("terminate")
+
+        def wait(self, timeout=None):
+            return 0
+
+    def run(command, **kwargs):
+        if str(D.MANIFEST) in command:
+            events.append(("manifest", command))
+            answers = Path(command[command.index("write") + 1])
+            (answers / "manifest.json").write_text(json.dumps({"checks": [{}] * 13}))
+            return subprocess.CompletedProcess(command, 0)
+        events.append("runner")
+        return subprocess.CompletedProcess(command, 0)
+
+    saved = D.subprocess.run, D.subprocess.Popen, D.wait_for
+    D.subprocess.run = run
+    D.subprocess.Popen = lambda *a, **k: Server()
+    D.wait_for = lambda port, process, seconds, name: {"served_name": name}
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            set_file, _ = loss_curve_set(tmp, 2)
+            port = free_port()
+            result = D.main(["answer", "--size", "2B", "--out", str(Path(tmp) / "run"), "--timeout", "600",
+                             "--port", str(port), "--set-file", str(set_file)])
+    finally:
+        D.subprocess.run, D.subprocess.Popen, D.wait_for = saved
+    kinds = [e if isinstance(e, str) else e[0] for e in events]
+    assert kinds == ["runner", "manifest", "terminate"], kinds
+    command = events[1][1]
+    assert command[command.index("--server") + 1] == f"http://127.0.0.1:{port}"
+    assert result["run_manifest"] == {"file": "answers/manifest.json", "passed": True, "checks": 13}
+
+
 def serve_once(body):
     """A server on a free port that answers every GET with `body`."""
     class Handler(http.server.BaseHTTPRequestHandler):
@@ -235,6 +275,13 @@ def live(adapter=None):
             assert server["adapter"] is None and manifest["adapter_check"] is None
         assert server["recurrent_layers"]["chosen"] == "reference"
         assert server["user_turn"]["rendered_sha256_frozen"] == E.user_turn.RENDERED_SHA256
+        # The run manifest was written against the live server: all 13 checks, server_matches
+        # passing. On the reference path it does not pass as a whole (the recurrent-layer check,
+        # and on the Mac the environment check, are the card's), so the step reports it as failed.
+        written = json.loads((out / "answers" / "manifest.json").read_text())
+        checks = {c["check"]: c["passed"] for c in written["checks"]}
+        assert len(checks) == manifest["run_manifest"]["checks"] == 13 and checks["server_matches"] is True, checks
+        assert checks["recurrent_layers"] is False and manifest["run_manifest"]["passed"] is False
         result = D.score(score_args(out / "answers", out / "scores", set_file))
         assert result["csr"]["n"] == 2 and result["answer_manifest"]["server"] == server
         print("ok   live:", json.dumps({"adapter": bool(adapter), "csr": result["csr"],

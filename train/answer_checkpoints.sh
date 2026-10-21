@@ -1,10 +1,9 @@
 #!/bin/bash
 # On the card: the dev answers of a training run's checkpoints, several at once, each checkpoint
-# answered by its own server on its own port, then its run manifest written
-# (decisions/pilot-run/card_session_plan.md). Every server is the same checkout with only the
-# adapter different, and answers one request at a time; running several side by side changes no
-# answer, only the wall-clock. train/dev_scoring.py `answer` runs the adapter check first and
-# refuses a port in use.
+# answered by its own server on its own port (decisions/pilot-run/card_session_plan.md). Every
+# server is the same checkout with only the adapter different, and answers one request at a time;
+# running several side by side changes no answer, only the wall-clock. train/dev_scoring.py `answer` runs the adapter check first, refuses
+# a port in use, and writes the run manifest while its server still runs.
 #
 # Run from the checkout, under nohup (train/card_session.sh `answer` does):
 #   bash train/answer_checkpoints.sh <size> <run folder> <dev folder> <at once> <checkpoint>...
@@ -29,8 +28,7 @@ one() {
     local step=$1 port=$2
     {
         "$PY" train/dev_scoring.py answer --size "$SIZE" --adapter "$(pwd)/$RUN/$step" \
-            --out "$DEV/$step" --timeout 600 --port "$port" \
-            && "$PY" infer/manifest.py write "$DEV/$step/answers"
+            --out "$DEV/$step" --timeout 600 --port "$port"
         echo "exit $?"
     } > "$LOGS/answer_$step.log" 2>&1
 }

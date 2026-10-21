@@ -1,5 +1,5 @@
 #!/bin/bash
-# Prepare a rented card for a training session (decisions/pilot-run/record.md, Part 2): the study
+# Prepare a rented card for a training session (decisions/pilot-run/implement.md, Part 2): the study
 # repository as a checkout of the packed commit, the files it needs that git does not hold, the
 # benchmark's runner and prompt, the pinned Python environment, a record of the card.
 #

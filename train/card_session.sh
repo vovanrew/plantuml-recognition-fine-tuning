@@ -21,6 +21,10 @@
 #               checkpoints side by side (train/answer_checkpoints.sh: one server per checkpoint,
 #               the adapter check first, the run manifest after); returns at once
 #   answering   how far the answers are; "all done" when every checkpoint has finished
+#   kernels     the recurrent layers' reversal check (train/kernel_check.py) with the pilot's
+#               step-126 adapter, restored from the backup into runs/train/2B_1000/ on the Mac:
+#               the step twice in one process and once in another under the kernels, twice on
+#               the reference path in bfloat16 and once in float32, the answer repeat, the verdict
 #   fetch       copy runs/ and the session's records to this Mac
 #   run <cmd>   any command on the pod, from the checkout
 # After fetch, on the Mac:  score and select (card_session_plan.md, "After the session").
@@ -97,6 +101,14 @@ case $step in
     echo "started; follow with: card_session.sh answering" ;;
   answering)
     remote "for f in $WORK/results/logs/answer_step_*.log; do s=\${f##*answer_}; s=\${s%.log}; echo \$s \$(ls $DEV/\$s/answers 2>/dev/null | grep -c '[.]puml\$') answers, \$(grep -h '^exit' \$f || echo running); done; tail -n 1 $WORK/results/logs/answers.log" ;;
+  kernels)
+    A=runs/train/2B_1000/step_00126; K=$WORK/results/kernel_check
+    [[ -f $FT/$A/adapter_model.safetensors ]] || { echo "restore $A first: tar -xf .local/backup/2B_1000_adapters.tar -C fine-tune"; exit 1; }
+    remote "mkdir -p $A $K"
+    scp -q -i $KEY -P $POD_PORT -o IdentitiesOnly=yes -o UserKnownHostsFile=$LOCAL/known_hosts \
+        $FT/$A/adapter_model.safetensors $FT/$A/adapter_config.json $POD:$WORK/fine-tune/$A/
+    S="$PY train/kernel_check.py step --adapter $A"
+    logged "{ $S --layers flash-linear-attention --dtype bfloat16 --repeat 2 --out $K/fla_1.pt && $S --layers flash-linear-attention --dtype bfloat16 --repeat 1 --out $K/fla_2.pt && $S --layers reference --dtype bfloat16 --repeat 2 --out $K/reference_bf16.pt && $S --layers reference --dtype float32 --repeat 1 --out $K/reference_f32.pt && $PY train/kernel_check.py answer --adapter $A --out $K/answers.json && $PY train/kernel_check.py compare --steps $K/fla_1.pt $K/fla_2.pt $K/reference_bf16.pt $K/reference_f32.pt --answers $K/answers.json --out $K/verdict.json; }" kernel_check ;;
   fetch)
     mkdir -p $FT/runs $LOCAL/results
     rsync -a -e "ssh ${SSH_OPTS[*]}" $POD:$WORK/fine-tune/runs/ $FT/runs/

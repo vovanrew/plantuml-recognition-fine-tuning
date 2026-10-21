@@ -124,13 +124,15 @@ Images and targets:
 - **Acceptance check:** re-render the 1,000 test-set diagrams through the training pipeline and confirm the
   output dimensions equal their `data/puml_images_1568/` counterparts.
 - Target = PlantUML source from `@startuml` to `@enduml`, with the three-line World of Code header
-  stripped.
+  stripped. (As built by `pilot-run`: the block the scorer's `extract_puml` isolates;
+  `methodology/training-recipe.md` §5.1.)
 - Every training image must compile and render to exactly one page; log and drop the rest.
 
 Output: `train_{1k,5k,20k}.jsonl`, `dev_200.jsonl`, images, leakage report, final counts per cell.
 (Built by `training-pool-rules`: `data/sets/train.json` with the subsets as ranks, `dev.json`,
 `loss_curve.json`, `d8_report.json`, `counts.json`, the images under `data/sets/render/`, and
-`data/pool/`. The `.jsonl` files of examples are the formatting step of Phase B.)
+`data/pool/`. The `.jsonl` files of examples are the formatting step of Phase B, built by
+`pilot-run`: `data/examples/`, `methodology/training-recipe.md` §5.1.)
 
 ### Phase B — Formatting and pilot
 
@@ -141,7 +143,7 @@ Output: `train_{1k,5k,20k}.jsonl`, `dev_200.jsonl`, images, leakage report, fina
   (The user turn is picture, newline, text, built by one function that training and the server both
   call; the runner's request is text part first and the server rearranges it:
   `decisions/prompt-arrangement/`, 2026-10-11.)
-- Pilot on 1–2k examples at 2B (Colab is enough; "Colab is enough" superseded by `decisions/gpu-precision/`, 2026-10-11: every run on the one card model). Exit criterion: the pipeline runs end to end and
+- Pilot on 1–2k examples at 2B (Colab is enough; "Colab is enough" superseded by `decisions/gpu-precision/`, 2026-10-11: every run on the one card model; "1–2k" superseded by `decisions/recipe/`, 2026-10-18: the 2B on the 1,000-pair subset, run by `pilot-run`). Exit criterion: the pipeline runs end to end and
   the dev set scores non-zero CSR and Element F1 — not "the output looks like PlantUML".
 - The pilot fixes the epoch count and confirms memory headroom at the longest sequences. ("Fixes the
   epoch count" is superseded by `decisions/recipe/`, 2026-10-18: 2 epochs at every size, the
@@ -249,7 +251,9 @@ items listed here before 2026-09-22 are now rows in §10 (`training-stack`, `ser
 
 - Hand-offs from `training-pool-rules` (recorded 2026-10-11; details in its record, Open threads),
   for items that have no record yet:
-  - `pilot-run`: read the training set from `data/sets/train.json`, not from the image folder,
+  - `pilot-run` (taken up by `pilot-run`, recorded 2026-10-20: `methodology/training-recipe.md`
+    §5.1; for the pilot the pictures went in the session's pack): read the training set from
+    `data/sets/train.json`, not from the image folder,
     although since 2026-10-12 the folder holds exactly the 20,000 images of the list (the 19 of replaced
     keys are in `data/replaced_images/train/`). How a target is written for the 6 training sources
     that the scorer reads from the whole file (1 in the 5,000 subset). One training diagram holds
@@ -342,9 +346,9 @@ once the core results exist. An optional item that is not done moves to §6 with
 | adapter-release | frozen | optional | HuggingFace repository names, licence, what is deposited | §7 (former) | — |  |
 | graphviz-render-check | implementation | core | Graphviz installed; class diagrams render to diagrams, not the notice image | Phase A images | merged into render-pipeline 2026-10-04 (Graphviz 16.1.0 present; 500 of 500 class test diagrams re-render to benchmark dimensions) | `decisions/render-pipeline/` |
 | registry-condition-field | implementation | core | `analysis/registry.py` gains `condition`; `_VALID_ARM` accepts the fine-tuned runs | Phase D | recorded 2026-10-10 (verified 2026-10-10, `verify.md`); no methodology entry (author, 2026-10-11) | `decisions/registry-condition-field/` |
-| pilot-run | implementation | core | messages format, chat template pinned, byte-equality test; the training script; the recipe's 60-step probe at the three sizes and the 27B's memory at the longest sequence; the pilot: the 2B on the 1,000-pair subset under the recipe (2 epochs, 126 steps, four checkpoints scored on dev), exit criterion met ("1–2k" superseded by `decisions/recipe/`, 2026-10-18) | Phase B | verified 2026-10-20 (`verify.md`, third pass): Implement Part 1 done 2026-10-17; Part 2 built 2026-10-18; card session done 2026-10-18 (probes pass at three sizes; pilot dev CSR 0.740, Element F1 0.762 at the selected step 126; exit criterion met); the session's fixes built into `train/` 2026-10-19; next Verify | `decisions/pilot-run/` |
+| pilot-run | implementation | core | messages format, chat template pinned, byte-equality test; the training script; the recipe's 60-step probe at the three sizes and the 27B's memory at the longest sequence; the pilot: the 2B on the 1,000-pair subset under the recipe (2 epochs, 126 steps, four checkpoints scored on dev), exit criterion met ("1–2k" superseded by `decisions/recipe/`, 2026-10-18) | Phase B | recorded 2026-10-20 (verified 2026-10-20, `verify.md`, third pass; the first two failed): the training example is the served user turn, then the target and `<|im_end|>`, loss on the answer only, byte-equal to what the server builds; the probe passes at the three sizes; the 27B fits under the recipe at the longest training sequences; pilot dev CSR 0.740, Element F1 0.7616 at the selected step 126; exit criterion met | `decisions/pilot-run/` · `methodology/training-recipe.md` §2.1, §2.3, §3–§6 |
 | ladder-training | implementation | core | 2B → 9B → 27B under the recipe; adapters, logs, dev-set score per checkpoint | Phase C | — |  |
-| data-efficiency-runs | implementation | optional | 1k and 5k at 2B | Phase C | — |  |
+| data-efficiency-runs | implementation | optional | 1k and 5k at 2B (1k: the pilot's run, `pilot-run`, 2026-10-20) | Phase C | — |  |
 | unfrozen-encoder-ablation | implementation | optional | one run at one size with the vision encoder unfrozen | Phase C | conditional: only if weeks 6–8 come in early |  |
 | main-inference-runs | implementation | core | 6 runs, raw responses stored in the benchmark's run format | Phase D | — |  |
 | controls-and-robustness-runs | implementation | core | the two control runs and the robustness run, scored under v2 | Phase D | split 2026-10-04 into control-runs and robustness-runs |  |

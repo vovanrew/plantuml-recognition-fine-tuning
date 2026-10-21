@@ -11,7 +11,9 @@ decisions/pilot-run/record.md. Two steps, which may run on different machines:
            over the 200 dev diagrams (data/examples/dev_runner_set.json, pictures under
            data/sets/render/dev/puml_images_1568/), stops the server, and writes the answers and
            answer_manifest.json (the server's identity, the runner's arguments, the adapter
-           check's result). Several checkpoints can be answered at once on one card, each with its
+           check's result). Before the server stops, writes the run manifest with
+           infer/manifest.py write --server, so it records all its checks; exits 1 if the
+           manifest does not pass. Several checkpoints can be answered at once on one card, each with its
            own server and port (train/answer_checkpoints.sh).
   score    on a machine with the scorer's Java and Graphviz. CSR and Element F1 of the answers
            under the tagged scorer v2 against the dev sources, through the benchmark's own
@@ -50,6 +52,7 @@ UNI = FT.parent
 INSTRUMENT = UNI / "plantuml-recognition-evaluation"
 SERVER = FT / "infer" / "server.py"
 ADAPTER_CHECK = FT / "infer" / "adapter_check.py"
+MANIFEST = FT / "infer" / "manifest.py"
 ADAPTER_CHECK_PICTURES = 3
 DEV_SET = FT / "data" / "examples" / "dev_runner_set.json"
 DEV_IMAGES = FT / "data" / "sets" / "render" / "dev" / "puml_images_1568"
@@ -152,6 +155,19 @@ def adapter_check(model, revision, adapter, out, recurrent_layers=None):
     return {"file": result.name, "sha256": sha256_file(result), "passed": json.loads(result.read_text())["passed"]}
 
 
+def write_manifest(answers, port, out):
+    """infer/manifest.py write for the answers while their server still runs (--server), so the
+    manifest records every check of methodology/compute-and-serving.md §5, `server_matches`
+    included."""
+    with open(Path(out) / "manifest.log", "a", encoding="utf-8") as log:
+        code = subprocess.run([sys.executable, str(MANIFEST), "write", str(answers), "--server",
+                               f"http://127.0.0.1:{port}"], stdout=log, stderr=subprocess.STDOUT,
+                              env=dict(os.environ, NO_PROXY="127.0.0.1,localhost")).returncode
+    written = Path(answers) / "manifest.json"
+    return {"file": "answers/manifest.json", "passed": code == 0 and written.is_file(),
+            "checks": len(json.loads(written.read_text())["checks"]) if written.is_file() else 0}
+
+
 def answer(args):
     sys.path.insert(0, str(HERE))
     from models import SIZES
@@ -186,6 +202,7 @@ def answer(args):
         with open(out / "runner.log", "a", encoding="utf-8") as log:
             code = subprocess.run(runner, stdout=log, stderr=subprocess.STDOUT,
                                   env=dict(env, LOCAL_KEY="local")).returncode
+        run_manifest = write_manifest(answers, args.port, out)
     finally:
         server.terminate()
         try:
@@ -198,7 +215,7 @@ def answer(args):
                 "images": str(args.images), "diagrams": len(rows), "answers_stored": len(stored),
                 "max_tokens": args.max_tokens, "timeout_seconds": args.timeout,
                 "runner_exit_code": code, "server": identity, "adapter_check": checked,
-                "dev_scoring_sha256": sha256_file(__file__)}
+                "run_manifest": run_manifest, "dev_scoring_sha256": sha256_file(__file__)}
     with open(out / "answer_manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=1)
     print(f"{len(stored)} of {len(rows)} answers stored in {answers}", flush=True)
@@ -301,4 +318,7 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    main()
+    result = main()
+    # `answer` fails when its run manifest does not pass (a failed runner included).
+    if isinstance(result, dict) and result.get("step") == "answer" and not result["run_manifest"]["passed"]:
+        sys.exit(1)
