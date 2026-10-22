@@ -172,6 +172,16 @@ def test_a_failing_adapter_check_stops_before_any_answer():
     assert calls[0][calls[0].index("--pictures") + 1:][:3] == [str(p) for p in D.check_pictures()]
 
 
+def test_answer_exits_1_when_its_run_manifest_does_not_pass():
+    saved = D.answer
+    try:
+        for passed, code in ((False, 1), (True, 0)):
+            D.answer = lambda args, passed=passed: {"step": "answer", "run_manifest": {"passed": passed}}
+            assert D.cli(["answer", "--size", "2B", "--out", "x", "--timeout", "600"]) == code
+    finally:
+        D.answer = saved
+
+
 class _Alive:
     returncode = None
 
@@ -284,6 +294,17 @@ def live(adapter=None):
         assert checks["recurrent_layers"] is False and manifest["run_manifest"]["passed"] is False
         result = D.score(score_args(out / "answers", out / "scores", set_file))
         assert result["csr"]["n"] == 2 and result["answer_manifest"]["server"] == server
+        # The command itself, on a port of its own: on the reference path its manifest fails, so
+        # it writes the manifest and exits 1.
+        rerun = list(argv)
+        rerun[rerun.index("--out") + 1] = str(Path(tmp) / "run_command")
+        rerun[rerun.index("--port") + 1] = str(free_port())
+        command = subprocess.run([sys.executable, str(FT / "train/dev_scoring.py"), *rerun,
+                                  *(["--adapter", str(adapter)] if adapter else [])],
+                                 cwd=FT, capture_output=True, text=True)
+        written = json.loads((Path(tmp) / "run_command" / "answer_manifest.json").read_text())
+        assert written["run_manifest"]["passed"] is False and written["run_manifest"]["checks"] == 13, written["run_manifest"]
+        assert command.returncode == 1, command.stdout[-1500:] + command.stderr[-1500:]
         print("ok   live:", json.dumps({"adapter": bool(adapter), "csr": result["csr"],
                                         "element_f1": result["element_f1"]}))
 

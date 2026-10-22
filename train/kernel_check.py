@@ -71,26 +71,42 @@ def sha256_file(path):
 # --------------------------------------------------------------------------- #
 # step
 # --------------------------------------------------------------------------- #
-def step(args):
-    if args.layers == "reference":
+def prepare(layers, device):
+    """This process's implementation and the server's two guards. The reference path is a
+    diagnostic process: flash-linear-attention is kept from importing first."""
+    if layers == "reference":
         block_fla()
     for p in (HERE, FT / "build"):
         sys.path.insert(0, str(p))
-    import torch
     import card_environment
+    import recurrent_layers
+    return {"environment": card_environment.require(device),
+            "recurrent_layers": recurrent_layers.require(layers, device, diagnostic=layers == "reference")}
+
+
+def configure(model, recipe):
+    """The training script's configuration of the model (train/train.py load): the vision tower
+    without gradient, non-reentrant gradient checkpointing, training mode."""
+    recipe.vision_without_grad(model)
+    model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+    model.train()
+    return model
+
+
+def step(args):
+    for p in (HERE, FT / "build"):
+        sys.path.insert(0, str(p))
+    import train as T
+    device = T.pick_device()
+    guards = prepare(args.layers, device)
+    import torch
     import examples as E
     import loss as L
     import recipe as R
-    import recurrent_layers
-    import train as T
     from models import SIZES
     from peft import PeftModel
     from transformers import AutoModelForImageTextToText, AutoProcessor
 
-    device = T.pick_device()
-    guards = {"environment": card_environment.require(device),
-              "recurrent_layers": recurrent_layers.require(args.layers, device,
-                                                           diagnostic=args.layers == "reference")}
     rows = T.load_rows()
     by_key = {r["key"]: r for r in rows}
     _, batches = T.run_plan(rows, 1000)
@@ -100,10 +116,7 @@ def step(args):
     processor = AutoProcessor.from_pretrained(model_id, revision=revision)
     base = AutoModelForImageTextToText.from_pretrained(model_id, revision=revision,
                                                        device_map={"": device}, dtype=dtype)
-    model = PeftModel.from_pretrained(base, args.adapter, is_trainable=True)
-    R.vision_without_grad(model)
-    model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
-    model.train()
+    model = configure(PeftModel.from_pretrained(base, args.adapter, is_trainable=True), R)
     named = [(n, p) for n, p in model.named_parameters() if p.requires_grad]
     if not named or any(".lora_" not in n for n, _ in named):
         raise SystemExit("the trainable parameters are not the adapter's")
@@ -133,6 +146,9 @@ def step(args):
             "model": model_id, "revision": revision, "adapter": str(args.adapter),
             "adapter_sha256": sha256_file(Path(args.adapter) / "adapter_model.safetensors"),
             "pairs": batch, "seed": CHECK_SEED, "guards": guards, "losses": losses,
+            "training_mode": all(m.training for m in model.modules()),   # every module, the base model's included
+            "gradient_checkpointing": bool(model.get_base_model().is_gradient_checkpointing
+                                           and model.get_base_model().training),   # transformers checkpoints only in training
             "gpu": torch.cuda.get_device_name(0) if device == "cuda" else None}
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     torch.save({"meta": meta, "grads": grads, "rng": rng}, args.out)
@@ -242,7 +258,7 @@ def compare(args):
         m = item["meta"]
         key = (m["layers"], m["dtype"])
         pick.setdefault(key, []).append(item)
-    fla = pick.get(("flash-linear-attention", "bfloat16"), [])
+    fla = sorted(pick.get(("flash-linear-attention", "bfloat16"), []), key=lambda it: -len(it["grads"]))  # the repeats first
     ref = pick.get(("reference", "bfloat16"), [])
     f32 = pick.get(("reference", "float32"), [])
     if len(fla) != 2 or len(fla[0]["grads"]) < 2 or len(ref) != 1 or len(f32) != 1:

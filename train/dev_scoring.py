@@ -317,8 +317,14 @@ def main(argv=None):
     return answer(args) if args.step == "answer" else score(args)
 
 
-if __name__ == "__main__":
-    result = main()
-    # `answer` fails when its run manifest does not pass (a failed runner included).
+def cli(argv=None):
+    """The command's exit status: 1 when `answer`'s run manifest does not pass (a failed runner
+    included), else 0."""
+    result = main(argv)
     if isinstance(result, dict) and result.get("step") == "answer" and not result["run_manifest"]["passed"]:
-        sys.exit(1)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(cli())

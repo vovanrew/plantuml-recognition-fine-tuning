@@ -338,6 +338,10 @@ the whole ladder. It moves the inputs to the card as the server does, without a 
 It writes one line per optimizer step to `log.jsonl`, with the loss, the norm before clipping and
 the learning rate. It never writes into a folder that holds files.
 
+The script keeps torch's default algorithms and does not enforce deterministic ones. A training
+step is therefore not repeatable bit for bit on the card. The backward of torch's Flash Attention
+in the full-attention layers is not deterministic. Each run trains once, with one seed.
+
 ## 6. The pilot
 
 The pilot is the 1,000-pair run of Qwen3.5-2B in the table of §1.5, made once before the ladder.

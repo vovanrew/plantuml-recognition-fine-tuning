@@ -103,7 +103,7 @@ case $step in
     remote "for f in $WORK/results/logs/answer_step_*.log; do s=\${f##*answer_}; s=\${s%.log}; echo \$s \$(ls $DEV/\$s/answers 2>/dev/null | grep -c '[.]puml\$') answers, \$(grep -h '^exit' \$f || echo running); done; tail -n 1 $WORK/results/logs/answers.log" ;;
   kernels)
     A=runs/train/2B_1000/step_00126; K=$WORK/results/kernel_check
-    [[ -f $FT/$A/adapter_model.safetensors ]] || { echo "restore $A first: tar -xf .local/backup/2B_1000_adapters.tar -C fine-tune"; exit 1; }
+    [[ -f $FT/$A/adapter_model.safetensors ]] || { echo "restore $A first, from fine-tune/: tar -xf .local/backup/2B_1000_adapters.tar"; exit 1; }
     remote "mkdir -p $A $K"
     scp -q -i $KEY -P $POD_PORT -o IdentitiesOnly=yes -o UserKnownHostsFile=$LOCAL/known_hosts \
         $FT/$A/adapter_model.safetensors $FT/$A/adapter_config.json $POD:$WORK/fine-tune/$A/
