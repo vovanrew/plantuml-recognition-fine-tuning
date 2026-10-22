@@ -11,12 +11,13 @@ diagrams, with the same images, prompt, decoding and scorer in both conditions.
 
 ## Status
 
-Work in progress, state of 2026-10-18. There are no results here yet.
+Work in progress, state of 2026-10-22. There are no results here yet.
 
 - Done: scorer v2 is frozen; the training, dev and loss-curve sets are drawn and frozen; the image
   pipeline passes its acceptance check on the 1,000 test diagrams; the compute platform is
-  frozen (tag `serving-v3`) and the prompt arrangement is decided; the training recipe and the checkpoint rule are frozen.
-- Not done: the pilot, the three trainings and the evaluation runs.
+  frozen (tag `serving-v3`); the prompt arrangement, the training recipe and the checkpoint rule
+  are frozen; the 2B pilot runs end to end.
+- Not done: the three trainings and the evaluation runs.
 
 [FINETUNE_PLAN.md](FINETUNE_PLAN.md) §10 lists every step with its status.
 

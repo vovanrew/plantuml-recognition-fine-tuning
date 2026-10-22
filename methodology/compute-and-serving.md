@@ -90,9 +90,17 @@ The server answers `POST /v1/chat/completions` as the runner sends it: one user 
 text part and at most one picture, as a base64 `data:` URL, with `temperature` 0, `max_tokens` (or
 `max_completion_tokens`) and `chat_template_kwargs: {"enable_thinking": false}`.
 `build/user_turn.py` builds the user turn: the picture, one newline and the prompt text, rendered by
-the model's own chat template with thinking off. The arrangement is the `prompt-arrangement` item's
-(`FINETUNE_PLAN.md` §10). For `prompts/zero_shot.txt` and one picture, the rendered turn has sha256
-`44a5cc713a568d729f5839c9f2903ef09327b890b8c9f4b756c765e6585141e8` at the three sizes.
+the model's own chat template with thinking off. For `prompts/zero_shot.txt` and one picture, the
+rendered turn has sha256 `44a5cc713a568d729f5839c9f2903ef09327b890b8c9f4b756c765e6585141e8` at the
+three sizes.
+
+This turn is the study's one arrangement of picture and prompt text. It is the same at the three
+sizes and in both conditions, and every training example starts with it
+(`methodology/training-recipe.md` §5.1). It is chosen to match the order of the benchmark's
+published hosted runs of the three sizes (the benchmark protocol, §2). The bridge table (`FINETUNE_PLAN.md`,
+Phase E) compares those published predictions with the self-served zero-shot run. Its serving
+step thus does not also change the layout of the prompt. The runner sends the text part first
+and runs unchanged: the server takes the two parts in either order and builds this turn from them.
 
 Decoding is greedy and stops at `eos_token_id` [248046, 248044] at every size. `finish_reason` is
 `stop` when the last token is one of these and `length` otherwise. `usage` gives the prompt and
@@ -190,8 +198,8 @@ before its scored run.
 ## 7. The deadline
 
 The runner's deadline is 600 s per answer (`--timeout 600`), at every size and in both conditions.
-It lies well above the time the card takes for an answer at the output cap, so no answer is cut by
-the clock. The manifest's `deadline` check reads it from `run_meta.json`.
+It is the deadline the benchmark's Qwen3.5 runs were completed with (the benchmark protocol, §2).
+The manifest's `deadline` check reads it from `run_meta.json`.
 
 ## 8. Scored runs
 
