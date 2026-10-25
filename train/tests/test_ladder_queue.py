@@ -422,9 +422,18 @@ def chain_setup():
 
 def test_chain_waits_for_the_queue_then_moves_the_checkout_and_starts_the_runs():
     tmp, mac, pod, second = chain_setup()
+    local = tmp / "uni" / "fine-tune" / ".local" / "ladder_session"
+    try:
+        _chain_end_to_end(tmp, mac, pod, second, local)
+    finally:   # the follow that chain-mac starts must not outlive a failed test
+        for name in ("follow.pid", "caffeinate.pid", "chain_mac.pid"):
+            if (local / name).exists():
+                subprocess.run(["kill", (local / name).read_text().strip()], capture_output=True)
+
+
+def _chain_end_to_end(tmp, mac, pod, second, local):
     logs = pod / "results" / "logs"
     (logs / "queue.log").write_text("2026-10-25T00:00:00Z answer 27B_20000: start\n")
-    local = tmp / "uni" / "fine-tune" / ".local" / "ladder_session"
     local.mkdir(parents=True)
     # stands in for the running follow: detached, as follow is, so that it is reaped when it ends
     sleeper = int(subprocess.run(["bash", "-c", "nohup sleep 3 > /dev/null 2>&1 & echo $!"],
