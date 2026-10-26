@@ -23,7 +23,10 @@
 #             loss_curve.jsonl (the files git does not hold)
 #   pack      refuse unless the session's code is committed; the commit and the study's tags as a
 #             git bundle, the data files above as data.tar, the benchmark's evaluation/ and
-#             prompts/, train/pod_setup.sh; checksums. Into .local/ladder_session/pack/
+#             prompts/, train/pod_setup.sh; checksums. Into .local/ladder_session/pack/. The tars
+#             carry no macOS metadata (packtar)
+#   packtar <dir> <out> <member>...
+#             the tar pack makes, alone (for the tests)
 #   push      copy the pack to the pod (rsync, resumable: data.tar is about 4 GB) and check it
 #   setup     on the pod: train/pod_setup.sh (checkout, data, pinned environment, the card's record)
 #   start     start train/ladder_queue.sh under nohup on the pod; returns at once.
@@ -89,7 +92,15 @@ EOF
 
 uncommitted() { git -C $FT status --porcelain -- train build infer requirements-card.txt data/examples data/sets }
 
+packtar() {   # packtar <dir> <out> <member or tar option>...: a plain tar made in <dir> without the
+              # macOS metadata (no AppleDouble ._ files, no extended attributes), which the pod's
+              # GNU tar would unpack as files of their own
+    local dir=$1 out=$2; shift 2
+    (cd $dir && COPYFILE_DISABLE=1 tar --no-mac-metadata --no-xattrs -cf $out "$@")
+}
+
 if [[ $step == files ]]; then files; exit 0; fi
+if [[ $step == packtar ]]; then packtar "$@"; exit $?; fi
 
 if [[ $step == pack ]]; then
     changed=$(uncommitted)
@@ -102,8 +113,8 @@ if [[ $step == pack ]]; then
     if [[ -n $missing ]]; then echo "missing data files:"; echo $missing | head; exit 1; fi
     bash $FT/train/study_bundle.sh create $FT $PACK/study.bundle
     git -C $FT rev-parse HEAD > $PACK/commit.txt
-    (cd $FT && tar -cf $PACK/data.tar -T $LOCAL/data_files.txt)
-    (cd $U/plantuml-recognition-evaluation && tar -cf $PACK/instrument.tar evaluation prompts)
+    packtar $FT $PACK/data.tar -T $LOCAL/data_files.txt
+    packtar $U/plantuml-recognition-evaluation $PACK/instrument.tar evaluation prompts
     cp $FT/train/pod_setup.sh $PACK/
     (cd $PACK && shasum -a 256 commit.txt study.bundle data.tar instrument.tar pod_setup.sh > SHA256SUMS)
     echo "$(wc -l < $LOCAL/data_files.txt | tr -d ' ') data files"; ls -la $PACK; exit 0

@@ -212,6 +212,26 @@ def test_files_lists_every_picture_of_the_training_and_dev_lists():
     assert set(files) == want
 
 
+def test_pack_tars_carry_no_macos_metadata():
+    """pack's tar must not add AppleDouble ._ members (the pod's GNU tar unpacks them as files)."""
+    import tarfile
+    tmp = Path(tempfile.mkdtemp())
+    src = tmp / "src" / "data" / "pictures"
+    src.mkdir(parents=True)
+    for name in ("a.png", "b.png"):
+        (src / name).write_bytes(b"png")
+        # an extended attribute, as macOS files often carry (quarantine, Finder info)
+        subprocess.run(["xattr", "-w", "com.example.test", "1", str(src / name)], check=True)
+    (tmp / "list.txt").write_text("data/pictures/a.png\ndata/pictures/b.png\n")
+    done = subprocess.run(["zsh", str(SESSION), "packtar", str(tmp / "src"), str(tmp / "out.tar"),
+                           "-T", str(tmp / "list.txt")], capture_output=True, text=True, timeout=60)
+    assert done.returncode == 0, done.stdout + done.stderr
+    with tarfile.open(tmp / "out.tar") as t:
+        names = t.getnames()
+        assert names == ["data/pictures/a.png", "data/pictures/b.png"], names
+        for m in t.getmembers():
+            assert not any(k.startswith(("LIBARCHIVE.xattr", "SCHILY.xattr")) for k in m.pax_headers), m.pax_headers
+
 def git(repo, *args):
     subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@t", "-C", str(repo), *args],
                    check=True, capture_output=True, text=True)
