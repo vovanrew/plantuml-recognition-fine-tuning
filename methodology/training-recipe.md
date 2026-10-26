@@ -1,8 +1,8 @@
 # Training Recipe
 
 Methodological record for how the study trains its adapters, how it picks one adapter per
-training run, and how a pilot run checks the pipeline before the ladder. The recipe trains
-Qwen3.5-2B, Qwen3.5-9B and Qwen3.5-27B on the training sample of
+training run, how a pilot run checks the pipeline, and the ladder that makes the study's three
+adapters. The recipe trains Qwen3.5-2B, Qwen3.5-9B and Qwen3.5-27B on the training sample of
 `methodology/training-set-construction.md` §4. Paths are relative to `fine-tune/`, and the scorer
 repository is `../plantuml-recognition-evaluation`. The analysis protocol of the benchmark,
 `../plantuml-recognition-evaluation/methodology/analysis-protocol.md`, is called the baseline
@@ -366,3 +366,32 @@ computed from the picture sizes of the render manifest and the target tokens, an
 them to `run.json` before any weights load. The longest has 7,132 positions, the tokens of its
 prompt, its target and `<|im_end|>`. The card holds the 27B under the recipe at these sequences, so
 the one card model of `methodology/compute-and-serving.md` §2 serves the whole ladder.
+
+## 7. The ladder
+
+The ladder is the three runs of the recipe on the 20,000-pair training sample, one at each of
+Qwen3.5-2B, Qwen3.5-9B and Qwen3.5-27B. Each run is the first row of the table of §1.5: 2 epochs,
+2,500 optimizer steps, and adapters saved after steps 625, 1,250, 1,875 and 2,500. The recipe is
+that of §1 at tag `recipe-v1`, unchanged after the probe of §3, and each size trains once (§5.3).
+The runs train one after another on the card of `methodology/compute-and-serving.md` §2, in the
+order 2B, 9B, 27B. A fault of the pipeline thus shows at the smallest size before a larger run
+starts.
+
+```
+python train/train.py run --size <2B|9B|27B> --pairs 20000 --out runs/train/<size>_20000
+```
+
+The four checkpoints of each run are answered on the 200 dev diagrams and scored under scorer v2,
+as §2.1 gives. The four of a run are answered on one pod, by servers equal in everything but the
+adapter (§2.3). At the 2B the four servers share the card; at the 9B and the 27B one server
+answers at a time. Either way each server answers one request at a time
+(`methodology/compute-and-serving.md` §4). The manifests of the 12 dev runs passed every check of
+`methodology/compute-and-serving.md` §5, so each is a scored run under §8 of that file.
+
+`train/select_checkpoint.py --pairs 20000` applies the rule of §2.2 to each run. At every size it
+took the last checkpoint, step 2,500, because no earlier checkpoint was better. The adapter in
+`runs/train/<size>_20000/step_02500` is therefore the fine-tuned model of that size.
+
+A run's folder `runs/train/<size>_20000` holds `run.json`, the step log `log.jsonl`, the four
+checkpoints, the optimizer state `state.pt` and the choice with its numbers, `selection.json`. The
+dev answers and scores of each checkpoint lie in `runs/dev/<size>_20000/<checkpoint>/`.
