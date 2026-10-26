@@ -1,0 +1,15 @@
+# The runs on the 1,000 test diagrams (decisions/main-inference-runs/record.md): the six main runs,
+# each size zero-shot and with its selected adapter (methodology/training-recipe.md §7), and the 2B's
+# selected 1,000-pair and 5,000-pair adapters for the data-efficiency curve
+# (decisions/data-efficiency-sizes/record.md). One run per line: its id, the size, the adapter
+# folder relative to fine-tune/ ("-": the base model alone, the zero-shot condition).
+# infer/test_queue.sh answers them on the card in this order, by size; infer/test_session.sh packs
+# the adapters named here.
+2B_zero_shot   2B   -
+2B_20000       2B   runs/train/2B_20000/step_02500
+2B_1000        2B   runs/train/2B_1000/step_00126
+2B_5000        2B   runs/train/2B_5000/step_00626
+9B_zero_shot   9B   -
+9B_20000       9B   runs/train/9B_20000/step_02500
+27B_zero_shot  27B  -
+27B_20000      27B  runs/train/27B_20000/step_02500
