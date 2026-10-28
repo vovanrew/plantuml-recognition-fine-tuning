@@ -95,12 +95,25 @@ def served_name(model, adapter):
 
 def port_free(port):
     """Refuse a port something already listens on (on the card, the image's nginx holds 8001):
-    the identity read from it would not be the study's server's."""
+    the identity read from it would not be the study's server's. Also refuse a port the study's
+    server could not bind. The bind is made as `infer/server.py` makes it, with SO_REUSEADDR
+    (http.server's default), so a port that a stopped server left in TIME_WAIT counts as free."""
+    in_use = SystemExit(f"port {port} is in use; give another --port")
+    try:
+        with socket.create_connection(("127.0.0.1", port), timeout=2):
+            pass
+    except ConnectionRefusedError:
+        pass
+    except OSError:
+        raise in_use from None
+    else:
+        raise in_use
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             s.bind(("127.0.0.1", port))
         except OSError:
-            raise SystemExit(f"port {port} is in use; give another --port") from None
+            raise in_use from None
 
 
 def wait_for(port, process, seconds, name):

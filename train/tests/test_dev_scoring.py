@@ -145,6 +145,43 @@ def test_a_port_in_use_is_refused_before_anything_starts():
         assert not (Path(tmp) / "run").exists()
 
 
+def test_a_port_another_server_listens_on_for_every_address_is_refused():
+    # The image's nginx listens on 0.0.0.0:8001; a bind to 127.0.0.1 alone may not see it.
+    with socket.socket() as taken:
+        taken.bind(("0.0.0.0", 0))
+        taken.listen()
+        port = taken.getsockname()[1]
+        try:
+            D.port_free(port)
+        except SystemExit as exc:
+            assert "in use" in str(exc), exc
+        else:
+            raise AssertionError("a port with a listener on every address was accepted")
+
+
+def test_a_port_a_stopped_server_left_in_time_wait_is_free():
+    # The queue starts the next run on the port the last server used (the 9B and 27B on 8000).
+    listener = socket.socket()
+    listener.bind(("127.0.0.1", 0))
+    listener.listen()
+    port = listener.getsockname()[1]
+    client = socket.create_connection(("127.0.0.1", port))
+    served, _ = listener.accept()
+    served.close()  # the server's side closes first, so the port is held in TIME_WAIT
+    client.close()
+    listener.close()
+    with socket.socket() as plain:
+        try:
+            plain.bind(("127.0.0.1", port))
+        except OSError:
+            pass
+        else:
+            raise AssertionError("no TIME_WAIT on the port; the test does not reproduce the case")
+    D.port_free(port)
+    server = http.server.HTTPServer(("127.0.0.1", port), http.server.BaseHTTPRequestHandler)
+    server.server_close()
+
+
 def test_a_failing_adapter_check_stops_before_any_answer():
     calls = []
 
