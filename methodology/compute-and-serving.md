@@ -2,8 +2,8 @@
 
 Methodological record for the platform that every run of the study uses: the precision, the card,
 the software, the server that answers every scored request, the manifest written beside each run,
-and the rules a scored run follows. It holds for the study's self-served runs what
-`../plantuml-recognition-evaluation/methodology/benchmark-protocol.md` §2 holds for the benchmark's
+the rules a scored run follows, and the runs on the test set. It holds for the study's self-served
+runs what `../plantuml-recognition-evaluation/methodology/benchmark-protocol.md` §2 holds for the benchmark's
 hosted runs; that file is called the benchmark protocol below. The inference runner, its
 image-ingestion check, its retries and its failure records are those of the benchmark protocol, §2.
 The decoding settings are those of its §2 and §3: greedy, temperature 0, `max_tokens` 5,376,
@@ -242,3 +242,83 @@ The tests lie under `build/tests/` and `infer/tests/`:
     build/tests/test_user_turn.py infer/tests/test_server.py infer/tests/test_manifest.py \
     infer/tests/test_adapter_check.py
 ```
+
+## 10. The runs on the test set
+
+The runs on the test set make the answers that the main table, the bridge table and the
+data-efficiency curve report. They are eight scored runs (§8) on the 1,000 diagrams of the
+benchmark's `data/test_set.json`, with their pictures in the benchmark's `data/puml_images_1568/`
+(`../plantuml-recognition-evaluation/methodology/test-set-construction.md` §7).
+`infer/test_runs.txt` lists them:
+
+| Run | Model | Condition | Adapter |
+|---|---|---|---|
+| `2B_zero_shot` | Qwen3.5-2B | zero-shot | none |
+| `2B_20000` | Qwen3.5-2B | fine-tuned, 20,000 pairs | `runs/train/2B_20000/step_02500` |
+| `2B_1000` | Qwen3.5-2B | fine-tuned, 1,000 pairs | `runs/train/2B_1000/step_00126` |
+| `2B_5000` | Qwen3.5-2B | fine-tuned, 5,000 pairs | `runs/train/2B_5000/step_00626` |
+| `9B_zero_shot` | Qwen3.5-9B | zero-shot | none |
+| `9B_20000` | Qwen3.5-9B | fine-tuned, 20,000 pairs | `runs/train/9B_20000/step_02500` |
+| `27B_zero_shot` | Qwen3.5-27B | zero-shot | none |
+| `27B_20000` | Qwen3.5-27B | fine-tuned, 20,000 pairs | `runs/train/27B_20000/step_02500` |
+
+The zero-shot runs and the 20,000-pair runs are the six main runs. The 2B's 1,000-pair and
+5,000-pair runs are the two inner points of the data-efficiency curve, whose end points are the
+2B's two main runs. Each adapter is the one the checkpoint rule (`methodology/training-recipe.md`
+§2.2) selected on the dev set. The 20,000-pair runs are the ladder (§7 of that file), and the
+1,000-pair run is the pilot (§6 of that file). The test set therefore selects nothing. The
+zero-shot condition is answered again on this stack, not taken from the benchmark's published
+hosted runs, so the two conditions of a size differ in the adapter alone (§4).
+
+### 10.1 How a run is made
+
+`infer/test_queue.sh` answers the runs on the card, unattended. Each run is
+`train/dev_scoring.py answer` with the test set in place of the dev set, as the dev scoring uses it
+(`methodology/training-recipe.md` §2.1). The adapter check of §6 runs first where the run has an
+adapter. The study's server then serves the run, and the benchmark's runner answers it unchanged,
+with `--n 1000` and `--timeout 600`. The manifest of §5 is written with `--server` before the
+server stops.
+
+Before any answer, the queue refuses a test set whose sha256 is not
+`e233e56968f90c7411d7c6b27cdd5c81f801fcc47fd1c7b45d174918a440744c`, and a picture folder that does
+not hold 1,000 PNG files. Every run thus answers the same frozen 1,000 cells. The four 2B runs share
+the card, each server on its own port, and the 9B and 27B runs go one at a time. Each server answers
+one request at a time, so sharing the card changes the wall-clock only (§4). A run that ends with a
+failure is resumed once with the same command, which passes `--run-dir` (rule 5 of §8). A run
+folder is resumed only by the checkout that started it, whose commit it records in
+`queue_commit.txt`.
+
+`infer/test_session.sh` drives the session from the Mac. Its `pack` step refuses uncommitted study
+code, a benchmark whose `evaluation/` and `prompts/` differ from its tag `scorer-v2`, and test files
+that differ from the benchmark's HEAD. It then packs one commit of the study with its tags, the
+listed adapters, and the benchmark's runner, prompt, test set and pictures. Its `fetch` step copies
+each run to the Mac, where the run is checked again (§10.3).
+
+Making the runs scores nothing. The main table, the bridge table and the data-efficiency curve
+score these stored runs under scorer v2 (`methodology/scorer-v2.md`).
+
+### 10.2 How a run is stored
+
+Each run lies in `runs/test/<run>/` of the study repository, which is local working output kept out
+of git (`FINETUNE_PLAN.md` §9). Its `answers/` folder is the runner's run directory, in the format
+of the benchmark protocol, §2. It holds the raw response of each cell as `<key>.json`, the
+prediction of each answered cell as `<key>.puml`, and `run_meta.json`, with `<key>` the cell's key
+in the test set without its `.puml` suffix. The run manifest `manifest.json` lies beside them (§5).
+
+The run folder also holds `answer_manifest.json`, with the server's identity, the runner's
+arguments and the sha256 of the test set. A run with an adapter adds `adapter_check.json`, and the
+server's and runner's logs lie there too. The benchmark's run reader (`analysis/run_level.py`,
+`NOT_CELLS`, from benchmark commit `35ed4d5`) leaves `run_meta.json` and `manifest.json` out of
+the cells. It therefore reads `answers/` as a run, as it reads the benchmark's own runs. The scorers read the `.puml` files alone.
+
+### 10.3 Checking a stored run
+
+```
+zsh infer/test_session.sh check <run>
+.venv/bin/python -m pytest -q infer/tests/test_test_queue.py::test_the_benchmark_reads_every_stored_test_run_as_1000_cells
+```
+
+The first command runs `infer/manifest.py check` on the run's `answers/` and requires `n_cells`
+1000 in its `run_meta.json`. Like every manifest check, it runs in a checkout that holds the tag
+`serving-v3` (§5). The second runs the benchmark's run reader, from `../plantuml-recognition-evaluation`,
+on every run present under `runs/test/`, and requires 1,000 cells in each.

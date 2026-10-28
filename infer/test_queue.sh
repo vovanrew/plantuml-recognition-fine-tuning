@@ -15,7 +15,7 @@
 # about 6 GB, one port each), one at a time at the 9B (no gain side by side) and the 27B (one
 # server's weights fill the card). Each server answers one request at a time.
 #
-# A run's answers go to runs/test/<id>/answers, the benchmark's run format (one <blob_id>.json and
+# A run's answers go to runs/test/<id>/answers, the benchmark's run format (one <key stem>.json and
 # .puml per cell, run_meta.json), with manifest.json beside them; dev_scoring.py's own files
 # (answer_manifest.json, adapter_check.json, server.log, runner.log) to runs/test/<id>/. A run that
 # ends with a failure is resumed once at once, with the same command: the runner then re-attempts

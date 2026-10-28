@@ -165,7 +165,9 @@ Output: `train_{1k,5k,20k}.jsonl`, `dev_200.jsonl`, images, leakage report, fina
 - **Checkpoint selection on real metrics, not validation loss:** score the 200-diagram dev set with
   CSR + Element F1 under frozen scorer v2 at each checkpoint. Same rule at all sizes.
 - **Data-efficiency curve at 2B:** train on 1k, 5k and 20k, report where the curve saturates. Two
-  extra short runs.
+  extra short runs. (Narrowed by `decisions/data-efficiency-sizes/`, 2026-10-25: the 2B only; the
+  1k run is the pilot's, one new 5k run; the selected 1k and 5k adapters each get a test-set run,
+  and the curve is reported on the test set, 0 / 1k / 5k / 20k.)
 - **Ablation, only if Weeks 6–8 come in early:** one run at one size with the vision encoder
   unfrozen. It is the only test of whether relation decorations (filled vs hollow diamond, dashed
   vs solid) are recoverable on the model side.
@@ -198,6 +200,9 @@ Output: three adapters (+2 data-efficiency adapters), training logs, dev-set sco
 ### Phase E — Evaluation
 
 Everything under scorer v2, full framework, both populations.
+
+- **Data-efficiency curve at the 2B** (optional): 0 / 1k / 5k / 20k pairs on the test set, the 0
+  and 20k points from the 2B's main runs (`decisions/data-efficiency-sizes/`, 2026-10-25).
 
 - **Bridge table** (opens Р.4): per size, published predictions under v1 → same predictions under
   v2 → self-served bf16 zero-shot under v2 ("4-bit" superseded by `decisions/gpu-precision/`,
@@ -273,7 +278,8 @@ items listed here before 2026-09-22 are now rows in §10 (`training-stack`, `ser
 
 ## 8. Budget
 
-Three ladder trainings, two data-efficiency runs, headroom for one failed run per size, and 6 main +
+Three ladder trainings, two data-efficiency runs (one new training and two test-set runs since
+`decisions/data-efficiency-sizes/`, 2026-10-25: USD 19.64–36.35), headroom for one failed run per size, and 6 main +
 robustness inference runs: **$300–800**.
 
 ## 9. Proposed layout of this folder
@@ -287,7 +293,8 @@ fine-tune/
                  JAR and the v1-to-v2 bridge of the stored runs
   train/         the recipe, one file for every size ("configs (one per size)" superseded by
                  `decisions/recipe/`, 2026-10-18), the checkpoint rule, launch scripts
-  infer/         the study's server, the run manifest and the adapter check (the runner is the benchmark's, unchanged)
+  infer/         the study's server, the run manifest and the adapter check (the runner is the benchmark's, unchanged);
+                 the runs on the test set (run list, card queue, session driver)
   runs/          local working output of a card session, kept out of the repository; a finished run
                  that is not final moves to its item's folder under `decisions/`; final runs are
                  published by `adapter-release` ("raw outputs, immutable" superseded, author,
@@ -345,15 +352,16 @@ once the core results exist. An optional item that is not done moves to §6 with
 | reference-lines | frozen | optional | whether frontier and MoE lines appear; if so, re-scored under v2 from stored predictions | §3; Phase E | — |  |
 | adapter-release | frozen | optional | HuggingFace repository names, licence, what is deposited | §7 (former) | — |  |
 | graphviz-render-check | implementation | core | Graphviz installed; class diagrams render to diagrams, not the notice image | Phase A images | merged into render-pipeline 2026-10-04 (Graphviz 16.1.0 present; 500 of 500 class test diagrams re-render to benchmark dimensions) | `decisions/render-pipeline/` |
-| registry-condition-field | implementation | core | `analysis/registry.py` gains `condition`; `_VALID_ARM` accepts the fine-tuned runs | Phase D | recorded 2026-10-10 (verified 2026-10-10, `verify.md`); no methodology entry (author, 2026-10-11) | `decisions/registry-condition-field/` |
+| registry-condition-field | implementation | core | `analysis/registry.py` gains `condition`; `_VALID_ARM` accepts the fine-tuned runs | Phase D | recorded 2026-10-10 (verified 2026-10-10, `verify.md`); no methodology entry (author, 2026-10-11); rule 5, who registers the six runs, superseded 2026-10-26: `main-tables-intervals` (author) | `decisions/registry-condition-field/` |
 | pilot-run | implementation | core | messages format, chat template pinned, byte-equality test; the training script; the recipe's 60-step probe at the three sizes and the 27B's memory at the longest sequence; the pilot: the 2B on the 1,000-pair subset under the recipe (2 epochs, 126 steps, four checkpoints scored on dev), exit criterion met ("1–2k" superseded by `decisions/recipe/`, 2026-10-18) | Phase B | recorded 2026-10-22 (verified 2026-10-22, `verify.md`, seventh pass; the kernels' reversal check run on the card, the decision not reversed, author 2026-10-21): the training example is the served user turn, then the target and `<|im_end|>`, loss on the answer only, byte-equal to what the server builds; the probe passes at the three sizes; the 27B fits under the recipe at the longest training sequences; pilot dev CSR 0.740, Element F1 0.7616 at the selected step 126; exit criterion met | `decisions/pilot-run/` · `methodology/training-recipe.md` §2.1, §2.3, §3–§6 |
 | ladder-training | implementation | core | 2B → 9B → 27B under the recipe; adapters, logs, dev-set score per checkpoint | Phase C | recorded 2026-10-26 (verified 2026-10-26, `verify.md`, second pass; implemented 2026-10-25; each size selects step 2,500; dev CSR / Element F1: 2B 0.915 / 0.900, 9B 0.980 / 0.968, 27B 0.975 / 0.956) | `decisions/ladder-training/` · `methodology/training-recipe.md` §7 |
-| data-efficiency-runs | implementation | optional | 1k and 5k at 2B (1k: the pilot's run, `pilot-run`, 2026-10-20) | Phase C | — |  |
+| data-efficiency-runs | implementation | optional | 1k and 5k at 2B (1k: the pilot's run, `pilot-run`, 2026-10-20); the selected 1k and 5k adapters each get a test-set run, the curve 0 / 1k / 5k / 20k on the test set at the 2B only (`data-efficiency-sizes`, 2026-10-25) | Phase C | framing 2026-10-25 (the two test-set runs made by `main-inference-runs`, 2026-10-26 and 27) | `decisions/data-efficiency-runs/` |
+| data-efficiency-sizes | frozen | optional | at which sizes the 1k and 5k data-efficiency runs are trained and evaluated: the 2B only, as planned, or also the 9B and the 27B; whether the 2B alone is enough for the study. Evaluation only (author, 2026-10-25): no implementation, no methodology entry; the answer sets the scope of `data-efficiency-runs` | Phase C; §8; row data-efficiency-runs | recorded 2026-10-26; no methodology entry (decided 2026-10-25: A + test, the 2B only (1k, new 5k, 20k), the 1k and 5k adapters also run on the test set) | `decisions/data-efficiency-sizes/` |
 | unfrozen-encoder-ablation | implementation | optional | one run at one size with the vision encoder unfrozen | Phase C | conditional: only if weeks 6–8 come in early |  |
-| main-inference-runs | implementation | core | 6 runs, raw responses stored in the benchmark's run format | Phase D | — |  |
+| main-inference-runs | implementation | core | 6 runs, raw responses stored in the benchmark's run format; its tooling and card session also make the two test-set runs of `data-efficiency-runs` | Phase D | recorded 2026-10-28 (verified 2026-10-28, `verify.md`, second pass; tooling 2026-10-26; the card session 2026-10-26 to 2026-10-28: eight runs on the test set, the six main and the two of `data-efficiency-runs`, each manifest passing with `n_cells` 1,000; the port check; the benchmark's run reader skips the run manifest) | `decisions/main-inference-runs/` · `methodology/compute-and-serving.md` §10 |
 | controls-and-robustness-runs | implementation | core | the two control runs and the robustness run, scored under v2 | Phase D | split 2026-10-04 into control-runs and robustness-runs |  |
 | bridge-table | implementation | core | per size: published v1 → same predictions under v2 → self-served bf16 zero-shot under v2 ("4-bit" superseded by `decisions/gpu-precision/`, 2026-10-11) | Phase E | — |  |
-| main-tables-intervals | implementation | core | main table, gain decomposition, paired intervals including the difference of deltas, per-relation, per-tier | Phase E | — |  |
+| main-tables-intervals | implementation | core | main table, gain decomposition, paired intervals including the difference of deltas, per-relation, per-tier; the six main runs' registry entries (`analysis/model_registry.json`, `condition`), written with their score files (author, 2026-10-26, in `main-inference-runs`; supersedes `registry-condition-field` rule 5 on that point) | Phase E | — |  |
 | error-analysis | implementation | core | stratified failure sample mapped onto the existing taxonomy, before and after | Phase E | — |  |
 | control-runs | implementation | core | the mechanical-repair control and the few-shot control, scored under v2 | Phase D | cut 2026-10-18 with `controls-definition` | |
 | robustness-runs | implementation | optional | the alternative-theme run first; image degradation after the fine-tune results, if time allows | Phase D | — | |
