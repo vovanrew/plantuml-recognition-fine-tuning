@@ -144,6 +144,23 @@ def test_the_adapters_listed_are_the_selected_ones():
         assert folder.endswith(f"runs/dev/{rid}/{adapter}/scores"), (rid, folder)
 
 
+def test_the_benchmark_reads_every_stored_test_run_as_1000_cells():
+    # The benchmark's run reader (analysis/run_level.py) on each stored run folder, the run
+    # manifest beside the cells included. Where runs/test/ is absent there is nothing to read.
+    stored = [rid for rid in ORDER if (FT / "runs" / "test" / rid / "answers").is_dir()]
+    if not stored:
+        return
+    code = ("import json, sys; sys.path.insert(0, sys.argv[1]); "
+            "from analysis.run_level import read_run_usage; "
+            "print(json.dumps({r: read_run_usage(f'{sys.argv[2]}/{r}/answers')['n_cells'] "
+            "for r in sys.argv[3:]}))")
+    out = subprocess.run([sys.executable, "-I", "-c", code, str(INSTRUMENT),
+                          str(FT / "runs" / "test"), *stored],
+                         capture_output=True, text=True)
+    assert out.returncode == 0, out.stderr[-2000:]
+    assert json.loads(out.stdout) == {rid: 1000 for rid in stored}
+
+
 # --------------------------------------------------------------------------- #
 # the queue
 # --------------------------------------------------------------------------- #
