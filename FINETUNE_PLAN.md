@@ -67,8 +67,10 @@ Rules for this study:
 
 - Why v2 belongs here: v1 credits reproducing the source's styling, which a model trained on the same
   corpus learns to imitate. Expected effect: v2 raises the zero-shot baseline at least as much as the
-  fine-tuned score, so the delta gets more conservative. Verify per fix in the bridge table. (Measured:
-  `methodology/scorer-v2.md` §6.)
+  fine-tuned score, so the delta gets more conservative. Verify per fix in the bridge table. (Measured on the published zero-shot predictions:
+  `methodology/scorer-v2.md` §6. Bridge table cut 2026-10-28, author: `decisions/bridge-table/`; the
+  expectation on both conditions is checked by `main-tables-intervals` from the v1 numbers reported
+  alongside.)
 - **Frozen and tagged before any fine-tuned output is scored**, dev-set checkpoint scoring included.
   Record the JAR hash and scorer tag here once frozen.
   Frozen 2026-10-13: tag `scorer-v2` of `../plantuml-recognition-evaluation` (commit `f460b35`);
@@ -208,10 +210,14 @@ Everything under scorer v2, full framework, both populations.
   v2 → self-served bf16 zero-shot under v2 ("4-bit" superseded by `decisions/gpu-precision/`,
   2026-10-11). Separates the scorer effect from the serving effect.
   One sentence on whether any published conclusion (ranking, population gap) moves under v2.
+  (Cut from this study, author, 2026-10-28: the gain is measured within the study's own runs, and
+  the baseline is the self-served zero-shot run, stated once in the paper; Р.3's hosted numbers are
+  not compared. `decisions/bridge-table/`.)
 - **Main table:** size × condition × type × tier.
 - **Decomposition of every gain:** Δ CSR, Δ compiled-only Element / Relationship F1, Δ population
   gap. Published gaps on Element F1 are +0.632 (2B), +0.354 (9B), +0.241 (27B); the headline result
-  is how far fine-tuning collapses them.
+  is how far fine-tuning collapses them. (Since the bridge table's cut, 2026-10-28: the gaps the
+  headline uses are those of the self-served zero-shot runs; the published ones are context only.)
 - **Intervals:** paired bootstrap on each before/after delta, plus a separate paired resample for
   the **difference of deltas** ("2B gains more than 27B"). Three sizes give a direction, not a fit.
 - **Per-relation Relationship F1** before and after — the test of the composition / aggregation /
@@ -240,6 +246,7 @@ Everything under scorer v2, full framework, both populations.
 | Text-only → VL staged pre-training | not needed for the claim |
 | The other 7 diagram types | class + sequence = 76.2% of the corpus |
 | Inference-only controls (few-shot / format-constrained prompt, mechanical repair pass) | not part of the paper; a separate thesis (author, 2026-10-18) |
+| Bridge table (Р.3's published zero-shot numbers, re-scored under v2, against the study's self-served zero-shot run) | the gain is measured within the study's own runs; the baseline is the self-served zero-shot run, stated once in the paper (author, 2026-10-28) |
 | Hand-labelled in-the-wild image set | manual ground truth is the expensive part; theme + degradation covers the threat |
 
 ## 7. Open questions
@@ -360,7 +367,7 @@ once the core results exist. An optional item that is not done moves to §6 with
 | unfrozen-encoder-ablation | implementation | optional | one run at one size with the vision encoder unfrozen | Phase C | conditional: only if weeks 6–8 come in early |  |
 | main-inference-runs | implementation | core | 6 runs, raw responses stored in the benchmark's run format; its tooling and card session also make the two test-set runs of `data-efficiency-runs` | Phase D | recorded 2026-10-28 (verified 2026-10-28, `verify.md`, second pass; tooling 2026-10-26; the card session 2026-10-26 to 2026-10-28: eight runs on the test set, the six main and the two of `data-efficiency-runs`, each manifest passing with `n_cells` 1,000; the port check; the benchmark's run reader skips the run manifest) | `decisions/main-inference-runs/` · `methodology/compute-and-serving.md` §10 |
 | controls-and-robustness-runs | implementation | core | the two control runs and the robustness run, scored under v2 | Phase D | split 2026-10-04 into control-runs and robustness-runs |  |
-| bridge-table | implementation | core | per size: published v1 → same predictions under v2 → self-served bf16 zero-shot under v2 ("4-bit" superseded by `decisions/gpu-precision/`, 2026-10-11) | Phase E | — |  |
+| bridge-table | frozen (was implementation; Frame 2026-10-28: it fixes what is reported before the self-served zero-shot runs are scored) | core | per size: published v1 → same predictions under v2 → self-served bf16 zero-shot under v2 ("4-bit" superseded by `decisions/gpu-precision/`, 2026-10-11) | Phase E | cut 2026-10-28 (author): the gain is measured within the study's own runs, the baseline is the self-served zero-shot run, stated once in the paper; Р.3's hosted numbers are not compared (framed, scouted and challenged before the cut) | `decisions/bridge-table/` |
 | main-tables-intervals | implementation | core | main table, gain decomposition, paired intervals including the difference of deltas, per-relation, per-tier; the six main runs' registry entries (`analysis/model_registry.json`, `condition`), written with their score files (author, 2026-10-26, in `main-inference-runs`; supersedes `registry-condition-field` rule 5 on that point) | Phase E | — |  |
 | error-analysis | implementation | core | stratified failure sample mapped onto the existing taxonomy, before and after | Phase E | — |  |
 | control-runs | implementation | core | the mechanical-repair control and the few-shot control, scored under v2 | Phase D | cut 2026-10-18 with `controls-definition` | |

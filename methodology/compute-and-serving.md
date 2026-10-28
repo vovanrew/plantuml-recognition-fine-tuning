@@ -97,9 +97,7 @@ three sizes.
 This turn is the study's one arrangement of picture and prompt text. It is the same at the three
 sizes and in both conditions, and every training example starts with it
 (`methodology/training-recipe.md` §5.1). It is chosen to match the order of the benchmark's
-published hosted runs of the three sizes (the benchmark protocol, §2). The bridge table (`FINETUNE_PLAN.md`,
-Phase E) compares those published predictions with the self-served zero-shot run. Its serving
-step thus does not also change the layout of the prompt. The runner sends the text part first
+published hosted runs of the three sizes (the benchmark protocol, §2). The runner sends the text part first
 and runs unchanged: the server takes the two parts in either order and builds this turn from them.
 
 Decoding is greedy and stops at `eos_token_id` [248046, 248044] at every size. `finish_reason` is
@@ -245,8 +243,8 @@ The tests lie under `build/tests/` and `infer/tests/`:
 
 ## 10. The runs on the test set
 
-The runs on the test set make the answers that the main table, the bridge table and the
-data-efficiency curve report. They are eight scored runs (§8) on the 1,000 diagrams of the
+The runs on the test set make the answers that the main table and the data-efficiency curve
+report. They are eight scored runs (§8) on the 1,000 diagrams of the
 benchmark's `data/test_set.json`, with their pictures in the benchmark's `data/puml_images_1568/`
 (`../plantuml-recognition-evaluation/methodology/test-set-construction.md` §7).
 `infer/test_runs.txt` lists them:
@@ -294,7 +292,7 @@ that differ from the benchmark's HEAD. It then packs one commit of the study wit
 listed adapters, and the benchmark's runner, prompt, test set and pictures. Its `fetch` step copies
 each run to the Mac, where the run is checked again (§10.3).
 
-Making the runs scores nothing. The main table, the bridge table and the data-efficiency curve
+Making the runs scores nothing. The main table and the data-efficiency curve
 score these stored runs under scorer v2 (`methodology/scorer-v2.md`).
 
 ### 10.2 How a run is stored
