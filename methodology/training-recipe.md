@@ -1,8 +1,8 @@
 # Training Recipe
 
 Methodological record for how the study trains its adapters, how it picks one adapter per
-training run, how a pilot run checks the pipeline, and the ladder that makes the study's three
-adapters. The recipe trains Qwen3.5-2B, Qwen3.5-9B and Qwen3.5-27B on the training sample of
+training run, how a pilot run checks the pipeline, the ladder that makes the study's three
+adapters, and the 5,000-pair run of the data-efficiency curve. The recipe trains Qwen3.5-2B, Qwen3.5-9B and Qwen3.5-27B on the training sample of
 `methodology/training-set-construction.md` §4. Paths are relative to `fine-tune/`, and the scorer
 repository is `../plantuml-recognition-evaluation`. The analysis protocol of the benchmark,
 `../plantuml-recognition-evaluation/methodology/analysis-protocol.md`, is called the baseline
@@ -97,7 +97,7 @@ five digits, inside the run's folder (`step_00625` to `step_02500` for a main ru
 | Run | Steps per epoch | Steps | Warm-up steps | Adapter saved after step |
 |---|---|---|---|---|
 | 20,000 pairs, every size | 1,250 | 2,500 | 75 | 625, 1,250, 1,875, 2,500 |
-| 5,000 pairs, 2B (optional) | 313 | 626 | 19 | 157, 313, 470, 626 |
+| 5,000 pairs, 2B (§8) | 313 | 626 | 19 | 157, 313, 470, 626 |
 | 1,000 pairs, 2B (the pilot, §6) | 63 | 126 | 4 | 32, 63, 95, 126 |
 
 The 5,000 and 1,000 runs are the nested subsets of `methodology/training-set-construction.md` §4.
@@ -356,7 +356,8 @@ optimizer steps over 2 epochs. It saves the adapter after steps 32, 63, 95 and 1
 checkpoints are answered on the 200 dev diagrams side by side on the card, each after its adapter
 check, and scored under scorer v2 (§2.1). `train/select_checkpoint.py --pairs 1000` then applies
 the rule of §2.2. The exit criterion is CSR > 0 and Element F1 > 0 on the dev set for the selected
-adapter (`FINETUNE_PLAN.md`, Phase B). The selected adapter met the exit criterion.
+adapter (`FINETUNE_PLAN.md`, Phase B). The selected adapter met the exit criterion. It is the
+1,000-pair point of the data-efficiency curve (§8).
 
 ### 6.2 Memory at the longest sequences
 
@@ -395,3 +396,29 @@ took the last checkpoint, step 2,500, because no earlier checkpoint was better. 
 A run's folder `runs/train/<size>_20000` holds `run.json`, the step log `log.jsonl`, the four
 checkpoints, the optimizer state `state.pt` and the choice with its numbers, `selection.json`. The
 dev answers and scores of each checkpoint lie in `runs/dev/<size>_20000/<checkpoint>/`.
+
+## 8. The 5,000-pair run
+
+The 5,000-pair run trains Qwen3.5-2B under the recipe on the 5,000-pair subset, for the
+data-efficiency curve of `methodology/analysis-protocol.md` §15. It is the second row of the table
+of §1.5: 2 epochs, 626 optimizer steps, 19 warm-up steps, and adapters saved after steps 157, 313,
+470 and 626. The recipe is that of §1 at tag `recipe-v1`, as for the ladder. The run therefore
+differs from the 2B's ladder run in the number of distinct pairs, and its steps follow from that
+number. It trains once, on the card of `methodology/compute-and-serving.md` §2, after the ladder.
+
+```
+python train/train.py run --size 2B --pairs 5000 --out runs/train/2B_5000
+```
+
+The four checkpoints are answered on the 200 dev diagrams on one pod, side by side. Their servers
+are equal in everything but the adapter, and the answers are scored under scorer v2 (§2.1, §2.3).
+`train/select_checkpoint.py --pairs 5000` applies the rule of §2.2. It took the last checkpoint,
+step 626, because no earlier checkpoint was better. The run's folder `runs/train/2B_5000` holds
+the files a ladder run holds (§7), and the dev answers and scores of each checkpoint lie in
+`runs/dev/2B_5000/<checkpoint>/`.
+
+The curve's two inner points are the last checkpoint of each run: the pilot's
+`runs/train/2B_1000/step_00126` (§6.1) and `runs/train/2B_5000/step_00626`, the one the rule took. Each
+answers the 1,000 test diagrams as the main runs do (`methodology/compute-and-serving.md` §10).
+Both are scored by the command of `methodology/analysis-protocol.md` §2, under scorer v2 and v1,
+as the main runs are.

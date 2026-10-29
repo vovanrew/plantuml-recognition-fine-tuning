@@ -1,7 +1,8 @@
 # Analysis Protocol
 
 Methodological record for the analysis of the main comparison of Р.4. It says how the six main runs
-on the test set are scored, and how each number of the main tables is computed and read. It holds
+on the test set are scored, and how each number of the main tables is computed and read. §15 does
+the same for the 2B's data-efficiency curve. The file holds
 for this study what `../plantuml-recognition-evaluation/methodology/analysis-protocol.md` holds for
 the benchmark; that file is called the baseline protocol below. The populations, aggregation,
 stratification, per-relation counts, bootstrap, population gap and eligibility rule are those of
@@ -15,7 +16,8 @@ The analysis compares each size with itself. The fine-tuned run of the 2B, 9B an
 with the same size's zero-shot run, answered on the same stack
 (`methodology/compute-and-serving.md` §10). The two runs of a size differ in the adapter alone, so
 each difference measures the fine-tune. Every difference is fine-tuned − zero-shot and is written Δ
-below. This file covers the six main runs; the two data-efficiency runs use the same command (§2).
+below. Sections 2 to 14 cover the six main runs. The 2B's two data-efficiency runs are scored by
+the same command (§2), and §15 gives the curve they belong to.
 
 ## 2. Scoring
 
@@ -212,3 +214,64 @@ outputs stay as they are. No benchmark file is changed.
 
 Each score manifest records the sha256 of the scoring command in `score_test_runs_sha256`.
 `main_tables.json` records that of the analysis code in `meta.main_tables_sha256`.
+
+## 15. The data-efficiency curve
+
+The data-efficiency curve shows how the 2B's scores on the test set change with the number of
+training pairs. It has four points: the zero-shot run (0 pairs) and the runs fine-tuned on 1,000,
+5,000 and 20,000 pairs (`methodology/training-recipe.md` §6 to §8). The 0 and 20,000 points are the
+2B's two main runs. The 1,000 and 5,000 points are the two data-efficiency runs, scored by the
+command of §2 as the main runs are. The curve covers the 2B only.
+
+**The variable.** The curve's one variable is the number of distinct pairs the recipe trains on.
+The recipe trains 2 epochs at every run length, so the optimizer steps and the warm-up grow with
+the pairs: 126, 626 and 2,500 steps (`methodology/training-recipe.md` §1.5). The curve therefore
+reads as more pairs under the recipe, not as more data at a fixed amount of training. Each adapter
+is its run's last checkpoint. Each point has one training seed, so its
+intervals cover diagram variance only (§5).
+
+**What each point shows.** Each point shows its number of compiled diagrams and the statistics of
+the main table (§10) under scorer v2. These are CSR; Element F1 and Relationship F1 micro, full-set
+and compiled-only, with their population gaps; chrF++ macro in both populations; and type accuracy.
+Beside them stand the same six F1 figures under scorer v1, and the failed = 0 figures of §4. The
+populations are those of §4.
+
+**Differences.** A difference is named by the pairs of its two points, with 1k for 1,000. The
+curve gives 1k − 0, 5k − 1k and 20k − 5k on every v2 statistic, each with its paired interval. The 20k − 5k difference on Element F1 and Relationship F1 micro is also given on the joint
+set of the two runs (§7), with the size of that set. A compiled-only difference compares two
+different sets of diagrams, as in §6, and the joint set compares the same diagrams.
+
+**Intervals and reading.** Every interval is that of §5. The draw of diagram indices depends only on
+the number of diagrams, the resamples and the seed, so it is the main comparison's draw. Every point
+and difference is therefore paired by diagram with the main runs. Every number of the curve is
+descriptive. None joins the claim family of §9, and each interval is read on its own at nominal 95%.
+No statistic is fixed in advance to decide whether the gain still rises between 5,000 and 20,000
+pairs, and no interval carries a verdict. The reading is written after the scores are seen, from the
+full table, so that no number is selected before the reader sees it.
+
+**Agreement with the main tables.** The 0 and 20,000 points must equal the main table's numbers,
+so that each run has one value per statistic in Р.4. Before it writes, `build/efficiency_curve.py`
+compares these two points and the 2B's headline Δ (§6) with `runs/test/_analysis/main_tables.json`,
+cell by cell and exactly. It refuses on any difference.
+
+**Registry, code and outputs.** `build/curve_registry.json` holds the six entries of
+`build/test_registry.json`, unchanged and in order, because the loader of `build/main_tables.py`
+requires every pair of §3. It adds the two data-efficiency runs as `qwen3.5-2b-ft1k` (`run_dir`
+`2B_1000`) and `qwen3.5-2b-ft5k` (`2B_5000`), with `condition: fine_tuned`.
+`build/efficiency_curve.py` loads the eight runs with the loader, leak gate and checks of
+`build/main_tables.py` (§3). It computes every statistic and interval with that file's functions,
+imported unchanged. The main tables therefore hold the six main runs only, and the files and
+sha256 of §14 stay as recorded.
+
+```
+python3 build/efficiency_curve.py
+```
+
+The command writes `runs/test/_analysis/efficiency_curve.json` and `efficiency_curve.md`. The json
+records in `meta` the sha256 of the script, of `build/main_tables.py`, of the registry and of the
+published `main_tables.json`.
+
+| File | sha256 |
+|---|---|
+| `build/efficiency_curve.py` | `dfe8845248120032ac458c75e8c806530b10a65b422bddfce41b57d866775b05` |
+| `build/curve_registry.json` | `528fc4b1095eea2b5786e7dcd4c10d24fd3fc956e8678efed4a3e7b36b8c3f12` |

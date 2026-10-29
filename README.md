@@ -21,7 +21,9 @@ Work in progress, state of 2026-10-29. There are no test-set results here yet.
   eight runs on the 1,000 test diagrams (the six main runs and two of the data-efficiency curve) are
   answered and stored; the six main runs are scored under scorer v2 and scorer v1, and the main
   tables are built.
-- Not done: the scoring of the two data-efficiency runs and the curve, and the error analysis.
+- The two data-efficiency runs are scored and the 2B's curve (0 / 1k / 5k / 20k pairs) is built;
+  its reading is not yet written.
+- Not done: the error analysis.
 
 [FINETUNE_PLAN.md](FINETUNE_PLAN.md) §10 lists every step with its status.
 
@@ -31,7 +33,7 @@ Work in progress, state of 2026-10-29. There are no test-set results here yet.
 |---|---|
 | [FINETUNE_PLAN.md](FINETUNE_PLAN.md) | The plan: question, design, phases, item table |
 | [methodology/](methodology/) | What was built and how: [scorer v2](methodology/scorer-v2.md), [training set construction](methodology/training-set-construction.md), [training recipe](methodology/training-recipe.md), [compute and serving](methodology/compute-and-serving.md), [analysis protocol](methodology/analysis-protocol.md) |
-| `build/` | Training pool, near-duplicate check against the test set, sampling, image rendering, the user turn, the scorer v1 to v2 bridge, the scoring of the test-set runs and the main tables (`score_test_runs.py`, `main_tables.py`, the study's registry `test_registry.json`); tests in `build/tests/` |
+| `build/` | Training pool, near-duplicate check against the test set, sampling, image rendering, the user turn, the scorer v1 to v2 bridge, the scoring of the test-set runs and the main tables (`score_test_runs.py`, `main_tables.py`, the study's registry `test_registry.json`), the data-efficiency curve (`efficiency_curve.py`, its registry `curve_registry.json`); tests in `build/tests/` |
 | `infer/` | The server used for both conditions, the run manifest, the adapter check, and the runs on the test set; tests in `infer/tests/` |
 | `train/` | The training recipe and the checkpoint rule; tests in `train/tests/` |
 | `data/pool/`, `data/sets/` | Frozen outputs of `build/`, each folder with a `SHA256SUMS` list |

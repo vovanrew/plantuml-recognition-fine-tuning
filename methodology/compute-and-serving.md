@@ -262,9 +262,11 @@ benchmark's `data/test_set.json`, with their pictures in the benchmark's `data/p
 
 The zero-shot runs and the 20,000-pair runs are the six main runs. The 2B's 1,000-pair and
 5,000-pair runs are the two inner points of the data-efficiency curve, whose end points are the
-2B's two main runs. Each adapter is the one the checkpoint rule (`methodology/training-recipe.md`
-§2.2) selected on the dev set. The 20,000-pair runs are the ladder (§7 of that file), and the
-1,000-pair run is the pilot (§6 of that file). The test set therefore selects nothing. The
+2B's two main runs. Each adapter is its run's last checkpoint; for the 5,000- and 20,000-pair runs
+it is the one the checkpoint rule (`methodology/training-recipe.md` §2.2) selected on the dev set.
+The 20,000-pair runs are the ladder (§7 of that file), the
+5,000-pair run is §8 of that file, and the 1,000-pair run is the pilot (§6 of that file). The test
+set therefore selects nothing. The
 zero-shot condition is answered again on this stack, not taken from the benchmark's published
 hosted runs, so the two conditions of a size differ in the adapter alone (§4).
 
@@ -293,8 +295,9 @@ listed adapters, and the benchmark's runner, prompt, test set and pictures. Its 
 each run to the Mac, where the run is checked again (§10.3).
 
 Making the runs scores nothing. The main table and the data-efficiency curve
-score these stored runs under scorer v2 (`methodology/scorer-v2.md`); the scoring command is
-described in `methodology/analysis-protocol.md` §2.
+score these stored runs under scorer v2 (`methodology/scorer-v2.md`), with scorer v1 beside; the
+scoring command is
+described in `methodology/analysis-protocol.md` §2, and the curve in §15 of that file.
 
 ### 10.2 How a run is stored
 
