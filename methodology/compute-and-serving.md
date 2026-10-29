@@ -309,8 +309,7 @@ in the test set without its `.puml` suffix. The run manifest `manifest.json` lie
 
 The run folder also holds `answer_manifest.json`, with the server's identity, the runner's
 arguments and the sha256 of the test set. A run with an adapter adds `adapter_check.json`, and the
-server's and runner's logs lie there too. The benchmark's run reader (`analysis/run_level.py`,
-`NOT_CELLS`, from benchmark commit `35ed4d5`) leaves `run_meta.json` and `manifest.json` out of
+server's and runner's logs lie there too. The benchmark's run reader (`analysis/run_level.py`) leaves `run_meta.json` and `manifest.json` out of
 the cells. It therefore reads `answers/` as a run, as it reads the benchmark's own runs. The scorers read the `.puml` files alone.
 
 ### 10.3 Checking a stored run

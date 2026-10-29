@@ -1,0 +1,45 @@
+{
+  "title": "Fine-tuning for image-to-PlantUML: Qwen3.5 at 2B, 9B and 27B",
+  "upload_type": "software",
+  "creators": [
+    {
+      "name": "Polishchuk, Volodymyr",
+      "affiliation": "Kyiv National University of Technologies and Design",
+      "orcid": "0009-0000-2161-4560"
+    }
+  ],
+  "license": "cc-by-4.0",
+  "notes": "Licensed in two parts: the software (build/, infer/, train/) under the MIT Licence (LICENSE); the data and documentation, runs.zip included, under CC BY 4.0 (LICENSE-DATA). The diagram sources the key lists name, and any render of them, keep the licence of the repository each source came from. The adapters are on Hugging Face under Apache-2.0.",
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/vovanrew/plantuml-recognition-fine-tuning",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    },
+    {
+      "identifier": "10.5281/zenodo.21670236",
+      "relation": "requires",
+      "scheme": "doi"
+    },
+    {
+      "identifier": "10.5281/zenodo.18952371",
+      "relation": "requires",
+      "scheme": "doi"
+    },
+    {
+      "identifier": "https://github.com/vovanrew/plantuml/releases/tag/v1.2025.9-stats",
+      "relation": "requires",
+      "scheme": "url"
+    }
+  ],
+  "keywords": [
+    "PlantUML",
+    "UML",
+    "multimodal large language models",
+    "diagram recognition",
+    "image-to-code",
+    "fine-tuning",
+    "LoRA",
+    "Qwen3.5"
+  ]
+}

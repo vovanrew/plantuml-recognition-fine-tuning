@@ -1,0 +1,41 @@
+cff-version: 1.2.0
+message: "If you use this study's adapters, runs, scores or code, please cite it as below."
+title: "Fine-tuning for image-to-PlantUML: Qwen3.5 at 2B, 9B and 27B"
+abstract: >-
+  Qwen3.5-2B, 9B and 27B are fine-tuned with one fixed LoRA recipe on 20,000 rendered
+  real-world PlantUML diagrams, and the published image-to-PlantUML benchmark is run before and
+  after on its 1,000 test diagrams, each size against itself. The release holds the code, the
+  frozen key lists, every test-set and dev-set run with its scores, and the tables; the adapters
+  are on Hugging Face.
+type: software
+authors:
+  - family-names: "Polishchuk"
+    given-names: "Volodymyr"
+    orcid: "https://orcid.org/0009-0000-2161-4560"
+    affiliation: "Kyiv National University of Technologies and Design"
+license:
+  - MIT
+  - CC-BY-4.0
+repository-code: "https://github.com/vovanrew/plantuml-recognition-fine-tuning"
+references:
+  - type: software
+    title: "Zero-shot image-to-PlantUML: a multi-level structural evaluation framework and benchmark"
+    authors:
+      - family-names: "Polishchuk"
+        given-names: "Volodymyr"
+    doi: "10.5281/zenodo.21670236"
+  - type: data
+    title: "UML-in-the-Wild: A Dataset of UML Diagrams in PlantUML Notation from Open-Source Repositories"
+    authors:
+      - family-names: "Polischuk"
+        given-names: "Volodymyr"
+    doi: "10.5281/zenodo.18952371"
+keywords:
+  - PlantUML
+  - UML
+  - multimodal large language models
+  - diagram recognition
+  - image-to-code
+  - fine-tuning
+  - LoRA
+  - Qwen3.5
