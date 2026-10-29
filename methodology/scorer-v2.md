@@ -175,7 +175,10 @@ scorer v2, and `_bridge/<level>/` holds each level, with its switches in `_bridg
 v1 result files lie under `../plantuml-recognition-evaluation/data/`.
 
 The table gives micro F1 of the three dense Qwen sizes as full-set / compiled-only. Full-set is the
-zeros-for-failed population of the baseline record (§3). Each row with a plus sign is the change
+zeros-for-failed population of the baseline record (§3). (Superseded by
+`methodology/analysis-protocol.md` §4, 2026-10-29: full-set is over all 1,000 diagrams, computed as
+in Р.3 from the per-diagram rows the runners store; an answer that does not render but that the
+extractor parses keeps its parsed counts, so not every failed answer scores 0.) Each row with a plus sign is the change
 that one rule adds to the rows above it. The two rows "of which the spot letter" are scorer v2 with
 every link and message an edge, minus the same with the letter put back into the names. Type
 accuracy is over compiled answers.

@@ -1,0 +1,8 @@
+@startuml
+!define run() (run())
+class Shop {
+  run()
+}
+class Order
+Shop -- Order
+@enduml

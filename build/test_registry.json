@@ -1,0 +1,90 @@
+{
+  "_doc": [
+    "The study's registry of its six main test-set runs, in the format of the benchmark's",
+    "analysis/model_registry.json (loaded by its analysis/registry.py). The benchmark's own",
+    "registry and every output built from it stay as published. run_dir is the run's name",
+    "under runs/test/, and the link name under runs/test/_root/<version>/ that",
+    "build/score_test_runs.py writes. Each size's zero-shot and fine-tuned entries are paired",
+    "in build/main_tables.py (PAIRS), not here."
+  ],
+  "models": [
+    {
+      "id": "qwen3.5-2b-zs",
+      "display": "Qwen3.5-2B, zero-shot",
+      "run_dir": "2B_zero_shot",
+      "status": "scored",
+      "lab": "qwen",
+      "arm": "qwen",
+      "family": "dense",
+      "params_total_b": 2,
+      "params_active_b": 2,
+      "supplementary": false,
+      "condition": "zero_shot"
+    },
+    {
+      "id": "qwen3.5-2b-ft20k",
+      "display": "Qwen3.5-2B, fine-tuned",
+      "run_dir": "2B_20000",
+      "status": "scored",
+      "lab": "qwen",
+      "arm": "qwen",
+      "family": "dense",
+      "params_total_b": 2,
+      "params_active_b": 2,
+      "supplementary": false,
+      "condition": "fine_tuned"
+    },
+    {
+      "id": "qwen3.5-9b-zs",
+      "display": "Qwen3.5-9B, zero-shot",
+      "run_dir": "9B_zero_shot",
+      "status": "scored",
+      "lab": "qwen",
+      "arm": "qwen",
+      "family": "dense",
+      "params_total_b": 9,
+      "params_active_b": 9,
+      "supplementary": false,
+      "condition": "zero_shot"
+    },
+    {
+      "id": "qwen3.5-9b-ft20k",
+      "display": "Qwen3.5-9B, fine-tuned",
+      "run_dir": "9B_20000",
+      "status": "scored",
+      "lab": "qwen",
+      "arm": "qwen",
+      "family": "dense",
+      "params_total_b": 9,
+      "params_active_b": 9,
+      "supplementary": false,
+      "condition": "fine_tuned"
+    },
+    {
+      "id": "qwen3.5-27b-zs",
+      "display": "Qwen3.5-27B, zero-shot",
+      "run_dir": "27B_zero_shot",
+      "status": "scored",
+      "lab": "qwen",
+      "arm": "qwen",
+      "family": "dense",
+      "params_total_b": 27,
+      "params_active_b": 27,
+      "supplementary": false,
+      "condition": "zero_shot"
+    },
+    {
+      "id": "qwen3.5-27b-ft20k",
+      "display": "Qwen3.5-27B, fine-tuned",
+      "run_dir": "27B_20000",
+      "status": "scored",
+      "lab": "qwen",
+      "arm": "qwen",
+      "family": "dense",
+      "params_total_b": 27,
+      "params_active_b": 27,
+      "supplementary": false,
+      "condition": "fine_tuned"
+    }
+  ]
+}

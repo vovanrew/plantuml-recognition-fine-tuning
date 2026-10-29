@@ -11,7 +11,7 @@ diagrams, with the same images, prompt, decoding and scorer in both conditions.
 
 ## Status
 
-Work in progress, state of 2026-10-28. There are no test-set results here yet.
+Work in progress, state of 2026-10-29. There are no test-set results here yet.
 
 - Done: scorer v2 is frozen; the training, dev and loss-curve sets are drawn and frozen; the image
   pipeline passes its acceptance check on the 1,000 test diagrams; the compute platform is
@@ -19,8 +19,9 @@ Work in progress, state of 2026-10-28. There are no test-set results here yet.
   are frozen; the 2B pilot runs end to end; the three trainings (2B, 9B and 27B on the 20,000
   training pairs) and the 2B's 5,000-pair run are trained, each adapter picked on the dev set; the
   eight runs on the 1,000 test diagrams (the six main runs and two of the data-efficiency curve) are
-  answered and stored.
-- Not done: the scoring of the test-set runs, and the tables.
+  answered and stored; the six main runs are scored under scorer v2 and scorer v1, and the main
+  tables are built.
+- Not done: the scoring of the two data-efficiency runs and the curve, and the error analysis.
 
 [FINETUNE_PLAN.md](FINETUNE_PLAN.md) §10 lists every step with its status.
 
@@ -29,8 +30,8 @@ Work in progress, state of 2026-10-28. There are no test-set results here yet.
 | Path | Content |
 |---|---|
 | [FINETUNE_PLAN.md](FINETUNE_PLAN.md) | The plan: question, design, phases, item table |
-| [methodology/](methodology/) | What was built and how: [scorer v2](methodology/scorer-v2.md), [training set construction](methodology/training-set-construction.md), [training recipe](methodology/training-recipe.md), [compute and serving](methodology/compute-and-serving.md) |
-| `build/` | Training pool, near-duplicate check against the test set, sampling, image rendering, the user turn, the scorer v1 to v2 bridge; tests in `build/tests/` |
+| [methodology/](methodology/) | What was built and how: [scorer v2](methodology/scorer-v2.md), [training set construction](methodology/training-set-construction.md), [training recipe](methodology/training-recipe.md), [compute and serving](methodology/compute-and-serving.md), [analysis protocol](methodology/analysis-protocol.md) |
+| `build/` | Training pool, near-duplicate check against the test set, sampling, image rendering, the user turn, the scorer v1 to v2 bridge, the scoring of the test-set runs and the main tables (`score_test_runs.py`, `main_tables.py`, the study's registry `test_registry.json`); tests in `build/tests/` |
 | `infer/` | The server used for both conditions, the run manifest, the adapter check, and the runs on the test set; tests in `infer/tests/` |
 | `train/` | The training recipe and the checkpoint rule; tests in `train/tests/` |
 | `data/pool/`, `data/sets/` | Frozen outputs of `build/`, each folder with a `SHA256SUMS` list |

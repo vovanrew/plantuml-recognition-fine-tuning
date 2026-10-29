@@ -27,7 +27,7 @@ measurement, decomposed into Δ CSR, Δ compiled-only structural F1 and Δ popul
 | Prompt | `prompts/zero_shot.txt`, verbatim, same for both conditions |
 | Decoding | temperature 0, `max_tokens` 5,376, `enable_thinking: false` |
 | Metrics | CSR, Element F1, Relationship F1, per-relation Relationship F1, type accuracy, chrF++ |
-| Populations | full-set (failed = 0) and compiled-only, side by side |
+| Populations | full-set (failed = 0) and compiled-only, side by side ("failed = 0" superseded by `decisions/main-tables-intervals/`, 2026-10-29: full-set over all 1,000 diagrams, computed as in Р.3 from the stored per-diagram rows, so an answer that does not render but that the extractor parses keeps its parsed counts. `methodology/analysis-protocol.md` §4.) |
 | Statistics | paired percentile bootstrap, seed 20260614, 1,000 resamples |
 
 **Input standard: 1,568 px is re-used** for training images, dev scoring and both evaluation
@@ -70,7 +70,10 @@ Rules for this study:
   fine-tuned score, so the delta gets more conservative. Verify per fix in the bridge table. (Measured on the published zero-shot predictions:
   `methodology/scorer-v2.md` §6. Bridge table cut 2026-10-28, author: `decisions/bridge-table/`; the
   expectation on both conditions is checked by `main-tables-intervals` from the v1 numbers reported
-  alongside.)
+  alongside. "From the v1 numbers reported alongside" superseded by `decisions/main-tables-intervals/`,
+  2026-10-29: the expectation is read on the joint set, the diagrams both runs of a size compiled, as
+  Δ_v2 − Δ_v1 with a paired interval; the full-set and compiled-only v1 deltas stand beside without a
+  verdict. `methodology/analysis-protocol.md` §13.)
 - **Frozen and tagged before any fine-tuned output is scored**, dev-set checkpoint scoring included.
   Record the JAR hash and scorer tag here once frozen.
   Frozen 2026-10-13: tag `scorer-v2` of `../plantuml-recognition-evaluation` (commit `f460b35`);
@@ -213,16 +216,33 @@ Everything under scorer v2, full framework, both populations.
   (Cut from this study, author, 2026-10-28: the gain is measured within the study's own runs, and
   the baseline is the self-served zero-shot run, stated once in the paper; Р.3's hosted numbers are
   not compared. `decisions/bridge-table/`.)
-- **Main table:** size × condition × type × tier.
+- **Main table:** size × condition × type × tier. ("× type × tier" superseded by
+  `decisions/main-tables-intervals/`, 2026-10-29: size × condition, overall and at the type and tier
+  margins, not their cross; margin cells are points. `methodology/analysis-protocol.md` §10.)
 - **Decomposition of every gain:** Δ CSR, Δ compiled-only Element / Relationship F1, Δ population
   gap. Published gaps on Element F1 are +0.632 (2B), +0.354 (9B), +0.241 (27B); the headline result
   is how far fine-tuning collapses them. (Since the bridge table's cut, 2026-10-28: the gaps the
   headline uses are those of the self-served zero-shot runs; the published ones are context only.)
+  ("Δ compiled-only Element / Relationship F1" superseded in part by
+  `decisions/main-tables-intervals/`, 2026-10-29: Element F1 carries the claim; Relationship F1
+  stands beside it and is descriptive; Δ gap is shown with its interval but is not a separate member
+  of the claim family. `methodology/analysis-protocol.md` §6, §9.)
 - **Intervals:** paired bootstrap on each before/after delta, plus a separate paired resample for
   the **difference of deltas** ("2B gains more than 27B"). Three sizes give a direction, not a fit.
+  ("A separate paired resample" superseded by `decisions/main-tables-intervals/`, 2026-10-29: the
+  differences of deltas come from the same draw as the Δ, so they are paired by diagram.
+  `methodology/analysis-protocol.md` §8.)
 - **Per-relation Relationship F1** before and after — the test of the composition / aggregation /
-  dependency hypothesis.
-- **Gains by tier.** Flat gains on the densest tier point at the input, not the model.
+  dependency hypothesis. ("The test of the composition / aggregation / dependency hypothesis"
+  superseded by `decisions/main-tables-intervals/`, 2026-10-29: per-relation results are descriptive,
+  with paired intervals above a support floor and no decoration verdict, because an edge matches only
+  when both endpoint names match too; the direct test, relation agreement on endpoint-matched edges,
+  goes to `error-analysis`. `methodology/analysis-protocol.md` §11.)
+- **Gains by tier.** Flat gains on the densest tier point at the input, not the model. ("Point at the
+  input, not the model" superseded by `decisions/main-tables-intervals/`, 2026-10-29: Δ(tier 4) −
+  Δ(tier 1) is reported with its interval, and a smaller gain on tier 4 is worded as consistent with
+  a limit set by the input, never as showing one; the tiers differ in diagram size and in crowding
+  together. `methodology/analysis-protocol.md` §12.)
 - **Robustness** reported next to the main result, same metrics.
 - **Error analysis** on a stratified failure sample, mapped onto the existing taxonomy so before and
   after compare like with like.
@@ -297,13 +317,15 @@ fine-tune/
   data/          train/dev key lists, jsonl, leakage report   (images gitignored; the freeze is
                  `data/*/SHA256SUMS`; the folder is a git repository since 2026-10-13)
   build/         pool construction, rendering, formatting; assembly of the scorer-v2 extractor
-                 JAR and the v1-to-v2 bridge of the stored runs
+                 JAR and the v1-to-v2 bridge of the stored runs; scoring of the test-set runs,
+                 the main tables and the study's registry (`main-tables-intervals`)
   train/         the recipe, one file for every size ("configs (one per size)" superseded by
                  `decisions/recipe/`, 2026-10-18), the checkpoint rule, launch scripts
   infer/         the study's server, the run manifest and the adapter check (the runner is the benchmark's, unchanged);
                  the runs on the test set (run list, card queue, session driver)
-  runs/          local working output of a card session, kept out of the repository; a finished run
-                 that is not final moves to its item's folder under `decisions/`; final runs are
+  runs/          local working output of a card session and its scores and tables, kept out of
+                 the repository; a finished run that is not final moves to its item's folder
+                 under `decisions/`; final runs are
                  published by `adapter-release` ("raw outputs, immutable" superseded, author,
                  2026-10-19)
   decisions/     one folder per §10 item: record.md plus the role outputs (plan-item skill);
@@ -321,7 +343,10 @@ imports it, runs it or is produced by it, and a methodology entry names no comma
 `decisions/`. A script that comes to be needed is moved out.
 
 Scoring and analysis stay in `../plantuml-recognition-evaluation` so both conditions go through one
-instrument.
+instrument. (Superseded in part by `decisions/main-tables-intervals/`, 2026-10-29: the instrument's
+runners, loader and bootstrap run unchanged, so both conditions still go through one instrument; the
+study's scoring and analysis commands are in `build/`, and their outputs are in `runs/test/`.
+`methodology/analysis-protocol.md` §2, §3, §14.)
 
 ## 10. Items
 
@@ -368,8 +393,8 @@ once the core results exist. An optional item that is not done moves to §6 with
 | main-inference-runs | implementation | core | 6 runs, raw responses stored in the benchmark's run format; its tooling and card session also make the two test-set runs of `data-efficiency-runs` | Phase D | recorded 2026-10-28 (verified 2026-10-28, `verify.md`, second pass; tooling 2026-10-26; the card session 2026-10-26 to 2026-10-28: eight runs on the test set, the six main and the two of `data-efficiency-runs`, each manifest passing with `n_cells` 1,000; the port check; the benchmark's run reader skips the run manifest) | `decisions/main-inference-runs/` · `methodology/compute-and-serving.md` §10 |
 | controls-and-robustness-runs | implementation | core | the two control runs and the robustness run, scored under v2 | Phase D | split 2026-10-04 into control-runs and robustness-runs |  |
 | bridge-table | frozen (was implementation; Frame 2026-10-28: it fixes what is reported before the self-served zero-shot runs are scored) | core | per size: published v1 → same predictions under v2 → self-served bf16 zero-shot under v2 ("4-bit" superseded by `decisions/gpu-precision/`, 2026-10-11) | Phase E | cut 2026-10-28 (author): the gain is measured within the study's own runs, the baseline is the self-served zero-shot run, stated once in the paper; Р.3's hosted numbers are not compared (framed, scouted and challenged before the cut) | `decisions/bridge-table/` |
-| main-tables-intervals | implementation | core | main table, gain decomposition, paired intervals including the difference of deltas, per-relation, per-tier; the six main runs' registry entries (`analysis/model_registry.json`, `condition`), written with their score files (author, 2026-10-26, in `main-inference-runs`; supersedes `registry-condition-field` rule 5 on that point) | Phase E | — |  |
-| error-analysis | implementation | core | stratified failure sample mapped onto the existing taxonomy, before and after | Phase E | — |  |
+| main-tables-intervals | frozen (was implementation; Frame 2026-10-28: it fixes what is reported, the interval family and the reading rules before the six runs are scored) | core | main table, gain decomposition, paired intervals including the difference of deltas, per-relation, per-tier; the six main runs' registry entries (`analysis/model_registry.json`, `condition`; "`analysis/model_registry.json`" superseded by `decisions/main-tables-intervals/`, 2026-10-29: the study's own `build/test_registry.json`, the published registry unchanged), written with their score files (author, 2026-10-26, in `main-inference-runs`; supersedes `registry-condition-field` rule 5 on that point) | Phase E | recorded 2026-10-29 (verified 2026-10-29, `verify.md`, second pass) | `decisions/main-tables-intervals/` · `methodology/analysis-protocol.md` §1–§14 |
+| error-analysis | implementation | core | stratified failure sample mapped onto the existing taxonomy, before and after; relation agreement on endpoint-matched edges, the direct per-relation test (from `main-tables-intervals`, 2026-10-29) | Phase E | — |  |
 | control-runs | implementation | core | the mechanical-repair control and the few-shot control, scored under v2 | Phase D | cut 2026-10-18 with `controls-definition` | |
 | robustness-runs | implementation | optional | the alternative-theme run first; image degradation after the fine-tune results, if time allows | Phase D | — | |
 | human-rater-validation | implementation | optional | people rate a sample of predictions; agreement between their ratings and the metrics, under v1 and v2 | ASSESSMENT §6 weeks 9–12 | — | |

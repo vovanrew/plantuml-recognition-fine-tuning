@@ -293,7 +293,8 @@ listed adapters, and the benchmark's runner, prompt, test set and pictures. Its 
 each run to the Mac, where the run is checked again (§10.3).
 
 Making the runs scores nothing. The main table and the data-efficiency curve
-score these stored runs under scorer v2 (`methodology/scorer-v2.md`).
+score these stored runs under scorer v2 (`methodology/scorer-v2.md`); the scoring command is
+described in `methodology/analysis-protocol.md` §2.
 
 ### 10.2 How a run is stored
 
