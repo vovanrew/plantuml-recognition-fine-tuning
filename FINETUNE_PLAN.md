@@ -240,7 +240,7 @@ Everything under scorer v2, full framework, both populations.
   superseded by `decisions/main-tables-intervals/`, 2026-10-29: per-relation results are descriptive,
   with paired intervals above a support floor and no decoration verdict, because an edge matches only
   when both endpoint names match too; the direct test, relation agreement on endpoint-matched edges,
-  goes to `error-analysis`. `methodology/analysis-protocol.md` §11.)
+  goes to `error-analysis`. `methodology/analysis-protocol.md` §11.) (Done by `error-analysis`, 2026-10-29: `methodology/analysis-protocol.md` §16.)
 - **Gains by tier.** Flat gains on the densest tier point at the input, not the model. ("Point at the
   input, not the model" superseded by `decisions/main-tables-intervals/`, 2026-10-29: Δ(tier 4) −
   Δ(tier 1) is reported with its interval, and a smaller gain on tier 4 is worded as consistent with
@@ -248,7 +248,8 @@ Everything under scorer v2, full framework, both populations.
   together. `methodology/analysis-protocol.md` §12.)
 - **Robustness** reported next to the main result, same metrics.
 - **Error analysis** on a stratified failure sample, mapped onto the existing taxonomy so before and
-  after compare like with like.
+  after compare like with like. (Done by `error-analysis`, 2026-10-29: a blind hand-coded sample of 95 failure cases and
+  relation agreement on endpoint-matched edges, `methodology/analysis-protocol.md` §16.)
 
 ## 5. Schedule
 
@@ -270,6 +271,7 @@ Everything under scorer v2, full framework, both populations.
 | The other 7 diagram types | class + sequence = 76.2% of the corpus |
 | Inference-only controls (few-shot / format-constrained prompt, mechanical repair pass) | not part of the paper; a separate thesis (author, 2026-10-18) |
 | Bridge table (Р.3's published zero-shot numbers, re-scored under v2, against the study's self-served zero-shot run) | the gain is measured within the study's own runs; the baseline is the self-served zero-shot run, stated once in the paper (author, 2026-10-28) |
+| Classifier rates per 1,000 of compile-fail categories (C1 / C2 / C3) | the classifier's raw rates are wrong in size and the chapter does not need them; `error-analysis`'s hand sample and §16 counts describe the failures (author, 2026-10-29) |
 | Hand-labelled in-the-wild image set | manual ground truth is the expensive part; theme + degradation covers the threat |
 
 ## 7. Open questions
@@ -398,7 +400,8 @@ once the core results exist. An optional item that is not done moves to §6 with
 | controls-and-robustness-runs | implementation | core | the two control runs and the robustness run, scored under v2 | Phase D | split 2026-10-04 into control-runs and robustness-runs |  |
 | bridge-table | frozen (was implementation; Frame 2026-10-28: it fixes what is reported before the self-served zero-shot runs are scored) | core | per size: published v1 → same predictions under v2 → self-served bf16 zero-shot under v2 ("4-bit" superseded by `decisions/gpu-precision/`, 2026-10-11) | Phase E | cut 2026-10-28 (author): the gain is measured within the study's own runs, the baseline is the self-served zero-shot run, stated once in the paper; Р.3's hosted numbers are not compared (framed, scouted and challenged before the cut) | `decisions/bridge-table/` |
 | main-tables-intervals | frozen (was implementation; Frame 2026-10-28: it fixes what is reported, the interval family and the reading rules before the six runs are scored) | core | main table, gain decomposition, paired intervals including the difference of deltas, per-relation, per-tier; the six main runs' registry entries (`analysis/model_registry.json`, `condition`; "`analysis/model_registry.json`" superseded by `decisions/main-tables-intervals/`, 2026-10-29: the study's own `build/test_registry.json`, the published registry unchanged), written with their score files (author, 2026-10-26, in `main-inference-runs`; supersedes `registry-condition-field` rule 5 on that point) | Phase E | recorded 2026-10-29 (verified 2026-10-29, `verify.md`, second pass) | `decisions/main-tables-intervals/` · `methodology/analysis-protocol.md` §1–§14 |
-| error-analysis | implementation | core | stratified failure sample mapped onto the existing taxonomy, before and after; relation agreement on endpoint-matched edges, the direct per-relation test (from `main-tables-intervals`, 2026-10-29) | Phase E | — |  |
+| error-analysis | frozen (changed from implementation at Frame, 2026-10-29: it selects the failure sample, judges outputs and defines a reported statistic) | core | stratified failure sample mapped onto the existing taxonomy, before and after; relation agreement on endpoint-matched edges, the direct per-relation test (from `main-tables-intervals`, 2026-10-29) | Phase E | recorded 2026-10-29 (verified 2026-10-29, `verify.md`, third pass; decided 2026-10-29, author: option 1, a blind hand-worked sample of 95 failure cases, and relation agreement on edges paired across both runs; option 2, the classifier census, split into `failure-classifier-rates`, cut 2026-10-29) | `decisions/error-analysis/` · `methodology/analysis-protocol.md` §16 |
+| failure-classifier-rates | frozen | optional | the baseline-errors thesis classifier's compile-fail branch ported into `build/`, frozen and hashed before it labels any fine-tuned answer; C1 / C2 / C3 rates per 1,000 diagrams before and after over the 1,964 compile-fail cells of the six main runs (the low-structural cells keep `error-analysis`'s hand sample and mechanical split); validated on about 80 held-out cases stratified on classifier code × condition, with agreement reported per condition (split from `error-analysis` option 2, author, 2026-10-29; run in parallel with it) | Phase E; row error-analysis | cut 2026-10-29 (author, after Implement): its validation shows the raw rates wrong in size (zero-shot C3 about half the corrected figure) with intervals around them, and the chapter does not need them; `error-analysis` already states the compile-fail mix (decided 2026-10-29: compile-fail codes only) | `decisions/failure-classifier-rates/` |
 | control-runs | implementation | core | the mechanical-repair control and the few-shot control, scored under v2 | Phase D | cut 2026-10-18 with `controls-definition` | |
 | robustness-runs | implementation | optional | the alternative-theme run first; image degradation after the fine-tune results, if time allows | Phase D | — | |
 | human-rater-validation | implementation | optional | people rate a sample of predictions; agreement between their ratings and the metrics, under v1 and v2 | ASSESSMENT §6 weeks 9–12 | — | |

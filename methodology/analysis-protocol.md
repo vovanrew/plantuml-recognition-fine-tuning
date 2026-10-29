@@ -2,7 +2,8 @@
 
 Methodological record for the analysis of the main comparison of Р.4. It says how the six main runs
 on the test set are scored, and how each number of the main tables is computed and read. §15 does
-the same for the 2B's data-efficiency curve. The file holds
+the same for the 2B's data-efficiency curve. §16 gives the error analysis of the six main runs and
+relation agreement on endpoint-matched edges. The file holds
 for this study what `../plantuml-recognition-evaluation/methodology/analysis-protocol.md` holds for
 the benchmark; that file is called the baseline protocol below. The populations, aggregation,
 stratification, per-relation counts, bootstrap, population gap and eligibility rule are those of
@@ -16,7 +17,7 @@ The analysis compares each size with itself. The fine-tuned run of the 2B, 9B an
 with the same size's zero-shot run, answered on the same stack
 (`methodology/compute-and-serving.md` §10). The two runs of a size differ in the adapter alone, so
 each difference measures the fine-tune. Every difference is fine-tuned − zero-shot and is written Δ
-below. Sections 2 to 14 cover the six main runs. The 2B's two data-efficiency runs are scored by
+below. Sections 2 to 14 and §16 cover the six main runs. The 2B's two data-efficiency runs are scored by
 the same command (§2), and §15 gives the curve they belong to.
 
 ## 2. Scoring
@@ -168,7 +169,8 @@ in the population of both runs, it has at least 100 ground-truth edges and at le
 that hold it. Below this floor, its run cells and its Δ are points, because few diagrams make the
 interval unstable. An edge matches only when its relation and both endpoint names match. A rise in
 a relation's F1 therefore does not isolate the reading of its decoration, and the per-relation
-results carry no verdict on it.
+results carry no verdict on it. The direct test is relation agreement on endpoint-matched edges
+(§16).
 
 ## 12. Tiers
 
@@ -275,3 +277,153 @@ published `main_tables.json`.
 |---|---|
 | `build/efficiency_curve.py` | `dfe8845248120032ac458c75e8c806530b10a65b422bddfce41b57d866775b05` |
 | `build/curve_registry.json` | `528fc4b1095eea2b5786e7dcd4c10d24fd3fc956e8678efed4a3e7b36b8c3f12` |
+
+## 16. Error analysis and relation agreement
+
+The error analysis says what kinds of failure the six main runs make before and after fine-tuning.
+It has three parts: outcome counts per 1,000 diagrams, a blind hand-coded sample of failure cases,
+and relation agreement on endpoint-matched edges. Relation agreement is the direct test of reading
+a relation's decoration, which per-relation F1 cannot isolate (§11). Every number is under scorer
+v2, and no scorer v1 figure is shown. Every number is descriptive and outside the claim family of
+§9. The data-efficiency runs are not part of it, because the analysis compares before and after.
+
+**Outcome classes.** Each diagram of a run gets one of the four outcome classes of the baseline
+protocol (its §7), decided in order: provider drop, compile fail, compiled low-structural, ok. The class
+comes from the run's stored v2 CSR row and its answer file, never from the F1 rows' `has_pred`
+flag. Provider drop is a CSR `error` that starts with "no prediction". Compile fail is a CSR
+`compiled` flag that is false. Compiled low-structural is a per-diagram Element F1 or Relationship
+F1 below 0.5, the baseline's cut. The answer held back from the extractor (§2; key
+`923d1610f6a6249cca9aa5ad7183ec60c1a6beba` of `9B_zero_shot`) is therefore a compile fail. The
+model answered and stopped, and the answer does not render, so it is not a provider drop.
+
+**Taxonomy.** The codes are the baseline's twelve (R, C1 to C3, S1 to S7, M; baseline
+`analysis/error_analysis.md` §2). Each case gets one primary code and any secondaries. The coding
+instructions are `build/error_codebook.md`. Six restatements fit the codes to scorer v2:
+
+- R stays as a row. It is 0 in every run, because every cell holds an answer.
+- C2 is an answer with no `@enduml`, the baseline's rule. A compile fail takes C1, C2 or C3 as its
+  primary, and a structural defect it shows is a secondary.
+- A typed circle letter kept in a name (`C Admin` for `Admin`) is a misread name, S4, as is a
+  dropped or added word. Scorer v2 scores these as misses, because they are reading errors that
+  fine-tuning may fix.
+- Notes that take members or labels are S3 with the secondary `note`. Notes that replace messages
+  are S2 with `note`. Scorer v2 counts notes on purpose (`methodology/scorer-v2.md` §3), so a note
+  is model behaviour, not a measurement artifact.
+- M is a primary only for an instrument effect that scorer v2 still has. Either the ground truth
+  declares what its image does not draw, or the extractor splits a faithful name (a dotted name
+  read as a namespace path). Anything else a coder would call M goes to the author.
+- An edge drawn between the right two elements but reversed, or an association with its arrowhead
+  wrong, is S1, a wrong decoration. Relation agreement treats it the same way, as its orientation
+  row.
+
+**The sample.** The strata are run × diagram type × tier × failure class (compile fail or compiled
+low-structural), 16 cells per run. Each cell gives one case. One cell is empty (`9B_20000`,
+sequence, tier 2, low-structural), so the sample holds 95 cases. One case per cell shows the kinds
+of failure, not how often each occurs. The case is drawn with the baseline sampler's `select_cell`
+and `cell_seed_key` (`analysis/failure_sampler.py`), seed 20260614, with the run name as the model
+id. The keys are written to `runs/test/_analysis/error_sample/keys.json` before any case is coded.
+
+**What the coder sees.** Each case is a packet: the input image, the ground-truth PlantUML, the
+answer and its outcome class. A compile fail carries the renderer's message. A compiled
+low-structural case carries its structural diff: matched, missed and spurious nodes and edges, as
+scorer v2 keys them.
+
+**Blinding.** The packets have shuffled ids (`E01` to `E95`) and hide run, size and condition. The
+answer is shown without its display-only lines, because they can reveal the condition and do not
+change the diagram. These are `skinparam` with its block, `title`, `hide`, `show`, `scale`, the
+two direction directives, lines that start with `!` or `'`, and `/' … '/` comments. The stripped
+lines sit in a separate file, opened only for a compile fail that the shown answer does not
+explain. An answer longer than 120 shown lines is clipped to its first 90 and last 30. The ground
+truth keeps its first comment line with the diagram key, which both conditions of a diagram share.
+
+**Separability.** How blind the coding is gets reported per size. The measure is the balanced
+accuracy of the best rule "zero-shot if any of A and none of B" on the shown answers of every
+failure cell. A holds at most three cues and B at most two. The twelve cues are six directive cues,
+absent after stripping, and six that survive it. These are directional arrows (`-up-` and the
+like), `note`, an alias (`as X`), a quoted name, more than 60 lines, and no `@enduml`. The rule is
+searched on the same cells it is scored on, so the figure is an upper bound for that rule family.
+
+**Coding.** Two independent passes code every case from its packet and the codebook. Each pass is a
+language-model coder, Claude Opus 5.5 (`claude-opus-5-5`), in four batches, and pass 2 never sees
+pass 1. Agreement on the primary code is reported per condition and overall, raw and as Cohen's κ.
+Every primary disagreement and every case a coder flags goes to the author, whose code is final.
+The coders are named in `error_sample/coders.json` and in the report. The report gives each run's
+primary codes as counts in the sample. It adds a written description of each size's failures
+before and after, written after the coding. No category rate per 1,000 diagrams and no interval on
+a category comes from the sample.
+
+**Counts per 1,000 diagrams.** Each run gets its compile fails and, of those, the
+answers with no `@enduml` (C2), with `finish_reason` `length` beside. It gets its compiled
+low-structural cells, split into Element F1 only, Relationship F1 only and both, and its ok and
+provider-drop cells. The shares of the run's own failures
+stand beside them, labelled as shares, because a share can rise while its count falls. A
+transition table per size gives each diagram's zero-shot class against its fine-tuned class. The
+counts carry no intervals, because the compile-fail difference already has one as Δ CSR (§6).
+
+**Relation agreement on endpoint-matched edges.** Edges come from the re-extracted graphs (below),
+with names under v2's `normalize()` and the first diagram of each answer. A ground-truth edge is
+endpoint-matched when it pairs one-to-one with an answer edge on the same unordered pair of names.
+Within a pair of names, edges of the same relation pair first, and the rest pair in sorted order.
+Two names that are both read but have no answer edge between them do not count. That is a missing
+edge, not a misread decoration.
+
+- *Population.* The ground-truth edges endpoint-matched in both runs of a size, on the diagrams
+  both runs compiled (§7). The same edges are judged before and after, so Δ does not mix reading
+  the decoration with connecting more edges.
+- *Relations.* The five class relations: inheritance, composition, aggregation, dependency and
+  association. Edges with a note endpoint (node type `note` or `tips`) are left out. Sequence
+  messages are reported apart, as family agreement. Every sequence edge is a `message`, so a
+  disagreement there means the wrong diagram family.
+- *Statistic.* Per relation and run, the share of endpoint-matched ground-truth edges whose answer
+  edge has the same relation, and its Δ. Beside it stand a ground truth × answer relation matrix
+  and an orientation row on the agreeing edges. Orientation is the same canonical source and
+  target. For an association it is the same arrowhead class: one head at the same node, or none or
+  two.
+- *Blind spots of the vocabulary.* A realization arrow counts as inheritance. A dotted line with no
+  head counts as dependency. Message arrow styles are not distinguished.
+- *Intervals.* The paired bootstrap of §5 resamples diagrams and re-pools their edges. A relation
+  gets an interval only when its paired denominator holds at least 100 edges in at least 30
+  diagrams, the floor of §11. Below that it gets points only.
+- *Reading.* Each interval is read on its own at nominal 95%, without correction, and the report
+  states how many there are. A relation whose Δ interval lies above 0 is worded "consistent with
+  better reading of that decoration", never "shows". The intervals cover diagram variance only, not
+  decoding or training seed (§5). The selection effect of pairing by edge is not measured.
+
+**Limitations.** The report states the test images that do not show what their ground truth
+declares:
+
+- Key `7b907a2193a6…`: the ground truth declares `Either --> "type" Either.SideType`, which its
+  image does not draw.
+- Keys `de434622c1f4…`, `73ece5e02bc2…` and `4ef701ef62d4…`: the source asks for a transparent
+  background and the test image is rendered on black. Black arrows and labels drawn on it do not
+  show (for `4ef701ef62d4…`, those outside its one filled box).
+
+Together the four are 4 of the 1,000 test diagrams, 29 of the 5,742 ground-truth elements (0.5%) and
+42 of the 9,265 ground-truth edges (0.45%). A rate per 1,000 diagrams moves by at most 4 if they are
+left out; the main tables keep them.
+
+**Code, checks and outputs.**
+
+```
+python3 build/error_analysis.py draw
+python3 build/error_analysis.py report
+```
+
+`draw` classes every cell, draws the sample and writes the blinded packets to
+`runs/test/_analysis/error_sample/cases/`. It refuses a folder that is not empty, so the sample is
+drawn once. `report` writes `runs/test/_analysis/error_analysis.json` and `error_analysis.md`. Both
+commands re-extract the ground-truth and answer graphs with the v2 extractor JAR
+(`methodology/scorer-v2.md` §7), holding back the answers listed under `extractor_crashes`. They
+compare every re-extracted graph with the stored v2 Element F1 and Relationship F1 rows, and stop on
+any difference. `report` refuses a codebook whose sha256 differs from the one recorded at the
+draw. The files of §14 and their sha256 stay as recorded.
+
+| File | sha256 |
+|---|---|
+| `build/error_codebook.md`, frozen at the draw | `2791dcbf9eb076ebca61e6c06557fc7fbcc9e556b4ededd46f99a2303b42d9c9` |
+| `build/error_analysis.py` at the draw | `562a3c2c67d9ca867b9536f7b8070bf05859710180a2bb3043a50cf7b84937d9` |
+| `build/error_analysis.py`, which wrote the report | `48b0c33308dd85910cca65fafb3d550e153ed2e2d5345069c09e666942274adc` |
+
+`keys.json` records the codebook and the draw-time script sha256. The json records all three in
+`meta` (`codebook_sha256`, `error_analysis_sha256_at_draw`, `error_analysis_sha256`). No tag is made: the
+hashes identify the frozen files, as §14's do for the main tables.
