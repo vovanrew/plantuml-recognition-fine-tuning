@@ -3,7 +3,8 @@
 Methodological record for the analysis of the main comparison of Р.4. It says how the six main runs
 on the test set are scored, and how each number of the main tables is computed and read. §15 does
 the same for the 2B's data-efficiency curve. §16 gives the error analysis of the six main runs and
-relation agreement on endpoint-matched edges. The file holds
+relation agreement on endpoint-matched edges. §17 gives the difficulty regression of the six main
+runs. The file holds
 for this study what `../plantuml-recognition-evaluation/methodology/analysis-protocol.md` holds for
 the benchmark; that file is called the baseline protocol below. The populations, aggregation,
 stratification, per-relation counts, bootstrap, population gap and eligibility rule are those of
@@ -17,7 +18,7 @@ The analysis compares each size with itself. The fine-tuned run of the 2B, 9B an
 with the same size's zero-shot run, answered on the same stack
 (`methodology/compute-and-serving.md` §10). The two runs of a size differ in the adapter alone, so
 each difference measures the fine-tune. Every difference is fine-tuned − zero-shot and is written Δ
-below. Sections 2 to 14 and §16 cover the six main runs. The 2B's two data-efficiency runs are scored by
+below. Sections 2 to 14, §16 and §17 cover the six main runs. The 2B's two data-efficiency runs are scored by
 the same command (§2), and §15 gives the curve they belong to.
 
 ## 2. Scoring
@@ -427,3 +428,121 @@ draw. The files of §14 and their sha256 stay as recorded.
 `keys.json` records the codebook and the draw-time script sha256. The json records all three in
 `meta` (`codebook_sha256`, `error_analysis_sha256_at_draw`, `error_analysis_sha256`). No tag is made: the
 hashes identify the frozen files, as §14's do for the main tables.
+
+## 17. Difficulty regression
+
+The difficulty regression says which properties of a test diagram predict compile failure and the
+per-diagram Element F1 of the six main runs, before and after fine-tuning. It asks in particular
+whether the data separate the size of a diagram from the crowding of its picture, which a tier
+contrast cannot do (§12). Every number is under scorer v2, and no scorer v1 figure is shown. The
+data-efficiency runs are not part of it, because the analysis compares before and after.
+
+**Outcomes.** Compile success is the run's v2 CSR `compiled` flag, on all 1,000 diagrams of the
+run. Element F1 is the per-diagram v2 Element F1 on the run's own compiled diagrams (§4). Its Δ
+therefore compares two different sets of diagrams, as in §6. Relationship F1 is not an outcome.
+For each fine-tuned run, the report states how many of its compiled low-structural cells (§16)
+involve Element F1, alone or with Relationship F1. The counts come from `counts` in
+`runs/test/_analysis/error_analysis.json`. The report adds that the regression therefore does not
+describe low relationship accuracy.
+
+**Predictors.** Size is log `content_lines`, the tier variable (baseline
+`methodology/test-set-construction.md` §5). Crowding has two axes, one per
+model, each named in the report for what it measures:
+
+| Model | Crowding axis | Name in the report |
+|---|---|---|
+| A | area of the standardized 1,568 px input image, in megapixels | image area at 1,568 px (for most large diagrams, the aspect ratio) |
+| B | shrink: original area / standardized area, 1 for an image whose original long side is at most 1,568 px | how far the image was shrunk |
+
+Neither axis alone measures crowding. For most large diagrams the standardized area records the
+aspect ratio, and the shrink records how far the glyphs were reduced. Both models are therefore
+reported side by side. `content_lines`, `primary_type`, `image_width` and `image_height` (the
+original render) come from the benchmark's `data/test_set.json`. The standardized width and height
+come from the PNG headers in its `data/puml_images_1568/`. The script refuses an image whose long
+side is not the smaller of 1,568 px and the original long side.
+
+**The models.** Each run, outcome and crowding axis gets one model: a type indicator (class as the
+reference), z log `content_lines` and z log of the crowding axis. The two types are pooled with
+common slopes, so each run has one crowding difference per axis. The z values are standardized
+within type, with the population SD of the log over the 1,000 test diagrams. These constants are
+fixed once and are not re-estimated in a resample. Compile success is fitted by Firth-penalized
+logistic regression (Jeffreys prior). A fine-tuned run that compiles nearly every diagram of a cell
+then still gives finite estimates. Element F1 is fitted by fractional logit (Bernoulli
+quasi-likelihood, logit link) without a penalty, which takes values of exactly 0 and 1 as they are.
+Both fits use Newton-Raphson with step-halving, in hand-written numpy. A fit converges when its
+largest absolute Newton step falls below 1e-8 within 100 iterations and every estimate is finite.
+A singular information matrix counts as not converging.
+
+**The read quantity.** A property's predicted difference is read on the probability scale, so that
+runs with very different compile rates are compared on one scale. Every diagram of the run's
+population gets the property's 25th percentile among its own type's test-set values, then the 75th,
+with the other terms as observed. The predicted probabilities are averaged over the population, and
+the difference is 75th − 25th. The percentiles are type 7, taken on the raw values within type and
+then put on the z log scale. They are fixed from the test set and are not re-estimated in a
+resample. For compile, the average is the predicted compile rate over all 1,000 diagrams. For
+Element F1, it is the predicted mean Element F1 over the run's compiled diagrams. Predicted
+differences are given for size and for crowding, in both parts, each with its Δ. The levels at the
+25th and the 75th percentile are points. The coefficients (logit scale, per SD) appear in a table,
+and no difference of coefficients is computed. The report states the ceiling: each run's compile
+failures per 1,000 diagrams, with the sentence "a run with few failures cannot show a large
+difference in compile rate".
+
+**Intervals.** Every interval is that of §5. The rows are those of `load` in `build/main_tables.py`,
+and the draw of diagram indices is that file's, imported unchanged. The regression is therefore
+paired by diagram with the main tables, and every Δ is fine-tuned − zero-shot resample by resample.
+A compile model whose minority outcome (failures or compiles, whichever is fewer) in the full run is
+below 25 gives points only. A fit that does not converge, on the full run or on a resample, makes the
+cells of that fit point-only (§5). These are the only two rules that leave a cell without an interval.
+
+**Repository ratio.** The test set holds up to five diagrams per repository, and the intervals
+resample diagrams. For each run and axis, the report states a ratio of two SDs of the crowding
+difference in predicted compile rate. The numerator is its SD under 1,000 resamples of
+repositories, and the denominator is its SD under the diagram resamples of the intervals. Each
+resample draws as many repositories as the test set holds (815),
+with replacement, from `random.Random(20260614)` over the sorted repository names. Every diagram of
+a drawn repository enters. The ratio is stated and is not used for the intervals.
+
+**Read list and agreement rule.** The two axes run in opposite directions: more standardized area
+is less crowded, and more shrink is more crowded. The read list therefore orients each crowding
+difference as the more crowded end minus the less crowded end. Model A's 75th − 25th difference and
+its interval are negated, and Model B's are used as they are. The tables keep the literal 75th −
+25th. An oriented difference below 0 means that the more crowded end predicts the lower compile
+rate. The read list holds 12 intervals: for each axis, the crowding difference in predicted compile
+rate after fine-tuning for each size (3) and its Δ (3).
+
+For each size and read quantity, the two axes' intervals are compared. Where both lie on the same
+side of 0, the report states that side. Otherwise, and where either is point-only, it states the
+fixed sentence "the data do not separate size from crowding", never "crowding does not matter". The
+rule keeps a crowding statement from resting on one axis. A crowding statement is worded as §12
+words a tier contrast: consistent with a limit set by the input, never showing one.
+
+**Reading.** Every number is descriptive and outside the claim family of §9. Each interval is read
+on its own at nominal 95%, without correction. The report holds 168 interval cells and states how
+many of them carry an interval. Per run, model and part, these are the four coefficients and the
+two predicted differences (144). The other 24 are the Δ of each predicted difference per size,
+model, part and property. The read list's 12 are among them.
+
+**Agreement with the main tables.** Before it writes, `build/difficulty_regression.py` compares each
+run's CSR, its CSR interval on the draw and its compiled count, and the seed and number of
+resamples, with `runs/test/_analysis/main_tables.json`, exactly. It refuses on any difference. It
+also refuses a published file whose `meta.main_tables_sha256` is not that of the current
+`build/main_tables.py`.
+
+**Code and outputs.**
+
+```
+python3 build/difficulty_regression.py
+```
+
+The command writes `runs/test/_analysis/difficulty_regression.json` and
+`difficulty_regression.md`. The json records in `meta` the sha256 of the script, of
+`build/main_tables.py`, of the published `main_tables.json`, of `error_analysis.json` and of
+`test_set.json`. The files of §14 and §15 and their sha256 stay as recorded.
+
+The specification was fixed after the six runs' overall, per-type and per-tier results were known
+but before any regression was fitted. The orientation of the crowding axes was fixed in code before
+the first run on study data.
+
+| File | sha256 |
+|---|---|
+| `build/difficulty_regression.py` | `1a433558f9cc3649138d9043600aa578c7b09c7cc993645f21f9506ddbf1fe73` |

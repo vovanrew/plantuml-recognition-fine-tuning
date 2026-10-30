@@ -250,6 +250,9 @@ Everything under scorer v2, full framework, both populations.
 - **Error analysis** on a stratified failure sample, mapped onto the existing taxonomy so before and
   after compare like with like. (Done by `error-analysis`, 2026-10-29: a blind hand-coded sample of 95 failure cases and
   relation agreement on endpoint-matched edges, `methodology/analysis-protocol.md` §16.)
+- **Difficulty regression:** which diagram properties predict compile failure and low Element F1,
+  before and after. (Done by `difficulty-regression`, 2026-10-30: size and two crowding axes
+  reported side by side, probability scale, descriptive, `methodology/analysis-protocol.md` §17.)
 
 ## 5. Schedule
 
@@ -405,7 +408,7 @@ once the core results exist. An optional item that is not done moves to §6 with
 | control-runs | implementation | core | the mechanical-repair control and the few-shot control, scored under v2 | Phase D | cut 2026-10-18 with `controls-definition` | |
 | robustness-runs | implementation | optional | the alternative-theme run first; image degradation after the fine-tune results, if time allows | Phase D | — | |
 | human-rater-validation | implementation | optional | people rate a sample of predictions; agreement between their ratings and the metrics, under v1 and v2 | ASSESSMENT §6 weeks 9–12 | — | |
-| difficulty-regression | implementation | optional | which diagram properties predict compile failure and low Element F1, before and after fine-tuning. Publication target (author, 2026-10-10, provisional): one conference thesis holding both, submitted after the Р.4 article; the article keeps gains by tier and one sentence. Thesis candidate R in `../theses/next-theses-probes/CANDIDATES.md` | ASSESSMENT §6 weeks 9–12 | — | |
+| difficulty-regression | frozen (was implementation; Frame 2026-10-30: it defines reported statistics and their reading before the regression is fitted) | core (was optional; author, 2026-10-30) | which diagram properties predict compile failure and low Element F1, before and after fine-tuning. Part of this study, not a separate thesis (author, 2026-10-30; supersedes the publication target of 2026-10-10, a conference thesis after the Р.4 article, candidate R in `../theses/next-theses-probes/CANDIDATES.md`) | ASSESSMENT §6 weeks 9–12 | recorded 2026-10-30 (verified 2026-10-30, `verify.md`, second pass; the first failed on four missing tests): per run, compile success (Firth logistic) and compiled Element F1 (fractional logit) against size and two crowding axes, image area at 1,568 px and shrink, reported side by side; predicted 75th − 25th differences on the probability scale with the ceiling stated; §5 paired bootstrap, event floor 25; descriptive, outside the claim family, a read list of 12 with a crowding statement only where both axes agree; decided 2026-10-30 (author) | `decisions/difficulty-regression/` · `methodology/analysis-protocol.md` §17 |
 | edit-readiness-rate | implementation | optional | share of predictions that compile and reach a stated structural threshold | ASSESSMENT §6 weeks 9–12 | — | |
 | prototype | implementation | optional | demo: image in, PlantUML out, live render, edit | ASSESSMENT §6 weeks 9–12 | — | |
 | benchmark-paths | implementation | core | every benchmark file the study reads is read from the public repository `../plantuml-recognition-evaluation`: code paths, the pin of the test-set rules, the six frozen records and both checksum lists re-frozen with the new path labels and code hashes | header; §9 | recorded 2026-10-15 (verified 2026-10-15, `verify.md`, third pass; the first two passes failed) | `decisions/benchmark-paths/` · `methodology/training-set-construction.md` §7 (re-freeze of 2026-10-14); paths and hashes in §1.1, §2, §7 |
