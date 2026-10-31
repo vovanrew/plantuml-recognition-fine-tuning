@@ -32,7 +32,7 @@ Work in progress, state of 2026-10-29.
 |---|---|
 | [FINETUNE_PLAN.md](FINETUNE_PLAN.md) | The plan: question, design, phases, item table |
 | [methodology/](methodology/) | What was built and how: [scorer v2](methodology/scorer-v2.md), [training set construction](methodology/training-set-construction.md), [training recipe](methodology/training-recipe.md), [compute and serving](methodology/compute-and-serving.md), [analysis protocol](methodology/analysis-protocol.md) |
-| `build/` | Training pool, near-duplicate check against the test set, sampling, image rendering, the user turn, the scorer v1 to v2 bridge, the scoring of the test-set runs and the main tables (`score_test_runs.py`, `main_tables.py`, the study's registry `test_registry.json`), the data-efficiency curve (`efficiency_curve.py`, its registry `curve_registry.json`), the error analysis (`error_analysis.py`, its codebook `error_codebook.md`), the difficulty regression (`difficulty_regression.py`), the release (`pack_runs.py`, `release_adapters.py`, the model card template in `release/`); tests in `build/tests/` |
+| `build/` | Training pool, near-duplicate check against the test set, sampling, image rendering, the user turn, the scorer v1 to v2 bridge, the scoring of the test-set runs and the main tables (`score_test_runs.py`, `main_tables.py`, the study's registry `test_registry.json`), the data-efficiency curve (`efficiency_curve.py`, its registry `curve_registry.json`), the error analysis (`error_analysis.py`, its codebook `error_codebook.md`), the difficulty regression (`difficulty_regression.py`), the human-rater check (`rater_check.py`), the release (`pack_runs.py`, `release_adapters.py`, the model card template in `release/`); tests in `build/tests/` |
 | `infer/` | The server used for both conditions, the run manifest, the adapter check, and the runs on the test set; tests in `infer/tests/` |
 | `train/` | The training recipe and the checkpoint rule; tests in `train/tests/` |
 | `data/pool/`, `data/sets/` | Frozen outputs of `build/`, each folder with a `SHA256SUMS` list |
@@ -80,7 +80,7 @@ scores of every checkpoint; `runs/train/<run>/` holds `run.json`, `log.jsonl` an
 `runs/test/_root/` links each run into the layout the benchmark's loader reads; its links to the
 test set and the test images resolve when the benchmark sits next to this repository (see
 [Running the code](#running-the-code)). The tables rebuild from the stored scores with
-`build/main_tables.py`, `build/efficiency_curve.py` and `build/difficulty_regression.py`. Re-scoring an answer needs the extractor
+`build/main_tables.py`, `build/efficiency_curve.py`, `build/difficulty_regression.py` and `build/rater_check.py report`. Re-scoring an answer needs the extractor
 JAR of its scorer version, with the sha256 that `methodology/scorer-v2.md` §7 pins. Files inside
 the runs keep the paths of the machine they were made on.
 

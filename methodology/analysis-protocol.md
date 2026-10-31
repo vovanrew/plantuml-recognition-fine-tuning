@@ -4,7 +4,7 @@ Methodological record for the analysis of the main comparison of Р.4. It says h
 on the test set are scored, and how each number of the main tables is computed and read. §15 does
 the same for the 2B's data-efficiency curve. §16 gives the error analysis of the six main runs and
 relation agreement on endpoint-matched edges. §17 gives the difficulty regression of the six main
-runs. The file holds
+runs. §18 gives the human-rater check of the metrics on the six main runs. The file holds
 for this study what `../plantuml-recognition-evaluation/methodology/analysis-protocol.md` holds for
 the benchmark; that file is called the baseline protocol below. The populations, aggregation,
 stratification, per-relation counts, bootstrap, population gap and eligibility rule are those of
@@ -18,7 +18,7 @@ The analysis compares each size with itself. The fine-tuned run of the 2B, 9B an
 with the same size's zero-shot run, answered on the same stack
 (`methodology/compute-and-serving.md` §10). The two runs of a size differ in the adapter alone, so
 each difference measures the fine-tune. Every difference is fine-tuned − zero-shot and is written Δ
-below. Sections 2 to 14, §16 and §17 cover the six main runs. The 2B's two data-efficiency runs are scored by
+below. Sections 2 to 14 and §16 to §18 cover the six main runs. The 2B's two data-efficiency runs are scored by
 the same command (§2), and §15 gives the curve they belong to.
 
 ## 2. Scoring
@@ -546,3 +546,104 @@ the first run on study data.
 | File | sha256 |
 |---|---|
 | `build/difficulty_regression.py` | `1a433558f9cc3649138d9043600aa578c7b09c7cc993645f21f9506ddbf1fe73` |
+
+## 18. Human-rater check
+
+The human-rater check asks whether people who compare two drawings prefer the answer that Element
+F1 and Relationship F1 score higher. It uses the six main runs and their stored scores (§2, §3), and it
+changes no score. Every number is under scorer v2, with scorer v1 beside.
+
+**The question.** A pair is one test diagram at one size. The rater sees three pictures: the test
+image the models read (the benchmark's `data/puml_images_1568/`), drawing A and drawing B. A and B are that size's
+zero-shot and fine-tuned answers, unlabelled and on random sides. Each answer's PlantUML block
+(`extract_puml` of the scorer) is rendered as written by `build/render.py`, the pipeline that made
+the test images (`methodology/training-set-construction.md` §1), so the three pictures look alike.
+The build stops on an answer that does not render to exactly one picture, so a rater always sees
+the whole answer. The rater sees no score, model, condition or source code, and answers one
+question, with an optional comment:
+
+> Which drawing shows the original diagram more faithfully: A, B, or about the same?
+> Judge the content: which boxes there are, their names and members, the messages and their text,
+> and what is connected to what, with which kind of arrow. Ignore layout, position and colour.
+
+The raters are Ukrainian, so the page shows a Ukrainian translation of this wording, the constants
+`QUESTION` and `GUIDANCE` of `build/rater_check.py`. The English wording is the reference. The
+answers are A, B and "about the same" (saved as `same`).
+
+**Pool and direction.** A pair enters the pool when both answers compiled (the stored v2 CSR
+`compiled` flag) and their v2 Element F1 or v2 Relationship F1 differ. A pair where only one answer
+compiled is left out, because a drawing against an error is an easy call and CSR already reports
+it. A pair's direction is the condition the metric prefers: by Element F1 when it differs,
+otherwise by Relationship F1.
+
+**The sample.** The sample holds 60 pairs, 20 per size:
+
+| Size | Pool | Pool, metric prefers zero-shot | Sample, metric prefers zero-shot | Sample, metric prefers fine-tuned |
+|---|---|---|---|---|
+| 2B | 141 | 3 | 3 | 17 |
+| 9B | 256 | 12 | 8 | 12 |
+| 27B | 240 | 26 | 9 | 11 |
+
+In most pool pairs the metric prefers the fine-tuned answer. A rater who always picked the
+fine-tuned drawing would then agree with the metric without judging content. A third of the sample
+therefore has the zero-shot direction, so high agreement requires following the content the metric
+follows. Within each size and direction, class and sequence diagrams are split as evenly as the
+cell allows, and class takes an odd pair. Each cell is drawn with
+`random.Random("20260614|rater-check|<size>|<direction>|<type>").sample` over the sorted keys.
+The pair ids, the sides of A and B and each rater's order come from further streams of the same
+form. The keys are drawn by this fixed seeded rule before rendering. They are written once to
+`keys.json`, with the seed, the pool counts and the sha256 of the script at the draw. Run on an
+empty `--out` folder, `draw` of the script below writes the same pairs from the stored scores.
+
+**Raters.** The author and one second rater who reads class and sequence diagrams rate every pair.
+They work independently and do not discuss pairs until both have finished. Each rater sees the 60
+pairs in a random order of their own. Each pair has one A/B assignment, shared by both raters, so the raters
+judge the same screens. Each rater's results are reported separately, so the second rater's
+agreement can be read on its own.
+
+**The numbers.** The report gives:
+
+1. Per rater and metric, the share of A/B picks that chose the answer with the higher score, with
+   a Wilson 95% interval. It uses only the pairs where that metric differs, and gives the number of
+   "about the same" beside it.
+2. The same agreement with the pair's direction, on the 40 pairs of the fine-tuned direction and on
+   the 20 of the zero-shot direction.
+3. Between the raters, Cohen's κ on A / B / about the same over the 60 pairs, and the share of pairs
+   with the same answer.
+4. Item 1 under scorer v1, on the pairs where the v1 score differs, so its denominators can differ
+   from v2's. Beside it, the sample pairs where v1 and v2 prefer different answers.
+5. The pairs where both raters chose the answer against the pair's direction. Each carries the
+   author's description of what differs between the two drawings, written after the ratings.
+6. Item 1 by size and by diagram type under v2, as counts without intervals, because 20 pairs per
+   size are too few for them.
+
+**Reading.** Every number is descriptive and outside the claim family of §9. No pass mark is set,
+and the reading is written after both raters' answers are in, so that no number is selected before
+the reader sees it.
+
+**Code and outputs.**
+
+```
+python3 build/rater_check.py draw
+python3 build/rater_check.py render
+python3 build/rater_check.py sheets
+python3 build/rater_check.py report
+```
+
+`draw` writes `runs/test/_analysis/rater_check/keys.json` and refuses to draw a second time.
+`render` writes the 120 answer pictures, their sources and the render counts (`check.json`) to
+`rater_check/render/`. `sheets` builds one rating page per rater in `runs/rater_sheets/`, outside
+the released runs, because its pictures are copies of `render/`. Each page saves the rater's
+answers as pair, choice and comment, kept as `rater_check/ratings/R1.csv` (the author) and `R2.csv`
+(the second rater). The author's descriptions of item 5 are in `rater_check/differences.csv`, and
+`report` refuses a file whose pairs are not exactly the report's list. `report` writes
+`rater_check/report.json` and `report.md`, and the json records the script's sha256 in
+`rater_check_sha256`.
+
+| File | sha256 |
+|---|---|
+| `build/rater_check.py` | `7cd968aa0a0e0ff334441d7cd847fb7f23659745f9f4a2f8cc5dc06c774950da` |
+| `rater_check/keys.json` | `f90a2ce6f69dac7af157932dd33f377e8f69c4ec4d3484b9da1c8094cf2a28ad` |
+| `rater_check/ratings/R1.csv` | `61cc10af352c0ee0b92fe42612b53e67f7214f2d7cc9898252aada05de2f3159` |
+| `rater_check/ratings/R2.csv` | `43deaf1454caf564e1e619763326f26a9c2fb5aa08fd91c44cd10ed4a400c737` |
+| `rater_check/differences.csv` | `96a1cafc1680f61f5af88cb8b2f445207b9416d86a550c7cc9b689882992e144` |
