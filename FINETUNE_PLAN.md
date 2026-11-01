@@ -1,6 +1,6 @@
 # Fine-tuning plan — Qwen3.5 dense ladder on image → PlantUML
 
-Status: draft for author review · 2026-09-21
+Status: working plan; §10 holds the status of every item
 Feeds: dissertation Розділ 4 and the fine-tuning paper
 Benchmark repo: `../plantuml-recognition-evaluation` (test set, prompt, scorer, analysis pipeline).
 `data/` comes from its `data.zip`; the 1,000 standardized test images are tracked in that repository
@@ -15,8 +15,12 @@ does the gain consist of: reliability (the output compiles) or structure (the ou
 
 The study fine-tunes Qwen3.5-2B, 9B and 27B with one fixed recipe and re-runs the published benchmark
 before and after. The comparison is within-family: each size against itself. The claim is a
-measurement, decomposed into Δ CSR, Δ compiled-only structural F1 and Δ population gap. It is not
-"a bigger SFT dataset" and not "first to fine-tune for UML".
+measurement, decomposed into Δ CSR, Δ compiled-only structural F1 and Δ population gap. (Superseded
+in part by `decisions/main-tables-intervals/`, 2026-10-29: the claim rests on Δ CSR and Δ
+compiled-only Element F1 with their differences of deltas; Δ population gap stays in the headline
+decomposition with its interval but is not a member of the claim family, and Relationship F1 is
+descriptive. `methodology/analysis-protocol.md` §6, §9.) It is not "a bigger SFT dataset" and not
+"first to fine-tune for UML".
 
 ## 2. What is carried over unchanged from the benchmark
 
@@ -50,7 +54,8 @@ Published zero-shot results for the ladder (hosted, scorer v1; full-set / compil
 - **One recipe across the ladder.** Same data, mix, precision, hyperparameters, epoch count and
   checkpoint rule at 2B, 9B and 27B. Ablations run outside the ladder at a single size.
 - **Frontier models and the MoE are context, not competitors.** If shown, they appear as reference
-  lines from the stored hosted predictions, re-scored under scorer v2. No new frontier inference.
+  lines from the stored hosted predictions, re-scored under scorer v2. No new frontier inference. (Cut, author, 2026-10-30: no reference lines,
+  `reference-lines`.)
 - **One seed per size.** Stated as a limitation; the bootstrap covers diagram variance only.
 
 ## 4. Phases
@@ -82,7 +87,9 @@ Rules for this study:
   scored.
 - Applied identically to both conditions; v1 numbers are reported alongside.
 - An artifact discovered after the freeze goes into a separate sensitivity analysis on both
-  conditions, not into v2.
+  conditions, not into v2. (Met for the one artifact found, an answer that stops the extractor, by
+  the rule of `methodology/analysis-protocol.md` §2 with its bound in place of a sensitivity table,
+  `decisions/main-tables-intervals/`, 2026-10-29, author.)
 - v1 stays runnable; scoring is offline, so any run can be scored under both.
 
 Output: tagged scorer v2, and the stored 8 runs re-scored under v2.
@@ -177,7 +184,8 @@ Output: `train_{1k,5k,20k}.jsonl`, `dev_200.jsonl`, images, leakage report, fina
   curve saturates written after the scores are seen; `methodology/analysis-protocol.md` §15.)
 - **Ablation, only if Weeks 6–8 come in early:** one run at one size with the vision encoder
   unfrozen. It is the only test of whether relation decorations (filled vs hollow diamond, dashed
-  vs solid) are recoverable on the model side.
+  vs solid) are recoverable on the model side. (Cut, author, 2026-10-30: not done,
+  `unfrozen-encoder-ablation`.)
 
 Output: three adapters (+2 data-efficiency adapters), training logs, dev-set score per checkpoint.
 
@@ -196,11 +204,12 @@ Output: three adapters (+2 data-efficiency adapters), training logs, dev-set sco
   If either recovers most of the reliability gain, the claim becomes "fine-tuning buys structure,
   not compilation".
   (Cut from this study, author, 2026-10-18: the controls are not part of the paper; they would be a
-  separate thesis. `decisions/controls-definition/`.)
+  separate thesis.)
 - **Robustness run:** the same 1,000 diagrams re-rendered under (a) a different PlantUML theme and
   (b) documentation-like degradation (JPEG compression, screenshot-scale resampling, ±3° rotation,
   mild noise). Both conditions, scored against the unchanged ground truth. Any training-time
-  augmentation stays train-only.
+  augmentation stays train-only. (Moved to a future conference thesis, author, 2026-10-30:
+  `robustness-parameters`, `robustness-runs`; candidate S in `../theses/next-theses-probes/CANDIDATES.md`.)
 - `analysis/registry.py` needs a `condition` field; `_VALID_ARM = {"frontier","qwen"}` raises on the
   fine-tuned runs today.
 
@@ -246,13 +255,17 @@ Everything under scorer v2, full framework, both populations.
   Δ(tier 1) is reported with its interval, and a smaller gain on tier 4 is worded as consistent with
   a limit set by the input, never as showing one; the tiers differ in diagram size and in crowding
   together. `methodology/analysis-protocol.md` §12.)
-- **Robustness** reported next to the main result, same metrics.
+- **Robustness** reported next to the main result, same metrics. (Moved to a future conference
+  thesis with the robustness run, author, 2026-10-30.)
 - **Error analysis** on a stratified failure sample, mapped onto the existing taxonomy so before and
   after compare like with like. (Done by `error-analysis`, 2026-10-29: a blind hand-coded sample of 95 failure cases and
   relation agreement on endpoint-matched edges, `methodology/analysis-protocol.md` §16.)
 - **Difficulty regression:** which diagram properties predict compile failure and low Element F1,
   before and after. (Done by `difficulty-regression`, 2026-10-30: size and two crowding axes
   reported side by side, probability scale, descriptive, `methodology/analysis-protocol.md` §17.)
+- **Human-rater check:** whether people who compare two drawings prefer the answer Element F1 and
+  Relationship F1 score higher. (Done by `human-rater-validation`, 2026-10-31: 60 paired
+  comparisons, the author and a second rater, descriptive, `methodology/analysis-protocol.md` §18.)
 
 ## 5. Schedule
 
@@ -260,8 +273,8 @@ Everything under scorer v2, full framework, both populations.
 |---|---|
 | 1–2 | Phase 0 (scorer v2, frozen) · Phase A (pool, leakage, renders, dev set) · decide framework and GPU |
 | 3–5 | Phase B pilot · Phase C ladder 2B → 9B → 27B · data-efficiency runs |
-| 6–8 | Phase D six runs, robustness · `registry.py` change · Phase E tables and intervals |
-| 9–12 | Error analysis · optional unfrozen-encoder ablation · write-up (Р.4, paper, arXiv preprint) |
+| 6–8 | Phase D six runs, robustness (moved to a thesis, 2026-10-30) · `registry.py` change · Phase E tables and intervals |
+| 9–12 | Error analysis · difficulty regression and the human-rater check (core, 2026-10-30) · optional unfrozen-encoder ablation (cut, 2026-10-30) · write-up (Р.4, paper, arXiv preprint) |
 
 ## 6. Out of scope
 
@@ -275,12 +288,17 @@ Everything under scorer v2, full framework, both populations.
 | Inference-only controls (few-shot / format-constrained prompt, mechanical repair pass) | not part of the paper; a separate thesis (author, 2026-10-18) |
 | Bridge table (Р.3's published zero-shot numbers, re-scored under v2, against the study's self-served zero-shot run) | the gain is measured within the study's own runs; the baseline is the self-served zero-shot run, stated once in the paper (author, 2026-10-28) |
 | Classifier rates per 1,000 of compile-fail categories (C1 / C2 / C3) | the classifier's raw rates are wrong in size and the chapter does not need them; `error-analysis`'s hand sample and §16 counts describe the failures (author, 2026-10-29) |
-| Hand-labelled in-the-wild image set | manual ground truth is the expensive part; theme + degradation covers the threat |
+| Hand-labelled in-the-wild image set | manual ground truth is the expensive part; theme + degradation covers the threat (that run moved to a future conference thesis, author, 2026-10-30) |
+| Robustness to the rendering style and to documentation-like degradation (`robustness-parameters`, `robustness-runs`) | moved to a future conference thesis, after the Р.4 article: candidate S in `../theses/next-theses-probes/CANDIDATES.md` (author, 2026-10-30) |
+| Reference lines of frontier and MoE models (`reference-lines`) | cut (author, 2026-10-30); the comparison is each size against itself (§3) |
+| Edit-readiness rate (`edit-readiness-rate`) | moved to a future conference thesis: candidate T in `../theses/next-theses-probes/CANDIDATES.md` (author, 2026-10-30) |
+| Prototype (`prototype`) | moved to a future conference thesis: candidate U in `../theses/next-theses-probes/CANDIDATES.md`; the dissertation takes it up later (author, 2026-10-30) |
+| Unfrozen-encoder ablation (`unfrozen-encoder-ablation`) | cut, not done (author, 2026-10-30) |
 
 ## 7. Open questions
 
 Questions not yet promoted to an item. Promoting one means adding a row to §10 and, if its answer
-would invalidate scored results or break a comparison, giving it the frozen tier. The seven open
+would invalidate scored results or break a comparison, giving it the frozen tier. The eight open
 items listed here before 2026-09-22 are now rows in §10 (`training-stack`, `serving-stack`,
 `gpu-precision`, `leakage-threshold`, `render-pipeline`, `robustness-parameters`,
 `reference-lines`, `adapter-release`).
@@ -288,6 +306,8 @@ items listed here before 2026-09-22 are now rows in §10 (`training-stack`, `ser
 - [x] Whether the assessment's weeks 9–12 additions belong to this plan. Decided by the author,
       2026-10-04: yes, as optional items in §10 (`human-rater-validation`, `difficulty-regression`,
       `edit-readiness-rate`, `prototype`), decided case by case after the core results.
+      Decided 2026-10-30 (author): `human-rater-validation` and `difficulty-regression` core;
+      `edit-readiness-rate` and `prototype` moved to future conference theses.
 
 - Hand-offs from `training-pool-rules` (recorded 2026-10-11; details in its record, Open threads),
   for items that have no record yet:
@@ -309,13 +329,15 @@ items listed here before 2026-09-22 are now rows in §10 (`training-stack`, `ser
     later). The images are backed up since 2026-10-17 in a private Hugging Face dataset,
     `vovanrew/plantuml-finetune-backup`, which is not the release. 7 training sources name a
     picture at a URL, which the render fetched: 2 stored images show the picture and 4 show
-    "Cannot decode" in its place; the sets are kept as built (author, 2026-10-17).
+    "Cannot decode" in its place; the sets are kept as built (author, 2026-10-17). (Decided by
+    `adapter-release`, 2026-10-29: the key list, no images; the README names the 11 images and the
+    7 URL pictures.)
 
 ## 8. Budget
 
 Three ladder trainings, two data-efficiency runs (one new training and two test-set runs since
 `decisions/data-efficiency-sizes/`, 2026-10-25: USD 19.64–36.35), headroom for one failed run per size, and 6 main +
-robustness inference runs: **$300–800**.
+robustness inference runs: **$300–800**. (Robustness moved to a thesis, author, 2026-10-30.)
 
 ## 9. Proposed layout of this folder
 
@@ -383,22 +405,22 @@ once the core results exist. An optional item that is not done moves to §6 with
 | render-pipeline | implementation (was frozen; the pipeline is fixed by the test set, this item reproduces it) | core | the three existing render stages behind one command; versions recorded; acceptance check over the 1,000 test diagrams | Phase A images | recorded 2026-10-09 (verified 2026-10-09, `verify.md`, fourth verification; three earlier builds failed: `verify_2026-10-05_fail.md`, `verify_2026-10-08_fail.md`, `verify_2026-10-09_fail.md`) | `decisions/render-pipeline/` · `methodology/training-set-construction.md` §1 |
 | training-stack | frozen | core | one training framework for the whole ladder | Phase C | merged into gpu-precision 2026-10-04 | `decisions/gpu-precision/` |
 | serving-stack | frozen | core | one serving stack for both conditions, bf16 base with adapter attached ("4-bit" superseded by `decisions/gpu-precision/`, 2026-10-11) | Phase D | merged into gpu-precision 2026-10-04 | `decisions/gpu-precision/` |
-| gpu-precision | frozen | core | the compute platform: provider, one GPU class, one precision at all sizes (bf16; "4-bit" superseded 2026-10-11), training framework, serving stack; 27B fits at the longest sequences; cost of the plan and of the cut | Phase B; Phase C; Phase D; §8 | recorded 2026-10-18 (verified 2026-10-18, `verify.md`, fifth pass; all five passes are in that file, the first, second and fourth failed): released bf16 weights, no quantization, at every size; one card model, NVIDIA RTX PRO 6000 Blackwell Server Edition, in Runpod Secure Cloud; transformers 5.18.0 + PEFT 0.21.2 on torch 2.14.1, every package pinned in `requirements-card.txt`; recurrent layers on flash-linear-attention 0.5.2; the study's own server, adapter attached and not merged, one request at a time; answer deadline 600 s; run manifest and adapter check; frozen as tag `serving-v3` on commit `e47bd5e` | `decisions/gpu-precision/` · `methodology/compute-and-serving.md` §1–§9 |
+| gpu-precision | frozen | core | the compute platform: provider, one GPU class, one precision at all sizes (bf16; "4-bit" superseded 2026-10-11), training framework, serving stack; 27B fits at the longest sequences; cost of the plan and of the cut | Phase B; Phase C; Phase D; §8 | recorded 2026-10-18 (verified 2026-10-18, `verify.md`, fifth pass; all five passes are in that file, the first, second and fourth failed): released bf16 weights, no quantization, at every size; one card model, NVIDIA RTX PRO 6000 Blackwell Server Edition, in Runpod Secure Cloud; transformers 5.18.0 + PEFT 0.21.2 on torch 2.14.1, every package pinned in `requirements-card.txt`; recurrent layers on flash-linear-attention 0.5.2; the study's own server, adapter attached and not merged, one request at a time; answer deadline 600 s; run manifest and adapter check; frozen as tag `serving-v3` on commit `e47bd5e` | `decisions/gpu-precision/` · `methodology/compute-and-serving.md` §1–§9, §11 |
 | prompt-arrangement | frozen | core | the order of picture and prompt text in the user turn (picture first, as the stored hosted runs appear to have been rendered, or text first, as the official template renders the runner's request), one arrangement in training and in serving, at all sizes and in both conditions | §2; Phase B; Phase D; Phase E | recorded 2026-10-22 (verified 2026-10-22, `verify.md`; decided 2026-10-11): picture, newline, text, at all sizes and in both conditions, one function for training and the server, rendered turn sha256 `44a5cc71…41e8`; the order of the published hosted runs; confirmed on the first card session, 2026-10-12: the more likely rendering on 18 of 20 cells at the 9B and 20 of 20 at the 27B | `decisions/prompt-arrangement/` · `methodology/compute-and-serving.md` §4.1 |
 | recipe | frozen | core | adapter targets, rank/alpha/dropout, learning rate and schedule, effective batch; the epoch count and the rule that fixes it; checkpoint selection on dev-set CSR + Element F1 under frozen v2; identical at all sizes (absorbs `epoch-checkpoint-rule`, author, 2026-10-17) | Phase B; Phase C | recorded 2026-10-18 (verified 2026-10-18, `verify.md`, fourth pass; the first three failed: `verify_2026-10-18_fail.md`, `_fail_2.md`, `_fail_3.md`): 2 epochs at every size, constant learning rate 1e-4 after a 3% warm-up, adapter picked within each run on dev CSR and Element F1 under v2 (the last checkpoint unless an earlier one is resolvably better); rank 16, alpha 32, dropout 0.05 on the language model's linear layers; effective batch 16 | `decisions/recipe/` · `methodology/training-recipe.md` §1–§4 |
 | epoch-checkpoint-rule | frozen | core | epoch count fixed by the pilot; checkpoint selection on dev-set CSR + Element F1 under frozen v2; same rule at all sizes | Phase B; Phase C | merged into recipe 2026-10-17 | `decisions/recipe/` |
-| controls-definition | frozen | core | the few-shot / format-constrained prompt and the mechanical repair pass, fixed before they are scored | Phase D | cut 2026-10-18 (author): not part of the paper; a separate thesis (candidate B in `../theses/next-theses-probes/CANDIDATES.md`) | `decisions/controls-definition/` |
-| robustness-parameters | frozen | optional | the alternative theme and the degradation parameters, fixed before scoring | Phase D | — |  |
-| reference-lines | frozen | optional | whether frontier and MoE lines appear; if so, re-scored under v2 from stored predictions | §3; Phase E | — |  |
-| adapter-release | frozen | optional | HuggingFace repository names, licence, what is deposited; widened (author, 2026-10-29): where each thing is published, Hugging Face vs Zenodo vs GitHub, for the adapters, the test-set runs and scores, and the training set | §7 (former); §9 `runs/` | decided 2026-10-29 | `decisions/adapter-release/` |
+| controls-definition | frozen | core | the few-shot / format-constrained prompt and the mechanical repair pass, fixed before they are scored | Phase D | cut 2026-10-18 (author): not part of the paper; a separate thesis (candidate B in `../theses/next-theses-probes/CANDIDATES.md`) | |
+| robustness-parameters | frozen | optional | the alternative theme and the degradation parameters, fixed before scoring | Phase D | moved to a future conference thesis 2026-10-30 (author): candidate S in `../theses/next-theses-probes/CANDIDATES.md`, with `robustness-runs`; §6 |  |
+| reference-lines | frozen | optional | whether frontier and MoE lines appear; if so, re-scored under v2 from stored predictions | §3; Phase E | cut 2026-10-30 (author); §6 |  |
+| adapter-release | frozen | optional | HuggingFace repository names, licence, what is deposited; widened (author, 2026-10-29): where each thing is published, Hugging Face vs Zenodo vs GitHub, for the adapters, the test-set runs and scores, and the training set | §7 (former); §9 `runs/` | decided 2026-10-29; no methodology entry (author, 2026-10-30) | `decisions/adapter-release/` |
 | graphviz-render-check | implementation | core | Graphviz installed; class diagrams render to diagrams, not the notice image | Phase A images | merged into render-pipeline 2026-10-04 (Graphviz 16.1.0 present; 500 of 500 class test diagrams re-render to benchmark dimensions) | `decisions/render-pipeline/` |
-| registry-condition-field | implementation | core | `analysis/registry.py` gains `condition`; `_VALID_ARM` accepts the fine-tuned runs | Phase D | recorded 2026-10-10 (verified 2026-10-10, `verify.md`); no methodology entry (author, 2026-10-11); rule 5, who registers the six runs, superseded 2026-10-26: `main-tables-intervals` (author) | `decisions/registry-condition-field/` |
+| registry-condition-field | implementation | core | `analysis/registry.py` gains `condition`; `_VALID_ARM` accepts the fine-tuned runs | Phase D | recorded 2026-10-10 (verified 2026-10-10, `verify.md`); no methodology entry (author, 2026-10-11); rule 5 superseded twice: on who registers the six runs by `main-inference-runs`, 2026-10-26 (author), and on "no registry file for the study" by `main-tables-intervals`, 2026-10-29 (the study's own `build/test_registry.json`) | `decisions/registry-condition-field/` |
 | pilot-run | implementation | core | messages format, chat template pinned, byte-equality test; the training script; the recipe's 60-step probe at the three sizes and the 27B's memory at the longest sequence; the pilot: the 2B on the 1,000-pair subset under the recipe (2 epochs, 126 steps, four checkpoints scored on dev), exit criterion met ("1–2k" superseded by `decisions/recipe/`, 2026-10-18) | Phase B | recorded 2026-10-22 (verified 2026-10-22, `verify.md`, seventh pass; the kernels' reversal check run on the card, the decision not reversed, author 2026-10-21): the training example is the served user turn, then the target and `<|im_end|>`, loss on the answer only, byte-equal to what the server builds; the probe passes at the three sizes; the 27B fits under the recipe at the longest training sequences; pilot dev CSR 0.740, Element F1 0.7616 at the selected step 126; exit criterion met | `decisions/pilot-run/` · `methodology/training-recipe.md` §2.1, §2.3, §3–§6 |
 | ladder-training | implementation | core | 2B → 9B → 27B under the recipe; adapters, logs, dev-set score per checkpoint | Phase C | recorded 2026-10-26 (verified 2026-10-26, `verify.md`, second pass; implemented 2026-10-25; each size selects step 2,500; dev CSR / Element F1: 2B 0.915 / 0.900, 9B 0.980 / 0.968, 27B 0.975 / 0.956) | `decisions/ladder-training/` · `methodology/training-recipe.md` §7 |
 | data-efficiency-runs | implementation | optional | 1k and 5k at 2B (1k: the pilot's run, `pilot-run`, 2026-10-20); the selected 1k and 5k adapters each get a test-set run, the curve 0 / 1k / 5k / 20k on the test set at the 2B only (`data-efficiency-sizes`, 2026-10-25) | Phase C | recorded 2026-10-29 (verified 2026-10-29, `verify.md`, second pass; the 5,000-pair run 2026-10-25, step 626 selected; the two test-set runs, made by `main-inference-runs` 2026-10-26 and 27, scored 2026-10-29; the curve as `efficiency-curve-analysis` decided) | `decisions/data-efficiency-runs/` · `methodology/training-recipe.md` §8 |
 | data-efficiency-sizes | frozen | optional | at which sizes the 1k and 5k data-efficiency runs are trained and evaluated: the 2B only, as planned, or also the 9B and the 27B; whether the 2B alone is enough for the study. Evaluation only (author, 2026-10-25): no implementation, no methodology entry; the answer sets the scope of `data-efficiency-runs` | Phase C; §8; row data-efficiency-runs | recorded 2026-10-26; no methodology entry (decided 2026-10-25: A + test, the 2B only (1k, new 5k, 20k), the 1k and 5k adapters also run on the test set); superseded in part by `efficiency-curve-analysis`, 2026-10-29: the reading fixed before the 5,000-pair result exists (author: every score shown, the reading written after) | `decisions/data-efficiency-sizes/` |
 | efficiency-curve-analysis | frozen | optional | before the 1,000- and 5,000-pair test runs are scored: how the 2B's test curve 0 / 1k / 5k / 20k is computed and read. Every score shown (the main table's v2 statistics at each point, v1 F1 and failed = 0 beside; the neighbour differences with paired intervals, 20k − 5k also on the joint set), all descriptive and outside the claim family; no verdict rule fixed in advance, the reading written after the scores are seen (author, 2026-10-29; supersedes in part `data-efficiency-sizes`); its own registry and script, `build/main_tables.py`, `build/test_registry.json` and their sha256 unchanged | Phase C; Phase E; rows data-efficiency-runs, data-efficiency-sizes, main-tables-intervals | recorded 2026-10-29 (verified 2026-10-29, `verify.md`, second pass) | `decisions/efficiency-curve-analysis/` · `methodology/analysis-protocol.md` §15 |
-| unfrozen-encoder-ablation | implementation | optional | one run at one size with the vision encoder unfrozen | Phase C | conditional: only if weeks 6–8 come in early |  |
+| unfrozen-encoder-ablation | implementation | optional | one run at one size with the vision encoder unfrozen | Phase C | cut 2026-10-30 (author): not done; §6 |  |
 | main-inference-runs | implementation | core | 6 runs, raw responses stored in the benchmark's run format; its tooling and card session also make the two test-set runs of `data-efficiency-runs` | Phase D | recorded 2026-10-28 (verified 2026-10-28, `verify.md`, second pass; tooling 2026-10-26; the card session 2026-10-26 to 2026-10-28: eight runs on the test set, the six main and the two of `data-efficiency-runs`, each manifest passing with `n_cells` 1,000; the port check; the benchmark's run reader skips the run manifest) | `decisions/main-inference-runs/` · `methodology/compute-and-serving.md` §10 |
 | controls-and-robustness-runs | implementation | core | the two control runs and the robustness run, scored under v2 | Phase D | split 2026-10-04 into control-runs and robustness-runs |  |
 | bridge-table | frozen (was implementation; Frame 2026-10-28: it fixes what is reported before the self-served zero-shot runs are scored) | core | per size: published v1 → same predictions under v2 → self-served bf16 zero-shot under v2 ("4-bit" superseded by `decisions/gpu-precision/`, 2026-10-11) | Phase E | cut 2026-10-28 (author): the gain is measured within the study's own runs, the baseline is the self-served zero-shot run, stated once in the paper; Р.3's hosted numbers are not compared (framed, scouted and challenged before the cut) | `decisions/bridge-table/` |
@@ -406,9 +428,10 @@ once the core results exist. An optional item that is not done moves to §6 with
 | error-analysis | frozen (changed from implementation at Frame, 2026-10-29: it selects the failure sample, judges outputs and defines a reported statistic) | core | stratified failure sample mapped onto the existing taxonomy, before and after; relation agreement on endpoint-matched edges, the direct per-relation test (from `main-tables-intervals`, 2026-10-29) | Phase E | recorded 2026-10-29 (verified 2026-10-29, `verify.md`, third pass; decided 2026-10-29, author: option 1, a blind hand-worked sample of 95 failure cases, and relation agreement on edges paired across both runs; option 2, the classifier census, split into `failure-classifier-rates`, cut 2026-10-29) | `decisions/error-analysis/` · `methodology/analysis-protocol.md` §16 |
 | failure-classifier-rates | frozen | optional | the baseline-errors thesis classifier's compile-fail branch ported into `build/`, frozen and hashed before it labels any fine-tuned answer; C1 / C2 / C3 rates per 1,000 diagrams before and after over the 1,964 compile-fail cells of the six main runs (the low-structural cells keep `error-analysis`'s hand sample and mechanical split); validated on about 80 held-out cases stratified on classifier code × condition, with agreement reported per condition (split from `error-analysis` option 2, author, 2026-10-29; run in parallel with it) | Phase E; row error-analysis | cut 2026-10-29 (author, after Implement): its validation shows the raw rates wrong in size (zero-shot C3 about half the corrected figure) with intervals around them, and the chapter does not need them; `error-analysis` already states the compile-fail mix (decided 2026-10-29: compile-fail codes only) | `decisions/failure-classifier-rates/` |
 | control-runs | implementation | core | the mechanical-repair control and the few-shot control, scored under v2 | Phase D | cut 2026-10-18 with `controls-definition` | |
-| robustness-runs | implementation | optional | the alternative-theme run first; image degradation after the fine-tune results, if time allows | Phase D | — | |
+| robustness-runs | implementation | optional | the alternative-theme run first; image degradation after the fine-tune results, if time allows | Phase D | moved to a future conference thesis 2026-10-30 (author): candidate S in `../theses/next-theses-probes/CANDIDATES.md`, with `robustness-parameters`; §6 | |
 | human-rater-validation | frozen (was implementation; Frame 2026-10-30: if done, it selects a sample, has people judge outputs and reports an agreement number) | core (was optional; author, 2026-10-30) | people rate a sample of predictions; agreement between their ratings and the metrics, under v1 and v2. First step (author, 2026-10-30): how often comparable studies validate their metrics against human raters; if they usually do not, the item is cut | ASSESSMENT §6 weeks 9–12 | recorded 2026-10-31 (verified 2026-10-30, `verify.md`, second pass; Ukrainian page verified 2026-10-30; descriptions verified 2026-10-31): the small paired check, 60 pairs (20 per size, a third where the metric prefers the zero-shot answer), test image beside the two answers' renders, unlabelled, A / B / about the same; the author and one second rater, each reported separately; agreement with Element F1 and Relationship F1 (Wilson 95%), by direction, Cohen's κ between raters, v1 beside, the pairs both raters chose against the metric described by the author; descriptive, outside the claim family, no pass mark, the reading written after the ratings; decided 2026-10-30, descriptions and reading approved 2026-10-31 (author) | `decisions/human-rater-validation/` · `methodology/analysis-protocol.md` §18 |
 | difficulty-regression | frozen (was implementation; Frame 2026-10-30: it defines reported statistics and their reading before the regression is fitted) | core (was optional; author, 2026-10-30) | which diagram properties predict compile failure and low Element F1, before and after fine-tuning. Part of this study, not a separate thesis (author, 2026-10-30; supersedes the publication target of 2026-10-10, a conference thesis after the Р.4 article, candidate R in `../theses/next-theses-probes/CANDIDATES.md`) | ASSESSMENT §6 weeks 9–12 | recorded 2026-10-30 (verified 2026-10-30, `verify.md`, second pass; the first failed on four missing tests): per run, compile success (Firth logistic) and compiled Element F1 (fractional logit) against size and two crowding axes, image area at 1,568 px and shrink, reported side by side; predicted 75th − 25th differences on the probability scale with the ceiling stated; §5 paired bootstrap, event floor 25; descriptive, outside the claim family, a read list of 12 with a crowding statement only where both axes agree; decided 2026-10-30 (author) | `decisions/difficulty-regression/` · `methodology/analysis-protocol.md` §17 |
-| edit-readiness-rate | implementation | optional | share of predictions that compile and reach a stated structural threshold | ASSESSMENT §6 weeks 9–12 | — | |
-| prototype | implementation | optional | demo: image in, PlantUML out, live render, edit | ASSESSMENT §6 weeks 9–12 | — | |
-| benchmark-paths | implementation | core | every benchmark file the study reads is read from the public repository `../plantuml-recognition-evaluation`: code paths, the pin of the test-set rules, the six frozen records and both checksum lists re-frozen with the new path labels and code hashes | header; §9 | recorded 2026-10-15 (verified 2026-10-15, `verify.md`, third pass; the first two passes failed) | `decisions/benchmark-paths/` · `methodology/training-set-construction.md` §7 (re-freeze of 2026-10-14); paths and hashes in §1.1, §2, §7 |
+| edit-readiness-rate | implementation | optional | share of predictions that compile and reach a stated structural threshold | ASSESSMENT §6 weeks 9–12 | moved to a future conference thesis 2026-10-30 (author): candidate T in `../theses/next-theses-probes/CANDIDATES.md`; §6 | |
+| prototype | implementation | optional | demo: image in, PlantUML out, live render, edit | ASSESSMENT §6 weeks 9–12 | moved to a future conference thesis 2026-10-30 (author): candidate U in `../theses/next-theses-probes/CANDIDATES.md`; the dissertation takes it up later; §6 | |
+| benchmark-paths | implementation | core | every benchmark file the study reads is read from the public repository `../plantuml-recognition-evaluation`: code paths, the pin of the test-set rules, the six frozen records and both checksum lists re-frozen with the new path labels and code hashes | header; §9 | recorded 2026-10-15 (verified 2026-10-15, `verify.md`, third pass; the first two passes failed) | `decisions/benchmark-paths/` · `methodology/training-set-construction.md` §7; paths and hashes in §1.1, §2, §7 |
+| study-audit | implementation | core | the final check of the whole study before the Zenodo archive (author, 2026-10-29): a clean clone of the published repositories, `runs.zip` and the Hugging Face adapters rebuild every reported table; every number, hash and pointer in `methodology/`, the README and the plan agrees with the code, data and outputs; every §10 row has a final status; the standing rules and reviewer questions are answered across the study. Reports findings; each fix goes to the item it belongs to | §10; `adapter-release` Part 2 | recorded 2026-11-01; no methodology entry | `decisions/study-audit/` |

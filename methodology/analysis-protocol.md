@@ -15,11 +15,15 @@ metrics are scored under scorer v2 (`methodology/scorer-v2.md`). Paths are relat
 ## 1. The comparison
 
 The analysis compares each size with itself. The fine-tuned run of the 2B, 9B and 27B is compared
-with the same size's zero-shot run, answered on the same stack
-(`methodology/compute-and-serving.md` §10). The two runs of a size differ in the adapter alone, so
-each difference measures the fine-tune. Every difference is fine-tuned − zero-shot and is written Δ
-below. Sections 2 to 14 and §16 to §18 cover the six main runs. The 2B's two data-efficiency runs are scored by
-the same command (§2), and §15 gives the curve they belong to.
+with the same size's zero-shot run, answered on the same stack (`methodology/compute-and-serving.md`
+§10). The two runs of a size differ in the adapter alone, so each difference measures the fine-tune.
+The base models' exposure to the public test sources in pretraining is unknown, since their training
+data is not published, but it is the same in both conditions of a size, so it does not enter a
+difference. The training set shares no repository with the test set and holds no near-copy of a test
+diagram (`methodology/training-set-construction.md` §2, §3, §6), so fine-tuning adds no exposure.
+Every difference is fine-tuned − zero-shot and is written Δ below. Sections 2 to 14 and §16 to §18 cover
+the six main runs. The 2B's two data-efficiency runs are scored by the same command (§2), and §15
+gives the curve they belong to.
 
 ## 2. Scoring
 
@@ -41,12 +45,14 @@ so a partial run must never reach them. The command refuses:
 
 **Answers the extractor cannot read.** An answer on which the frozen extractor fails is scored as an
 empty graph, as a non-parsing answer is. It has no true or false positive, and every ground-truth
-element and edge is a false negative. One rule for every unreadable answer keeps the frozen scorer unchanged
-and treats both conditions alike. The extractor writes an empty record for an answer it cannot
-parse. An answer that stops the extractor's Java process (a Java `Error`, such as a stack overflow)
-is held back from that scorer version's F1 input. The unchanged runner then scores it as a missing
-answer, which is the same empty graph. CSR and chrF++ still read the answer. The score manifest
-lists each held-back answer under `extractor_crashes`.
+element and edge is a false negative. One rule for every unreadable answer keeps the frozen scorer
+unchanged and treats both conditions alike. The extractor writes an empty record for an answer it
+cannot parse. An answer that stops the extractor's Java process (a Java `Error`, such as a stack
+overflow) is held back from that scorer version's F1 input. The unchanged runner then scores it as a
+missing answer, which is the same empty graph. CSR and chrF++ still read the answer. The score
+manifest lists each held-back answer under `extractor_crashes`. In the eight test runs one answer is
+held back, in the 9B's zero-shot run. Whether it counts with full credit or none, no figure of the
+claim family moves, and no full-set figure moves more than 0.0027.
 
 **Output.** Scores go to `runs/test/<run>/scores/v2/` and `scores/v1/`, in the layout of the
 benchmark's loader (`<metric>/<run>/<metric>_results.json`). `scores/manifest.json` holds the
@@ -419,6 +425,12 @@ compare every re-extracted graph with the stored v2 Element F1 and Relationship 
 any difference. `report` refuses a codebook whose sha256 differs from the one recorded at the
 draw. The files of §14 and their sha256 stay as recorded.
 
+The codebook, the sample, the cut, the floor and the paired population were fixed after the
+fine-tuned answers existed but before any category or agreement number was computed: by then the
+per-relation Relationship F1 of each run, the outcome classes at three cuts and the
+endpoint-matched support per relation had been seen, and the floor and the paired population were
+chosen with that support in view.
+
 | File | sha256 |
 |---|---|
 | `build/error_codebook.md`, frozen at the draw | `2791dcbf9eb076ebca61e6c06557fc7fbcc9e556b4ededd46f99a2303b42d9c9` |
@@ -464,7 +476,7 @@ side is not the smaller of 1,568 px and the original long side.
 **The models.** Each run, outcome and crowding axis gets one model: a type indicator (class as the
 reference), z log `content_lines` and z log of the crowding axis. The two types are pooled with
 common slopes, so each run has one crowding difference per axis. The z values are standardized
-within type, with the population SD of the log over the 1,000 test diagrams. These constants are
+within type, with the population SD of the log over that type's 500 test diagrams. These constants are
 fixed once and are not re-estimated in a resample. Compile success is fitted by Firth-penalized
 logistic regression (Jeffreys prior). A fine-tuned run that compiles nearly every diagram of a cell
 then still gives finite estimates. Element F1 is fitted by fractional logit (Bernoulli

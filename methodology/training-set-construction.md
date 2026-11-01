@@ -125,7 +125,7 @@ exception is recorded on its line (`renderer_trace`).
 `render.py` and compares every image with the benchmark's. It passes when all diagrams are rendered
 and every raw and final image has the pixel dimensions of the benchmark's image. Equal dimensions
 are the criterion `FINETUNE_PLAN.md` sets for this check (Phase A). The check passes, and its
-report gives the counts below:
+report, `data/render_checks/acceptance_report.json`, gives the counts below:
 
 ```
 python3 build/acceptance_check.py --work <scratch> --report <file> --stock

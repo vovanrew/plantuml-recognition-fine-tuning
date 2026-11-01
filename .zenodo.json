@@ -1,5 +1,6 @@
 {
   "title": "Fine-tuning for image-to-PlantUML: Qwen3.5 at 2B, 9B and 27B",
+  "description": "<p>Qwen3.5-2B, 9B and 27B are fine-tuned with one fixed LoRA recipe on 20,000 rendered real-world PlantUML diagrams, and the published image-to-PlantUML benchmark is run before and after on its 1,000 test diagrams, each size against itself.</p><p>The release holds the code, the frozen key lists, every test-set and dev-set run with its scores, and the tables; the adapters are on Hugging Face.</p>",
   "upload_type": "software",
   "creators": [
     {

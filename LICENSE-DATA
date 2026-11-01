@@ -15,7 +15,14 @@ Full CC BY 4.0 text: https://creativecommons.org/licenses/by/4.0/legalcode
 The PlantUML sources that the key lists in `data/` name are **not original work of this study**.
 They come from the UML-in-the-Wild corpus (https://doi.org/10.5281/zenodo.18952371), which mined
 them from public open-source repositories, and each file remains under the licence of the
-repository it came from. This repository does not copy them.
+repository it came from. This repository holds copies of some of them, all inside `runs.zip`:
+
+- the scorer's working copies of the 200 dev-set sources (`gt_extracted/` in the scores of each dev
+  checkpoint);
+- the 95 cases of the error sample (`runs/test/_analysis/error_sample/cases/`), each with its
+  test-set source and test image, which the benchmark also publishes.
+
+These copies keep the licence of the repository each came from.
 
 The same applies to any image rendered from those sources, including the training and test images
 this study renders or reads. A render is a derivative of its source file and carries the source
@@ -39,5 +46,4 @@ licence of their base models; see the model card of each repository.
 
 ## Attribution
 
-If you use this study's data or code, please cite it. See `CITATION.cff` and the citation section
-of `README.md`.
+If you use this study's data or code, please cite it. See `CITATION.cff`.

@@ -62,7 +62,7 @@ source changes it with `skinparam` or `<style>`. The largest line is then the li
 draws largest in that diagram, in a ground-truth file and in an answer alike. `<size:10>Components::`
 above the unsized `DimensionComponent` is `DimensionComponent`, because the default of 14 pt is the
 larger size. The base size was checked for a class name, a participant and a note, each without an
-override and with three. In 12 of 12 cases it equalled the size at which the stock renderer
+override and with three. Each time it equalled the size at which the stock renderer
 (`../dataset/plantuml-in-wild-dataset/phase2/4.generate_images/plantuml-1.2025.9.jar`) drew the
 unsized line.
 
@@ -107,8 +107,8 @@ diagram that the extractor reads as elements and links, and for the messages of 
 It removes no node, so Element F1 and type accuracy do not depend on it.
 
 Every left-out edge was looked for in an SVG render of its diagram, made with the stock renderer
-inside the v1 JAR of §7. None was drawn: 0 of 172 in the ground truth of the test set, 0 of 36 in
-that of the dev set and 0 of 991 in the answers of the eight stored runs.
+inside the v1 JAR of §7. None was drawn, in the ground truth of the test set and of the dev set or in
+the answers of the eight stored runs.
 
 ## 4. Answers with several diagrams
 
@@ -169,19 +169,19 @@ unpaired stereotype bracket, and no name had lost a word: nothing was left over.
 
 The eight stored runs were scored again with the two runners of §7, under scorer v2 and at every
 cumulative level between v1 and v2 (`build/bridge.py`). `build/bridge_table.py` forms the
-differences of the table below, and `build/spot_effect.py` gives its two spot-letter rows. The result files lie under
+differences of the table below, and `build/spot_effect.py` gives its two spot-letter rows. The
+result files are `data_v2.zip` of the scorer repository, which unzips to
 `../plantuml-recognition-evaluation/data_v2/`: `element_f1/<run>/` and `relationship_f1/<run>/` hold
-scorer v2, and `_bridge/<level>/` holds each level, with its switches in `_bridge/levels.json`. The
-v1 result files lie under `../plantuml-recognition-evaluation/data/`.
+scorer v2, `_bridge/<level>/` holds each level, with its switches in `_bridge/levels.json`, and
+`_bridge/spot_effect.json` holds the two spot-letter rows. The v1 result files lie under
+`../plantuml-recognition-evaluation/data/`.
 
 The table gives micro F1 of the three dense Qwen sizes as full-set / compiled-only. Full-set is the
-zeros-for-failed population of the baseline record (§3). (Superseded by
-`methodology/analysis-protocol.md` §4, 2026-10-29: full-set is over all 1,000 diagrams, computed as
-in Р.3 from the per-diagram rows the runners store; an answer that does not render but that the
-extractor parses keeps its parsed counts, so not every failed answer scores 0.) Each row with a plus sign is the change
-that one rule adds to the rows above it. The two rows "of which the spot letter" are scorer v2 with
-every link and message an edge, minus the same with the letter put back into the names. Type
-accuracy is over compiled answers.
+population of `methodology/analysis-protocol.md` §4: all 1,000 diagrams, computed as in Р.3 from the
+per-diagram rows the runners store, so an answer that does not render but that the extractor parses
+keeps its parsed counts. Each row with a plus sign is the change that one rule adds to the rows
+above it. The two rows "of which the spot letter" are scorer v2 with every link and message an edge,
+minus the same with the letter put back into the names. Type accuracy is over compiled answers.
 
 | | Qwen3.5-2B | Qwen3.5-9B | Qwen3.5-27B |
 |---|---|---|---|
@@ -227,19 +227,19 @@ other runs and the figures per relation are in the result files.
 | Scorer repository, `../plantuml-recognition-evaluation` | tag `scorer-v2` on commit `f460b35` | tag `scorer-v1` on commit `8f85611` |
 | Extractor fork `vovanrew/plantuml`, branch `stats-extractor-graph` (`../plantuml`) | commit `549fe8ec08` | commit `7d2292dab1` |
 | Extractor JAR | `plantuml-stats-extractor-v2.jar`, sha256 `2747a72aec9206e424ddf9ed659f9eceb96730444a68b1fe99094317400f555b` | `plantuml-stats-extractor-v1.jar`, sha256 `f6e76d4973ce12c23cb15dff6420726f7d2203a80c1761d1454b5a2c5a91777b` |
-| Result files of the stored runs | `../plantuml-recognition-evaluation/data_v2/` | `../plantuml-recognition-evaluation/data/element_f1/`, `relationship_f1/` |
+| Result files of the stored runs | `data_v2.zip` of the scorer repository, sha256 `bf1c56f72cf0cc18674c1c1dab3f2171fa8a31e66ffed9c2ba1b2c7f9af06a6d` | `../plantuml-recognition-evaluation/data/element_f1/`, `relationship_f1/` |
 
-The message of a tag names the fork commit and the sha256 of the JAR, so one tag identifies the whole
-scorer. The two JARs and `data_v2/` lie in the folder of the scorer repository and are not tracked
-by git. The commit, the fork commit and the JAR of scorer v2 were fixed before any output of a
-fine-tuned model was scored.
+The message of a tag names the fork commit and the sha256 of the JAR, so one tag identifies the
+whole scorer. The two JARs are tracked at the root of the scorer repository.
+`data_v2.zip` is tracked beside `data.zip`, and unzipping it recreates `data_v2/`. The commit, the
+fork commit and the JAR of scorer v2 were fixed before any output of a fine-tuned model was scored.
 
 **The v2 JAR.** The file is the v1 JAR with the two classes changed on the fork,
 `DiagramStatsExtractor` and `CreoleHorizontalLine`, recompiled and replaced in place
 (`build/build_v2_jar.sh <fork checkout> <v1 JAR> <output JAR>`). It is not a
-Gradle build, and the sha256 names this file, not the commit. Assembled twice from an export of
-commit `549fe8ec08`, it was the same file both times (25,337,575 bytes). 2 of its 10,115 entries
-differ from the v1 JAR.
+Gradle build, and the sha256 names this file, not the commit. Assembling it again from an export of
+commit `549fe8ec08` gives the same file (25,337,575 bytes). 2 of its 10,115 entries differ from the
+v1 JAR.
 
 **Runners and switches.** `evaluation/element_f1_runner.py` and
 `evaluation/relationship_f1_runner.py` of the scorer repository score under v2 by default. Seven
@@ -251,12 +251,9 @@ switches, given to both runners, turn every rule off:
 ```
 
 With all seven the v2 code and the v2 JAR are scorer v1. With its three options the extractor
-printed byte for byte the output of the v1 JAR on 17 of 17 folders (10,239 records). With all seven
-the runners gave the per-diagram counts of the stored v1 result files in 16 of 16 files (16,000
-rows).
+prints byte for byte the output of the v1 JAR, and with all seven the runners give the per-diagram
+counts of the stored v1 result files.
 
 Each result file records its rules, its extractor options and the sha256 of the JAR in a `scorer`
-block. All 272 result files of `data_v2/` carry the sha256 of the v2 JAR. The test suite of
-commit `f460b35` gave 543 passed, 1 skipped with that JAR (`python3 -m pytest -q`, with
-`PLANTUML_EXTRACTOR_JAR` set to it and `data.zip` unpacked). The measurements ran under Java Temurin 26.0.1 and Python
-3.9.6.
+block. All 272 result files of `data_v2/` carry the sha256 of the v2 JAR. The measurements ran under
+Java Temurin 26.0.1 and Python 3.9.6.

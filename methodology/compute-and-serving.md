@@ -2,7 +2,7 @@
 
 Methodological record for the platform that every run of the study uses: the precision, the card,
 the software, the server that answers every scored request, the manifest written beside each run,
-the rules a scored run follows, and the runs on the test set. It holds for the study's self-served
+the rules a scored run follows, the runs on the test set, and the compute of the study's runs. It holds for the study's self-served
 runs what `../plantuml-recognition-evaluation/methodology/benchmark-protocol.md` §2 holds for the benchmark's
 hosted runs; that file is called the benchmark protocol below. The inference runner, its
 image-ingestion check, its retries and its failure records are those of the benchmark protocol, §2.
@@ -97,8 +97,8 @@ three sizes.
 This turn is the study's one arrangement of picture and prompt text. It is the same at the three
 sizes and in both conditions, and every training example starts with it
 (`methodology/training-recipe.md` §5.1). It is chosen to match the order of the benchmark's
-published hosted runs of the three sizes (the benchmark protocol, §2). The runner sends the text part first
-and runs unchanged: the server takes the two parts in either order and builds this turn from them.
+published hosted runs of the three sizes. The runner sends the text part first and runs unchanged:
+the server takes the two parts in either order and builds this turn from them.
 
 Decoding is greedy and stops at `eos_token_id` [248046, 248044] at every size. `finish_reason` is
 `stop` when the last token is one of these and `length` otherwise. `usage` gives the prompt and
@@ -249,16 +249,16 @@ benchmark's `data/test_set.json`, with their pictures in the benchmark's `data/p
 (`../plantuml-recognition-evaluation/methodology/test-set-construction.md` §7).
 `infer/test_runs.txt` lists them:
 
-| Run | Model | Condition | Adapter |
+| Run | Model | Condition | Adapter (training run, checkpoint) |
 |---|---|---|---|
 | `2B_zero_shot` | Qwen3.5-2B | zero-shot | none |
-| `2B_20000` | Qwen3.5-2B | fine-tuned, 20,000 pairs | `runs/train/2B_20000/step_02500` |
-| `2B_1000` | Qwen3.5-2B | fine-tuned, 1,000 pairs | `runs/train/2B_1000/step_00126` |
-| `2B_5000` | Qwen3.5-2B | fine-tuned, 5,000 pairs | `runs/train/2B_5000/step_00626` |
+| `2B_20000` | Qwen3.5-2B | fine-tuned, 20,000 pairs | `2B_20000`, `step_02500` |
+| `2B_1000` | Qwen3.5-2B | fine-tuned, 1,000 pairs | `2B_1000`, `step_00126` |
+| `2B_5000` | Qwen3.5-2B | fine-tuned, 5,000 pairs | `2B_5000`, `step_00626` |
 | `9B_zero_shot` | Qwen3.5-9B | zero-shot | none |
-| `9B_20000` | Qwen3.5-9B | fine-tuned, 20,000 pairs | `runs/train/9B_20000/step_02500` |
+| `9B_20000` | Qwen3.5-9B | fine-tuned, 20,000 pairs | `9B_20000`, `step_02500` |
 | `27B_zero_shot` | Qwen3.5-27B | zero-shot | none |
-| `27B_20000` | Qwen3.5-27B | fine-tuned, 20,000 pairs | `runs/train/27B_20000/step_02500` |
+| `27B_20000` | Qwen3.5-27B | fine-tuned, 20,000 pairs | `27B_20000`, `step_02500` |
 
 The zero-shot runs and the 20,000-pair runs are the six main runs. The 2B's 1,000-pair and
 5,000-pair runs are the two inner points of the data-efficiency curve, whose end points are the
@@ -301,11 +301,11 @@ described in `methodology/analysis-protocol.md` §2, and the curve in §15 of th
 
 ### 10.2 How a run is stored
 
-Each run lies in `runs/test/<run>/` of the study repository, which is local working output kept out
-of git (`FINETUNE_PLAN.md` §9). Its `answers/` folder is the runner's run directory, in the format
-of the benchmark protocol, §2. It holds the raw response of each cell as `<key>.json`, the
-prediction of each answered cell as `<key>.puml`, and `run_meta.json`, with `<key>` the cell's key
-in the test set without its `.puml` suffix. The run manifest `manifest.json` lies beside them (§5).
+Each run lies in `runs/test/<run>/` of the study repository. Its `answers/` folder is the runner's
+run directory, in the format of the benchmark protocol, §2. It holds the raw response of each cell
+as `<key>.json`, the prediction of each answered cell as `<key>.puml`, and `run_meta.json`, with
+`<key>` the cell's key in the test set without its `.puml` suffix. The run manifest `manifest.json`
+lies beside them (§5).
 
 The run folder also holds `answer_manifest.json`, with the server's identity, the runner's
 arguments and the sha256 of the test set. A run with an adapter adds `adapter_check.json`, and the
@@ -323,3 +323,20 @@ The first command runs `infer/manifest.py check` on the run's `answers/` and req
 1000 in its `run_meta.json`. Like every manifest check, it runs in a checkout that holds the tag
 `serving-v3` (§5). The second runs the benchmark's run reader, from `../plantuml-recognition-evaluation`,
 on every run present under `runs/test/`, and requires 1,000 cells in each.
+
+## 11. Compute
+
+Each run uses one card (§2). The table gives the time the card was busy, in GPU-hours, from the
+`started` and `finished` times each run's folder in `runs.zip` records: `runs/train/<run>/run.json`
+for a training, and `answer_manifest.json` of each checkpoint or test run for answering. Runs that
+share the card count once while they overlap: the four dev checkpoints of a 2B run, and the four 2B
+test runs (§10.1). Setting up the machine, downloading the models, the recipe's probe and the 27B
+memory step (`methodology/training-recipe.md` §3, §6.2) and scoring are not counted; scoring needs no
+card. Each figure is rounded on its own, so the parts need not add up to the total.
+
+| Part | Runs | GPU-hours |
+|---|---|---|
+| Training | 2B on 1,000 / 5,000 / 20,000 pairs: 0.2 / 0.7 / 2.7; 9B: 6.4; 27B: 18.3 | 28.2 |
+| Dev answers of the checkpoints (4 per run) | 2B on 1,000 / 5,000 / 20,000 pairs, the four side by side: 4.4 / 2.7 / 1.4; 9B: 2.8; 27B: 4.8, one at a time | 16.1 |
+| Test-set runs (§10) | the four 2B runs side by side: 12.0; 9B zero-shot / fine-tuned: 8.8 / 4.9; 27B: 11.3 / 9.2 | 46.2 |
+| All | | 90.6 |

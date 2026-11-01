@@ -83,8 +83,7 @@ In training the vision tower and its merger run without gradient tracking, so th
 trained on are those the server computes. The adapter of §1.1 leaves every vision weight frozen,
 and the tower's forward also runs under `torch.no_grad`. In the live test of
 `train/tests/test_recipe.py` (Qwen3.5-2B, one pair of the loss-curve split), the vision output of a
-training forward equalled the served output bit for bit. With a vision weight left trainable, the
-output differed from the served one by a relative 0.1021 without `torch.no_grad` and by 0 under it.
+training forward equalled the served output bit for bit.
 
 ### 1.5 Length and checkpoints
 
@@ -147,8 +146,9 @@ python3 train/dev_scoring.py score --answers <dev folder>/<checkpoint>/answers \
     --out <dev folder>/<checkpoint>/scores
 ```
 
-The rule reads two metrics: CSR, and Element F1 micro over the full set, where a failed answer
-scores 0 (baseline protocol, §1).
+The rule reads two metrics: CSR, and Element F1 micro over the full set, as the runner pools it
+(`zeros_for_failed`; `methodology/analysis-protocol.md` §4: an answer that does not render but that
+the extractor parses keeps its parsed counts).
 
 ### 2.2 The rule
 
@@ -354,10 +354,12 @@ the 27B under the recipe at the longest training sequences (§6.2).
 `train/train.py run --size 2B --pairs 1000` trains on the 1,000-pair subset for the recipe's 126
 optimizer steps over 2 epochs. It saves the adapter after steps 32, 63, 95 and 126 (§1.5). The four
 checkpoints are answered on the 200 dev diagrams side by side on the card, each after its adapter
-check, and scored under scorer v2 (§2.1). `train/select_checkpoint.py --pairs 1000` then applies
-the rule of §2.2. The exit criterion is CSR > 0 and Element F1 > 0 on the dev set for the selected
-adapter (`FINETUNE_PLAN.md`, Phase B). The selected adapter met the exit criterion. It is the
-1,000-pair point of the data-efficiency curve (§8).
+check, and scored under scorer v2 (§2.1). Their four manifests were written without `--server`, so
+they record every check of `methodology/compute-and-serving.md` §5 but `server_matches`; each passes
+those. `train/select_checkpoint.py --pairs 1000` then applies the rule of §2.2. The exit criterion
+is CSR > 0 and Element F1 > 0 on the dev set for the selected adapter (`FINETUNE_PLAN.md`, Phase B).
+The selected adapter met the exit criterion. It is the 1,000-pair point of the data-efficiency curve
+(§8).
 
 ### 6.2 Memory at the longest sequences
 
@@ -390,12 +392,12 @@ answers at a time. Either way each server answers one request at a time
 `methodology/compute-and-serving.md` §5, so each is a scored run under §8 of that file.
 
 `train/select_checkpoint.py --pairs 20000` applies the rule of §2.2 to each run. At every size it
-took the last checkpoint, step 2,500, because no earlier checkpoint was better. The adapter in
-`runs/train/<size>_20000/step_02500` is therefore the fine-tuned model of that size.
+took the last checkpoint, step 2,500, because no earlier checkpoint was better. The adapter of run
+`<size>_20000` at step 2,500 is therefore the fine-tuned model of that size.
 
-A run's folder `runs/train/<size>_20000` holds `run.json`, the step log `log.jsonl`, the four
-checkpoints, the optimizer state `state.pt` and the choice with its numbers, `selection.json`. The
-dev answers and scores of each checkpoint lie in `runs/dev/<size>_20000/<checkpoint>/`.
+In `runs.zip`, a run's folder `runs/train/<size>_20000` holds `run.json`, the step log `log.jsonl` and the choice
+with its numbers, `selection.json`. The dev answers and scores of each checkpoint lie in
+`runs/dev/<size>_20000/<checkpoint>/`.
 
 ## 8. The 5,000-pair run
 
@@ -417,8 +419,8 @@ step 626, because no earlier checkpoint was better. The run's folder `runs/train
 the files a ladder run holds (§7), and the dev answers and scores of each checkpoint lie in
 `runs/dev/2B_5000/<checkpoint>/`.
 
-The curve's two inner points are the last checkpoint of each run: the pilot's
-`runs/train/2B_1000/step_00126` (§6.1) and `runs/train/2B_5000/step_00626`, the one the rule took. Each
+The curve's two inner points are the last checkpoint of each run: the pilot's run `2B_1000` at
+step 126 (§6.1) and run `2B_5000` at step 626, the one the rule took. Each
 answers the 1,000 test diagrams as the main runs do (`methodology/compute-and-serving.md` §10).
 Both are scored by the command of `methodology/analysis-protocol.md` §2, under scorer v2 and v1,
 as the main runs are.

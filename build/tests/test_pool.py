@@ -400,8 +400,7 @@ def test_the_extractor_run_equals_the_run_of_the_test_set_code(made_up_sources, 
 # D3: one diagram block, read by the scorer as its labelled type
 # --------------------------------------------------------------------------- #
 def test_the_block_rule_is_the_one_written_from_plantuml_source():
-    sys.path.insert(0, str(FT / "decisions/render-pipeline/scripts"))
-    import verify_r2_corpus_block_starts as original
+    import block_starts_reference as original
     cases = [text for _, text in SOURCES.values()] + [
         "@startuml\nA\n@enduml", "\\startuml\nA\n\\enduml", "@startsalt\n{\n}\n@endsalt", "@STARTUML\nA\n@enduml",
         "' @startuml\n' A\n' @enduml", "@startuml\nA", "@enduml\n@startuml", "text @startuml\nA\n@enduml",
