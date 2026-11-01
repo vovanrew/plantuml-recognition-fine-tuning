@@ -23,7 +23,8 @@ references:
     authors:
       - family-names: "Polishchuk"
         given-names: "Volodymyr"
-    doi: "10.5281/zenodo.21670236"
+    version: "v1.1.0"
+    doi: "10.5281/zenodo.23864232"
   - type: data
     title: "UML-in-the-Wild: A Dataset of UML Diagrams in PlantUML Notation from Open-Source Repositories"
     authors:

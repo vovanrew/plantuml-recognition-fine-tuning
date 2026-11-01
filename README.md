@@ -126,7 +126,7 @@ Working records of each decision are kept outside this repository, so paths that
 
 ## Related
 
-- Benchmark and scorer: [plantuml-recognition-evaluation](https://github.com/vovanrew/plantuml-recognition-evaluation), [10.5281/zenodo.21670236](https://doi.org/10.5281/zenodo.21670236)
+- Benchmark and scorer: [plantuml-recognition-evaluation](https://github.com/vovanrew/plantuml-recognition-evaluation), release `v1.1.0`, [10.5281/zenodo.23864232](https://doi.org/10.5281/zenodo.23864232)
 - Corpus: UML-in-the-Wild, [10.5281/zenodo.18952371](https://doi.org/10.5281/zenodo.18952371)
 - Extractor fork: [vovanrew/plantuml](https://github.com/vovanrew/plantuml)
 
